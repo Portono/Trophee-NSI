@@ -1,116 +1,121 @@
-
-#On importe pygame et sys(sys sert a quitter proprement le programme)
 import pygame
-import sys
 
-#demarre pygame
 pygame.init()
 
-#dimensions de la fenetre
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
+#Dimensions de la fenetre
+#acquisition de la resolution de l'ecran
+Monitor_info=pygame.display.Info()
+Monitor_Width=Monitor_info.current_w   #=valeur de test (temporaire)
+Monitor_Height=Monitor_info.current_h  #=valeur de test (temporaire)
+Width=Monitor_Width
+Height=Monitor_Height
+#Variables de gestion du mode plein ecran
+Fullscreen_Change=False  #True si bouton Fulscreen appuye Temporaire, doit etre False au debut mais peut varier selon les parametres sauvegardes
+Fullscreen=True    #Etat de plein ecran, doit etre True au debut mais peut varier selon les parametres sauvegardes
+Resolution_Change=True  #True si resolution changee doit etre True au debut pour tout initialiser mais peut varier selon les parametres sauvegardes
 
-#couleurs
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-BLUE = (50, 100, 200)
-LIGHT_BLUE = (100, 150, 255)
-GRAY = (200, 200, 200)
+#predefinission des couleurs utiles
+White=(255,255,255)
+Black=(0,0,0)
+Red=(255,0,0)
+Green=(0,255,0)
+Blue=(0,0,255)
+Yellow=(255,255,0)
+Orange=(255,165,0)
+Gray=(128,128,128)
 
-# cree la fenetre
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Home Screen")
+#Predeffinission de la police et de la couleur des boutons
+Menu_font=pygame.font.SysFont(None, 24)
+button_color=Black
+hover_color=Gray
+text_color=Orange
 
-#Limite les FPS a 60 pour une meilleure fluidité
-clock = pygame.time.Clock()
-FPS = 60
+#definition des dimensions des boutons
+button_width=int(Width*0.25)
+button_height=int(Height*0.1)
 
-#Police et taille des textes
-title_font = pygame.font.Font(None, 72)
-button_font = pygame.font.Font(None, 48)
-small_font = pygame.font.Font(None, 32)
+#Definition des boutons
+play_button_rect=pygame.Rect(0,0,button_width,button_height)
+settings_button_rect=pygame.Rect(0,0,button_width,button_height)
+quit_button_rect=pygame.Rect(0,0,button_width,button_height)
 
-class Button:
-    def __init__(self, x, y, width, height, text, color, hover_color):
-        self.rect = pygame.Rect(x, y, width, height)
-        self.text = text
-        self.color = color
-        self.hover_color = hover_color
-        self.is_hovered = False
-    
-    def draw(self, surface):
-        color = self.hover_color if self.is_hovered else self.color
-        pygame.draw.rect(surface, color, self.rect)
-        pygame.draw.rect(surface, BLACK, self.rect, 2)
-        
-        text_surface = button_font.render(self.text, True, BLACK)
-        text_rect = text_surface.get_rect(center=self.rect.center)
-        surface.blit(text_surface, text_rect)
-    
-    def update(self, mouse_pos):
-        self.is_hovered = self.rect.collidepoint(mouse_pos)
-    
-    def is_clicked(self, mouse_pos):
-        return self.rect.collidepoint(mouse_pos)
 
-def main():
-    #Cree les boutons avec leurs positions, tailles et couleurs
-    play_button = Button(250, 250, 300, 80, "Play", LIGHT_BLUE, (150, 200, 255))
-    settings_button = Button(250, 370, 300, 80, "Settings", LIGHT_BLUE, (150, 200, 255))
-    quit_button = Button(250, 490, 300, 80, "Quit", LIGHT_BLUE, (150, 200, 255))
-    
-    buttons = [play_button, settings_button, quit_button]
-    
-    running = True
-    while running:
-        clock.tick(FPS)
-        
-        #position de la souris
-        mouse_pos = pygame.mouse.get_pos()
-        
-        #gestion des evenements(quand tu appuie sur un bouton)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if play_button.is_clicked(mouse_pos):
-                    print("Play button clicked!")
-                elif settings_button.is_clicked(mouse_pos):
-                    print("Settings button clicked!")
-                elif quit_button.is_clicked(mouse_pos):
-                    running = False
-        
-        #Quand tu survole le bouton
-        for button in buttons:
-            button.update(mouse_pos)
-        
-        #Colorie l'ecran en blanc
-        screen.fill(WHITE)
-        
-        #mets les couleurs du fond
-        pygame.draw.rect(screen, BLUE, (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT // 2))
-        pygame.draw.rect(screen, WHITE, (0, SCREEN_HEIGHT // 2, SCREEN_WIDTH, SCREEN_HEIGHT // 2))
-        
-        #Met le titre
-        title_text = title_font.render("Welcome", True, BLACK)
-        title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, 80))
-        screen.blit(title_text, title_rect)
-        
-        #met le sous-titre
-        subtitle_text = small_font.render("to My Game", True, BLACK)
-        subtitle_rect = subtitle_text.get_rect(center=(SCREEN_WIDTH // 2, 150))
-        screen.blit(subtitle_text, subtitle_rect)
-        
-        #met les boutons
-        for button in buttons:
-            button.draw(screen)
-        
-        pygame.display.flip()
-    
-    pygame.quit()
-    sys.exit()
-#On verifie si le script est un main, dans ce cas on execute, sinon on affiche pas apart si execute main() (facultatif sert uniquement a tester les fonctions sans executer tout le script)
-if __name__ == "__main__":
-    main()
+#Creation de la fenetre
+screen=pygame.display.set_mode((Width,Height), pygame.FULLSCREEN)   #Definition de la fenetre avec la resolution
+pygame.display.set_caption("Champ de Mars") #Titre de la fenetre
 
+#Ajout du logo + redissionnement adaptatif a la resolution choisie
+logo_import=pygame.image.load("logo_champ_de_mars.png")
+logo_import_width=logo_import.get_width()
+logo_import_height=logo_import.get_height()
+logo=pygame.transform.smoothscale(logo_import,(Width,int(logo_import_height/logo_import_width*Width)))
+screen.fill(White)
+
+def Refresh_UI():
+    """
+    Cette fonction sert a rafraichir l'interface utilisateur en repositionnant les boutons et le logo
+    """
+    global play_button_rect, settings_button_rect, quit_button_rect, logo
+    Monitor_info=pygame.display.Info()
+    Monitor_Width=Monitor_info.current_w
+    Monitor_Height=Monitor_info.current_h
+    Width=Monitor_Width
+    Height=Monitor_Height
+    if Fullscreen==True:
+        screen=pygame.display.set_mode((Width,Height), pygame.FULLSCREEN)
+    elif Fullscreen==False:
+        screen=pygame.display.set_mode((Width,Height))
+    #Repositionnement du logo
+    logo=pygame.transform.smoothscale(logo_import,(Width,int(logo_import_height/logo_import_width*Width)))
+    #Repositionnement des boutons
+    button_width=int(Width*0.25)
+    button_height=int(Height*0.1)
+    ##Bouton Play
+    play_button_rect=pygame.Rect(0,0,button_width,button_height)
+    play_button_rect.center=(Width//2, Height//4)
+    ##Bouton Settings
+    settings_button_rect=pygame.Rect(0,0,button_width,button_height)
+    settings_button_rect.center=(Width//2, Height//2)
+    ##Bouton Quit
+    quit_button_rect=pygame.Rect(0,0,button_width,button_height)
+    quit_button_rect.center=(Width//2, Height*3//4)
+
+
+
+while True:
+    #Recuperation de la position de la souris
+    mouse_pos=pygame.mouse.get_pos()
+    #Raffraichissement du logo sur l'ecran
+    screen.fill(White)  ##Fond blanc
+    screen.blit(logo,(0,0))     ##Affichage du logo en haut de l'ecran
+
+    #Quitter le jeu
+    for event in pygame.event.get():    ##Recuperation des evenements
+        if event.type == pygame.QUIT:   ##Si on clique sur la croix
+            pygame.quit()       ##Quitte pygame
+            exit()      ##Quitte le programme
+        if event.type == pygame.MOUSEBUTTONDOWN:   ##Si un bouton de la souris est appuye  
+            if play_button_rect.collidepoint(mouse_pos):   ##Si le bouton Play est appuye
+                print("Play button clicked")   ##Action du bouton Play (a definir)
+            if settings_button_rect.collidepoint(mouse_pos):   ##Si le bouton Settings est appuye
+                print("Settings button clicked")   ##Action du bouton Settings (a definir)
+            if quit_button_rect.collidepoint(mouse_pos):   ##Si le bouton Quit est appuye
+                pygame.quit()       ##Quitte pygame
+                exit()      ##Quitte le programme
+    #dessine les boutons et le texte
+    for rect,texte in [(play_button_rect,"Play"),(settings_button_rect,"Settings"),(quit_button_rect,"Quit")]:
+        if rect.collidepoint(mouse_pos):    ##Si la souris est au dessus du bouton
+            button_color=hover_color    ##Change la couleur du bouton
+        else:
+            button_color=Black
+        pygame.draw.rect(screen,button_color, rect)   ##Dessin du bouton
+        texte_surface=Menu_font.render(texte,True,Orange)    ##Creation du texte
+        texte_rect=texte_surface.get_rect(center=rect.center)   ##Centrage du texte
+        screen.blit(texte_surface, texte_rect)  ##Affichage du texte
+
+    #Toggle du fullscreen
+    if Fullscreen_Change==True or Resolution_Change==True:
+        Fullscreen_Change=False
+        Resolution_Change=False
+        Refresh_UI()
+    pygame.display.flip()
