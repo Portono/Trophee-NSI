@@ -1,0 +1,25 @@
+import pygame
+
+x = 
+y = 
+z =
+vitesse = 0
+
+while True:
+  touche = pygame.key.get_pressed()
+
+  if touche[pygame.K_z] or touche[pygame.K_w]:
+    vitesse = 15 #je mets çaau hasard, on changera après
+    y = y - vitesse
+
+  if touche[pygame.K_s]:
+    vitesse = 15
+    y = y + vitesse
+
+  if touche[pygame.K_q] or touche[pygame.K_a]:
+    vitesse = 15
+    x = x - vitesse
+
+  if touche[pygame.K_d]:
+    vitesse = 15
+    x = x + vitesse
