@@ -110,6 +110,7 @@ def main():
     
     pygame.quit()
     sys.exit()
-
+#On verifie si le script est un main, dans ce cas on execute, sinon on affiche pas apart si execute main() (facultatif sert uniquement a tester les fonctions sans executer tout le script)
 if __name__ == "__main__":
     main()
+
