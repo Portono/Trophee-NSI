@@ -25,7 +25,7 @@ Orange=(255,165,0)
 Gray=(128,128,128)
 
 #Predeffinission de la police et de la couleur des boutons
-Menu_font=pygame.font.SysFont(None, 24)
+Menu_font=pygame.font.Font("font.ttf", int(Height*0.05)) ##Definition de la police et de la taille du texte des boutons
 button_color=Black
 hover_color=Gray
 text_color=Orange
@@ -41,8 +41,8 @@ quit_button_rect=pygame.Rect(0,0,button_width,button_height)
 
 
 #Creation de la fenetre
-screen=pygame.display.set_mode((Width,Height), pygame.FULLSCREEN)   #Definition de la fenetre avec la resolution
-pygame.display.set_caption("Champ de Mars") #Titre de la fenetre
+screen=pygame.display.set_mode((Width,Height), pygame.FULLSCREEN)   ##Definition de la fenetre avec la resolution
+pygame.display.set_caption("Champ de Mars") ##Titre de la fenetre
 
 #Ajout du logo + redissionnement adaptatif a la resolution choisie
 logo_import=pygame.image.load("logo_champ_de_mars.png")
@@ -55,7 +55,7 @@ def Refresh_UI():
     """
     Cette fonction sert a rafraichir l'interface utilisateur en repositionnant les boutons et le logo
     """
-    global play_button_rect, settings_button_rect, quit_button_rect, logo
+    global play_button_rect, settings_button_rect, quit_button_rect, logo, Menu_font
     Monitor_info=pygame.display.Info()
     Monitor_Width=Monitor_info.current_w
     Monitor_Height=Monitor_info.current_h
@@ -79,6 +79,8 @@ def Refresh_UI():
     ##Bouton Quit
     quit_button_rect=pygame.Rect(0,0,button_width,button_height)
     quit_button_rect.center=(Width//2, Height*3//4)
+    ##Taille de la police
+    Menu_font=pygame.font.Font("font.ttf", int(Height*0.05))
 
 
 
