@@ -85,25 +85,25 @@ def Refresh_UI():
     button_height=int(Height*0.1)
     ##Bouton Play
     play_button_rect=pygame.Rect(0,0,button_width,button_height)
-    play_button_rect.center=(Width//2, Height//4+100)
+    play_button_rect.center=(Width//2, Height//3.8)
     ##Bouton Settings
     settings_button_rect=pygame.Rect(0,0,button_width,button_height)
-    settings_button_rect.center=(Width//2, Height//2+100)
+    settings_button_rect.center=(Width//2, Height*2//3.8)
     ##Bouton Quit
     quit_button_rect=pygame.Rect(0,0,button_width,button_height)
-    quit_button_rect.center=(Width//2, Height*3//4+100)
+    quit_button_rect.center=(Width//2, Height*3//3.8)
     ##Bouton Settings-Fullscreen
     fullscreen_button_rect=pygame.Rect(0, 0, button_width/1.25, button_height/1.25)
-    fullscreen_button_rect.center = (Width // 2, Height // 2+100)
+    fullscreen_button_rect.center = (Width // 2, Height*2 // 3.8)
     ##Bouton Settings-Go Back
     goback_button_rect=pygame.Rect(0, 0, button_width, button_height)
-    goback_button_rect.center = (Width//2, Height*3//4+100)
+    goback_button_rect.center = (Width//2, Height*3//3.8)
     ##Bouton Settings-Input Width
     input_width_rect=pygame.Rect(0, 0, button_width/1.5, button_height/1.5)
-    input_width_rect.center = (Width // 1.5, Height // 4+100)
+    input_width_rect.center = (Width // 1.5, Height // 3.8)
     ##Bouton Settings-Input Height
     input_height_rect=pygame.Rect(0, 0, button_width/1.5, button_height/1.5)
-    input_height_rect.center = (Width // 3, Height // 4+100)
+    input_height_rect.center = (Width // 3, Height // 3.8)
     ##Taille de la police
     Menu_font=pygame.font.Font("font.ttf", int(Height*0.05))
 
