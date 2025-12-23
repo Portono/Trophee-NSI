@@ -64,6 +64,7 @@ screen.fill(White)
 menu_main="main"
 menu_settings="settings"
 current_menu=menu_main
+play=False  ##Variable pour lancer le jeu
 
 
 def Refresh_UI():
@@ -107,7 +108,7 @@ def Refresh_UI():
     ##Taille de la police
     Menu_font=pygame.font.Font("font.ttf", int(Height*0.05))
 
-while True:
+while play!=True:   ##Boucle principale du menu
     #Recuperation de la position de la souris
     mouse_pos=pygame.mouse.get_pos()
     #Raffraichissement du logo sur l'ecran
@@ -123,8 +124,7 @@ while True:
             #   Main Menu   #
             if current_menu==menu_main: ##Si on est dans le menu principal
                 if play_button_rect.collidepoint(mouse_pos):   ##Si le bouton Play est appuye
-                    print("Play button clicked")   ##Action du bouton Play (a definir)
-
+                    play=True
                 if settings_button_rect.collidepoint(mouse_pos):   ##Si le bouton Settings est appuye
                     print("Settings button clicked")   ##Action du bouton Settings (a definir)
                     current_menu=menu_settings
