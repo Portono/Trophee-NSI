@@ -39,11 +39,11 @@ while play==True:   ##boucle infinie du jeu
     touches=pygame.key.get_pressed()  ##recuperation des touches appuyees
     if touches[pygame.K_d]:  ##si la touche droite est appuyee
         x+=vitesse   ##deplacer le personnage vers la droite
-    if touches[pygame.K_q]:  ##si la touche gauche est appuyee
-        x-=vitesse   ##deplacer le personnage vers la gauche
+    if touches[pygame.K_q] or touches[pygame.K_a]:  ##si la touche gauche est appuyee
+        x-=vitesse   ##deplacer le personnage vers la gauchedd
     if touches[pygame.K_s]:  ##si la touche bas est appuyee
         y+=vitesse   ##deplacer le personnage vers le bas
-    if touches[pygame.K_z]:  ##si la touche haut est appuyee
+    if touches[pygame.K_z] or touches[pygame.K_w]:  ##si la touche haut est appuyee
         y-=vitesse   ##deplacer le personnage vers le haut
     pygame.draw.rect(screen,color,(x,y,50,50))   ##dessiner le personnage
     pygame.display.flip()   ##mettre a jour l'affichage
