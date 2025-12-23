@@ -81,8 +81,11 @@ def Refresh_UI():
     ##Bouton Quit
     quit_button_rect=pygame.Rect(0,0,button_width,button_height)
     quit_button_rect.center=(Width//2, Height*3//4)
-    # Boutons Settings menu
+    ##Bouton Settings-Fullscreen
+    fullscreen_button_rect = pygame.Rect(0, 0, button_width, button_height)
     fullscreen_button_rect.center = (Width // 2, Height // 2)
+    ##Bouton Settings-Go Back
+    goback_button_rect = pygame.Rect(0, 0, button_width, button_height)
     goback_button_rect.center = (Width//2, Height*3//4)
     ##Taille de la police
     Menu_font=pygame.font.Font("font.ttf", int(Height*0.05))
