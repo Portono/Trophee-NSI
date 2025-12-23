@@ -10,10 +10,15 @@ Monitor_Width=Monitor_info.current_w   #=valeur de test (temporaire)
 Monitor_Height=Monitor_info.current_h  #=valeur de test (temporaire)
 Width=Monitor_Width
 Height=Monitor_Height
+
 #Variables de gestion du mode plein ecran
 Fullscreen_Change=False  #True si bouton Fulscreen appuye Temporaire, doit etre False au debut mais peut varier selon les parametres sauvegardes
 Fullscreen=True    #Etat de plein ecran, doit etre True au debut mais peut varier selon les parametres sauvegardes
 Resolution_Change=True  #True si resolution changee doit etre True au debut pour tout initialiser mais peut varier selon les parametres sauvegardes
+user_width_input="Largeur"  #Variable pour stocker l'input utilisateur pour la largeur
+width_input_toggle=False  #Variable pour activer/desactiver l'input de la largeur
+user_height_input="Hauteur"  #Variable pour stocker l'input utilisateur pour la hauteur
+height_input_toggle=False  #Variable pour activer/desactiver l'input de la hauteur
 
 #predefinission des couleurs utiles
 White=(255,255,255)
@@ -41,6 +46,8 @@ settings_button_rect=pygame.Rect(0,0,button_width,button_height)
 quit_button_rect=pygame.Rect(0,0,button_width,button_height)
 fullscreen_button_rect=pygame.Rect(0, 0, button_width, button_height)
 goback_button_rect=pygame.Rect(0, 0, button_width, button_height)
+input_width_rect=pygame.Rect(0, 0, button_width, button_height)
+input_height_rect=pygame.Rect(0, 0, button_width, button_height)
 
 #Creation de la fenetre
 screen=pygame.display.set_mode((Width,Height), pygame.FULLSCREEN)   ##Definition de la fenetre avec la resolution
@@ -53,16 +60,20 @@ logo_import_height=logo_import.get_height()
 logo=pygame.transform.smoothscale(logo_import,(Width,int(logo_import_height/logo_import_width*Width)))
 screen.fill(White)
 
+#on définit les variables pour les changement de scène du menu
+menu_main="main"
+menu_settings="settings"
+current_menu=menu_main
+
+
 def Refresh_UI():
     """
     Cette fonction sert a rafraichir l'interface utilisateur en repositionnant les boutons et le logo
     """
-    global play_button_rect, settings_button_rect, quit_button_rect, logo, Menu_font, fullscreen_button_rect, goback_button_rect
+    global play_button_rect, settings_button_rect, quit_button_rect, logo, Menu_font, fullscreen_button_rect, goback_button_rect, input_width_rect,input_height_rect
     Monitor_info=pygame.display.Info()
     Monitor_Width=Monitor_info.current_w
     Monitor_Height=Monitor_info.current_h
-    Width=Monitor_Width
-    Height=Monitor_Height
     if Fullscreen==True:
         screen=pygame.display.set_mode((Width,Height), pygame.FULLSCREEN)
     elif Fullscreen==False:
@@ -82,18 +93,19 @@ def Refresh_UI():
     quit_button_rect=pygame.Rect(0,0,button_width,button_height)
     quit_button_rect.center=(Width//2, Height*3//4+100)
     ##Bouton Settings-Fullscreen
-    fullscreen_button_rect=pygame.Rect(0, 0, button_width, button_height)
+    fullscreen_button_rect=pygame.Rect(0, 0, button_width/1.25, button_height/1.25)
     fullscreen_button_rect.center = (Width // 2, Height // 2+100)
     ##Bouton Settings-Go Back
     goback_button_rect=pygame.Rect(0, 0, button_width, button_height)
     goback_button_rect.center = (Width//2, Height*3//4+100)
+    ##Bouton Settings-Input Width
+    input_width_rect=pygame.Rect(0, 0, button_width/1.5, button_height/1.5)
+    input_width_rect.center = (Width // 1.5, Height // 4+100)
+    ##Bouton Settings-Input Height
+    input_height_rect=pygame.Rect(0, 0, button_width/1.5, button_height/1.5)
+    input_height_rect.center = (Width // 3, Height // 4+100)
     ##Taille de la police
     Menu_font=pygame.font.Font("font.ttf", int(Height*0.05))
-
-#on définit les variables pour les changement de scène du menu
-menu_main="main"
-menu_settings="settings"
-current_menu=menu_main
 
 while True:
     #Recuperation de la position de la souris
@@ -128,6 +140,43 @@ while True:
                 if goback_button_rect.collidepoint(mouse_pos):   ##Si le bouton Go Back est appuye
                     print("Go Back button clicked")
                     current_menu=menu_main ##on retourne au menu principal
+                if input_width_rect.collidepoint(mouse_pos):   ##Si le bouton de la largeur est appuye
+                    width_input_toggle=True
+                    width_button_text="Largeur"
+                    user_width_input=""
+                if input_height_rect.collidepoint(mouse_pos):   ##Si le bouton de la hauteur est appuye
+                    height_input_toggle=True
+                    height_button_text="Hauteur"
+                    user_height_input=""
+
+        ##Changement de la resolution via l'input utilisateur
+        if event.type == pygame.KEYDOWN and current_menu==menu_settings and width_input_toggle==True:   ##Si une touche est appuye dans le menu des parametres
+            if event.key==pygame.K_RETURN:   ##Si la touche entree est appuyee
+                try:
+                    Width=int(user_width_input)   ##Conversion de l'input utilisateur en entier
+                    Resolution_Change=True
+                    width_input_toggle=False
+                    user_width_input=width_button_text  ##Reset de l'input utilisateur
+                except ValueError:
+                    print("Invalid width input")   ##Message d'erreur pour input invalide
+            elif event.key==pygame.K_BACKSPACE:   ##Si la touche retour est appuyee
+                user_width_input=user_width_input[:-1]   ##Supprime le dernier caractere de l'input utilisateur
+            else:
+                user_width_input+=event.unicode   ##Ajoute le caractere appuye a l'input utilisateur
+        if event.type == pygame.KEYDOWN and current_menu==menu_settings and height_input_toggle==True:   ##Si une touche est appuye dans le menu des parametres
+            if event.key==pygame.K_RETURN:   ##Si la touche entree est appuyee
+                try:
+                    Height=int(user_height_input)   ##Conversion de l'input utilisateur en entier
+                    Resolution_Change=True
+                    height_input_toggle=False
+                    user_height_input=height_button_text  ##Reset de l'input utilisateur
+                except ValueError:
+                    print("Invalid height input")   ##Message d'erreur pour input invalide
+            elif event.key==pygame.K_BACKSPACE:   ##Si la touche retour est appuyee
+                user_height_input=user_height_input[:-1]   ##Supprime le dernier caractere de l'input utilisateur
+            else:
+                user_height_input+=event.unicode   ##Ajoute le caractere appuye a l'input utilisateur
+
     #dessine les boutons et le texte
     if current_menu==menu_main: #les boutons dans le menu principal
         for rect,texte in [(play_button_rect,"Play"),(settings_button_rect,"Settings"),(quit_button_rect,"Quit")]:
@@ -140,7 +189,7 @@ while True:
             texte_rect=texte_surface.get_rect(center=rect.center)   ##Centrage du texte
             screen.blit(texte_surface, texte_rect)  ##Affichage du texte
     elif current_menu==menu_settings: #les boutons dans le menu des parametres
-        for rect,texte in [(fullscreen_button_rect,"Toggle Fullscreen"),(goback_button_rect,"Go Back")]:
+        for rect,texte in [(fullscreen_button_rect,"Toggle Fullscreen"),(goback_button_rect,"Go Back"),(input_width_rect,user_width_input),(input_height_rect,user_height_input)]:
             if rect.collidepoint(mouse_pos):    ##Si la souris est au dessus du bouton
                 button_color=hover_color    ##Change la couleur du bouton
             else:
