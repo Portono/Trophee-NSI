@@ -15,6 +15,7 @@ enemy_speed=5
 enemies=[]  ##list des coordonnes des ennemis
 enemy_spawn_time=60  ##temps entre chaque spawn d'ennemi en millisecondes
 enemy_color=(0,0,255)
+delai_spawn_enemis=60  ##delai entre chaque spawn d'ennemi en frames, ici 60 frames = 1 seconde a 60 fpsa
 
 clock=pygame.time.Clock()  ##creation d'une horloge pour gerer les fps
 
@@ -45,25 +46,26 @@ while play==True:   ##boucle infinie du jeu
         y+=vitesse   ##deplacer le personnage vers le bas
     if touches[pygame.K_z] or touches[pygame.K_w]:  ##si la touche haut est appuyee
         y-=vitesse   ##deplacer le personnage vers le haut
-    pygame.draw.rect(screen,color,(x,y,50,50))   ##dessiner le personnage
-    pygame.display.flip()   ##mettre a jour l'affichage
 
     #Gestion des ennemis
     enemy_spawn_time += 1
-    if enemy_spawn_time >= 240:  ##spawn d'un ennemi toutes les secondes
-        enemies.append(spawn_enemy())
-        enemy_spawn_time = 0
+    if enemy_spawn_time >= delai_spawn_enemis:  ##spawn d'un ennemi toutes les secondes
+        if len(enemies)<2000:
+            enemies.append(spawn_enemy())
+            enemy_spawn_time = 0
     screen.fill((255,255,255))   ##remplir l'ecran en blanc
+    pygame.draw.rect(screen,color,(x,y,50,50))   ##dessiner le personnage
     player_rect=pygame.Rect(x,y,50,50)
-    for en in enemies:
-        dx= x-en[0]
-        dy= y-en[1]
-        distance = (dx**2 + dy**2) ** 0.5
-        if distance != 0:
-            en[0]+=(dx/distance)*enemy_speed
-            en[1]+=(dy/distance)*enemy_speed
+    for en in enemies:  ##pour chaque ennemi
+        dx= x-en[0] ##difference de position en x entre le joueur et l'ennemi
+        dy= y-en[1] ##difference de position en y entre le joueur et l'ennemi
+        distance = (dx**2 + dy**2) ** 0.5   ##calcul de la distance entre le joueur et l'ennemi
+        if distance != 0:   ##eviter la division par zero
+            en[0]+=(dx/distance)*enemy_speed    ##deplacer l'ennemi vers le joueur
+            en[1]+=(dy/distance)*enemy_speed    ##deplacer l'ennemi vers le joueur
         pygame.draw.rect(screen,enemy_color,(en[0],en[1],40,40))   ##dessiner l'ennemi
         enemy_rect=pygame.Rect(en[0],en[1],40,40)
-        if player_rect.colliderect(enemy_rect):
+        if player_rect.colliderect(enemy_rect): ##collision entre le joueur et l'ennemi
             print("Game Over")
             pygame.quit()
+    pygame.display.flip()   ##mettre a jour l'affichages
