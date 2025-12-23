@@ -8,6 +8,12 @@ x=400
 y=300
 vitesse=10
 color=(255,0,0)
+#Variable de l'ennemi
+enemy_x=800
+enemy_y=300
+enemy_vitesse=5
+enemy_color=(0,0,255)
+
 
 clock=pygame.time.Clock()  ##creation d'une horloge pour gerer les fps
 
@@ -28,4 +34,13 @@ while True:   ##boucle infinie du jeu
         y-=vitesse   ##deplacer le personnage vers le haut
     screen.fill((255,255,255))   ##remplir l'ecran en noir
     pygame.draw.rect(screen,color,(x,y,50,50))   ##dessiner le personnage
+    pygame.draw.rect(screen,enemy_color,(enemy_x,enemy_y,50,50))   ##dessiner l'ennemi
     pygame.display.flip()   ##mettre a jour l'affichage
+
+    #Mouvement de l'ennemi
+    dx=x-enemy_x
+    dy=y-enemy_y
+    distance=(dx**2+dy**2)**0.5
+    if distance!=0:
+        enemy_x+=enemy_vitesse*dx/distance
+        enemy_y+=enemy_vitesse*dy/distance
