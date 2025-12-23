@@ -39,8 +39,8 @@ button_height=int(Height*0.1)
 play_button_rect=pygame.Rect(0,0,button_width,button_height)
 settings_button_rect=pygame.Rect(0,0,button_width,button_height)
 quit_button_rect=pygame.Rect(0,0,button_width,button_height)
-fullscreen_button_rect = pygame.Rect(0, 0, button_width, button_height)
-goback_button_rect = pygame.Rect(0, 0, button_width, button_height)
+fullscreen_button_rect=pygame.Rect(0, 0, button_width, button_height)
+goback_button_rect=pygame.Rect(0, 0, button_width, button_height)
 
 #Creation de la fenetre
 screen=pygame.display.set_mode((Width,Height), pygame.FULLSCREEN)   ##Definition de la fenetre avec la resolution
@@ -74,19 +74,17 @@ def Refresh_UI():
     button_height=int(Height*0.1)
     ##Bouton Play
     play_button_rect=pygame.Rect(0,0,button_width,button_height)
-    play_button_rect.center=(Width//2, Height//4)
+    play_button_rect.center=(Width//2, Height//4+100)
     ##Bouton Settings
     settings_button_rect=pygame.Rect(0,0,button_width,button_height)
-    settings_button_rect.center=(Width//2, Height//2)
+    settings_button_rect.center=(Width//2, Height//2+100)
     ##Bouton Quit
     quit_button_rect=pygame.Rect(0,0,button_width,button_height)
-    quit_button_rect.center=(Width//2, Height*3//4)
+    quit_button_rect.center=(Width//2, Height*3//4+100)
     ##Bouton Settings-Fullscreen
-    fullscreen_button_rect = pygame.Rect(0, 0, button_width, button_height)
-    fullscreen_button_rect.center = (Width // 2, Height // 2)
+    fullscreen_button_rect.center = (Width // 2, Height // 2+100)
     ##Bouton Settings-Go Back
-    goback_button_rect = pygame.Rect(0, 0, button_width, button_height)
-    goback_button_rect.center = (Width//2, Height*3//4)
+    goback_button_rect.center = (Width//2, Height*3//4+100)
     ##Taille de la police
     Menu_font=pygame.font.Font("font.ttf", int(Height*0.05))
 
