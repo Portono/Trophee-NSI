@@ -36,7 +36,12 @@ while True:   ##boucle infinie du jeu
     pygame.draw.rect(screen,color,(x,y,50,50))   ##dessiner le personnage
     pygame.draw.rect(screen,enemy_color,(enemy_x,enemy_y,50,50))   ##dessiner l'ennemi
     pygame.display.flip()   ##mettre a jour l'affichage
-
+    Player_rect=pygame.Rect(x,y,50,50)   ##creer un rectangle pour le personnage
+    Enemy_rect=pygame.Rect(enemy_x,enemy_y,50,50)   ##creer un rectangle pour l'ennemi
+    if Player_rect.colliderect(Enemy_rect):   ##si le personnage touche l'ennemi
+        print("Game Over")   ##afficher game over
+        pygame.quit()   ##quitter pygame
+        exit()   ##quitter le programme
     #Mouvement de l'ennemi
     dx=x-enemy_x
     dy=y-enemy_y
