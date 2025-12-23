@@ -57,7 +57,7 @@ def Refresh_UI():
     """
     Cette fonction sert a rafraichir l'interface utilisateur en repositionnant les boutons et le logo
     """
-    global play_button_rect, settings_button_rect, quit_button_rect, logo, Menu_font
+    global play_button_rect, settings_button_rect, quit_button_rect, logo, Menu_font, fullscreen_button_rect, goback_button_rect
     Monitor_info=pygame.display.Info()
     Monitor_Width=Monitor_info.current_w
     Monitor_Height=Monitor_info.current_h
@@ -82,8 +82,10 @@ def Refresh_UI():
     quit_button_rect=pygame.Rect(0,0,button_width,button_height)
     quit_button_rect.center=(Width//2, Height*3//4+100)
     ##Bouton Settings-Fullscreen
+    fullscreen_button_rect=pygame.Rect(0, 0, button_width, button_height)
     fullscreen_button_rect.center = (Width // 2, Height // 2+100)
     ##Bouton Settings-Go Back
+    goback_button_rect=pygame.Rect(0, 0, button_width, button_height)
     goback_button_rect.center = (Width//2, Height*3//4+100)
     ##Taille de la police
     Menu_font=pygame.font.Font("font.ttf", int(Height*0.05))
