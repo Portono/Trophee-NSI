@@ -1,0 +1,27 @@
+# --- CLASSE PROJECTILE ---
+class Projectile:
+    def __init__(self, x, y, target_x, target_y):
+        self.x = x
+        self.y = y
+        self.speed = 15
+        self.radius = 5
+        self.alive = True
+
+        dx = target_x - x
+        dy = target_y - y
+        distance = (dx**2 + dy**2) ** 0.5 # Distance entre le point de départ et la cible avec pythagore
+
+        if distance == 0: # Évite les bugs (division par zéro)
+            self.vx = 0
+            self.vy = 0
+        else:
+            self.vx = (dx / distance) * self.speed # Vitesse en x
+            self.vy = (dy / distance) * self.speed # Vitesse en y
+
+        self.rect = pygame.Rect(0, 0, self.radius * 2, self.radius * 2) # hitbox du projectile
+        self.rect.center = (self.x, self.y)
+
+    def updateposition(self): # Met à jour la position du projectile
+        self.x += self.vx
+        self.y += self.vy
+        self.rect.center = (self.x, self.y)
