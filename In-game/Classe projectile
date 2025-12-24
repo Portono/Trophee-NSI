@@ -19,9 +19,9 @@ class Projectile:
             self.vy = (dy / distance) * self.speed # Vitesse en y
 
         self.rect = pygame.Rect(0, 0, self.radius * 2, self.radius * 2) # hitbox du projectile
-        self.rect.center = (self.x, self.y)
+        self.rect.center = (int(self.x),int(self.y))
 
     def updateposition(self): # Met à jour la position du projectile
-        self.x += self.vx
-        self.y += self.vy
+        self.x += self.vx * dt
+        self.y += self.vy * dt
         self.rect.center = (self.x, self.y)
