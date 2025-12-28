@@ -101,10 +101,10 @@ def Refresh_UI():
     goback_button_rect.center = (Width//2, Height*3//3.8)
     ##Bouton Settings-Input Width
     input_width_rect=pygame.Rect(0, 0, button_width/1.5, button_height/1.5)
-    input_width_rect.center = (Width // 1.5, Height // 3.8)
+    input_width_rect.center = (Width // 1.5, Height // 3)   
     ##Bouton Settings-Input Height
     input_height_rect=pygame.Rect(0, 0, button_width/1.5, button_height/1.5)
-    input_height_rect.center = (Width // 3, Height // 3.8)
+    input_height_rect.center = (Width // 3, Height // 3)
     ##Taille de la police
     Menu_font=pygame.font.Font("font.ttf", int(Height*0.05))
 
@@ -189,6 +189,10 @@ while play!=True:   ##Boucle principale du menu
             texte_rect=texte_surface.get_rect(center=rect.center)   ##Centrage du texte
             screen.blit(texte_surface, texte_rect)  ##Affichage du texte
     elif current_menu==menu_settings: #les boutons dans le menu des parametres
+        #Texte de la resolution actuelle
+        resolution_texte=Menu_font.render(f"Resolution: {Width}x{Height}",True,Black)  ##Creation du texte de la resolution
+        resolution_texte_rect=resolution_texte.get_rect(center=(Width//2, Height//5))   ##Centrage du texte de la resolution
+        screen.blit(resolution_texte, resolution_texte_rect)  ##Affichage du texte
         for rect,texte in [(fullscreen_button_rect,"Toggle Fullscreen"),(goback_button_rect,"Go Back"),(input_width_rect,user_width_input),(input_height_rect,user_height_input)]:
             if rect.collidepoint(mouse_pos):    ##Si la souris est au dessus du bouton
                 button_color=hover_color    ##Change la couleur du bouton
