@@ -90,11 +90,11 @@ couleur_joueur = (255, 0, 0)
 
 enemies = []
 enemy_spawn_time = 0
-delai_spawn = 60 
+delai_spawn = 60
 
 projectiles = []
-dernier_tir = pygame.time.get_ticks()
-delai_tir=1000
+delai_tir_spawn=0
+delai_tir=60
 
 
 clock = pygame.time.Clock()
@@ -134,11 +134,12 @@ while play == True:
         enemy_spawn_time = 0
 
     #Gestion des tirs
-    if temps_actuel - dernier_tir >= delai_tir:
+    delai_tir_spawn+=1
+    if delai_tir_spawn>= delai_tir:
         cible=ennemi_le_plus_proche(x, y, enemies)
         if cible:
             projectiles.append(Projectile(x, y, cible.x, cible.y))
-        dernier_tir = temps_actuel
+        delai_tir_spawn=0
     for proj in projectiles[:]:
         proj.update(screen, offset_x, offset_y)
         # Vérification des collisions avec les ennemis
@@ -179,3 +180,4 @@ while play == True:
     pygame.display.flip()
 
 pygame.quit()
+
