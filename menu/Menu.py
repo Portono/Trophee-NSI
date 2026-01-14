@@ -213,3 +213,4 @@ while play!=True:   ##Boucle principale du menu
         resolution_change=False
         refresh_ui()
     pygame.display.flip()
+
