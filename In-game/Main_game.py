@@ -166,6 +166,7 @@ pv_joueur=10  ##Points de vie du joueur
 while play == True:
     clock.tick(60)
     temps_actuel = pygame.time.get_ticks()
+    pygame.mixer.music.stop()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
