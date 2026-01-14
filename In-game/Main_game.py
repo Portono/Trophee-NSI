@@ -1,187 +1,216 @@
 import pygame
-import random
-import math
-from Menu import *
 
 pygame.init()
 
-# Configuration de la fenêtre
-screen = pygame.display.set_mode((width, height)) 
-#Definition de variables
-portee=int(2/5*width)
-vitesse_ennemi=width//216
-#Classes
-class Enemy:
-    def __init__(self, x_start, y_start):
-        self.x = x_start
-        self.y = y_start
-        self.vitesse = vitesse_ennemi
-        self.rect = pygame.Rect(0, 0, 40, 40)
-        self.rect.center = (self.x, self.y)
+#Dimensions de la fenetre
+#acquisition de la resolution de l'ecran
+monitor_info=pygame.display.Info()
+monitor_width=monitor_info.current_w   #=valeur de test (temporaire)
+monitor_height=monitor_info.current_h  #=valeur de test (temporaire)
+width=monitor_width
+height=monitor_height
 
-    def se_deplacer(self, p_x, p_y):
-        """Deplace l'ennemi vers le joueur"""
-        dx = p_x - self.x
-        dy = p_y - self.y
-        distance = (dx**2 + dy**2) ** 0.5
-        if distance != 0:   ##Pour éviter la division par zéro
-            self.x += (dx / distance) * self.vitesse
-            self.y += (dy / distance) * self.vitesse
-        
-        # Mise à jour de la position réelle
-        self.rect.center = (self.x, self.y)
+#Variables de gestion du mode plein ecran
+fullscreen_change=False  #True si bouton Fulscreen appuye Temporaire, doit etre False au debut mais peut varier selon les parametres sauvegardes
+fullscreen=True    #Etat de plein ecran, doit etre True au debut mais peut varier selon les parametres sauvegardes
+resolution_change=True  #True si resolution changee doit etre True au debut pour tout initialiser mais peut varier selon les parametres sauvegardes
+user_width_input="Largeur"  #Variable pour stocker l'input utilisateur pour la largeur
+width_input_toggle=False  #Variable pour activer/desactiver l'input de la largeur
+user_height_input="Hauteur"  #Variable pour stocker l'input utilisateur pour la hauteur
+height_input_toggle=False  #Variable pour activer/desactiver l'input de la hauteur
 
-    def dessiner(self, surface, offset_x, offset_y):
-        """Dessine l'ennemi en tenant compte du décalage de la caméra"""
-        # On dessine l'ennemi à sa position RÉELLE moins le décalage CAMÉRA
-        draw_rect = self.rect.copy()    ##Permet d'aficher l'ennemi à la bonne position sans modifier sa position réelle
-        draw_rect.x -= offset_x
-        draw_rect.y -= offset_y
-        pygame.draw.rect(surface, (0, 0, 255), draw_rect)
+#predefinission des couleurs utiles
+white=(255,255,255)
+black=(0,0,0)
+red=(255,0,0)
+green=(0,255,0)
+blue=(0,0,255)
+yellow=(255,255,0)
+orange=(255,165,0)
+gray=(128,128,128)
 
-class projectile:
-    def update(self,surface, offset_x, offset_y):	###Ajouter toggle homing
-        #mouvement
-        self.x += self.dir_x*self.vitesse
-        self.y += self.dir_y*self.vitesse
-        self.rect.center = (self.x, self.y)
-        #dessin
-        draw_rect = self.rect.copy()
-        draw_rect.x -= offset_x
-        draw_rect.y -= offset_y
-        pygame.draw.rect(surface, (0, 255, 0), draw_rect)
+#Predeffinission de la police et de la couleur des boutons
+menu_font=pygame.font.Font("font.ttf", int(height*0.05)) ##Definition de la police et de la taille du texte des boutons
+button_color=black
+hover_color=gray
+text_color=orange
+height_button_text="Hauteur"
+width_button_text="Largeur"
+#definition des dimensions des boutons
+button_width=int(width*0.25)
+button_height=int(height*0.1)
 
-class balle_classique(projectile):
-    homing=False
-    def __init__(self, x_start, y_start, target_x, target_y):
-        self.x = x_start
-        self.y = y_start
-        self.vitesse = 20
-        dx = target_x - x_start
-        dy = target_y - y_start
-        distance = (dx**2 + dy**2) ** 0.5
-        if distance != 0:
-            self.dir_x = dx / distance
-            self.dir_y = dy / distance
-        else:
-            self.dir_x = 0
-            self.dir_y = 0
-        self.rect = pygame.Rect(0, 0, 10, 10)
-        self.rect.center = (self.x, self.y)
-        
-def spawn_enemy(p_x, p_y):
-    # On fait apparaître les ennemis autour du joueur mais hors écran
-    distance_spawn = ((width//2)**2+(height//2)**2)**0.5 + 100
-    angle = random.uniform(0,2*math.pi)
-    spawn_x = p_x + math.cos(angle) * distance_spawn
-    spawn_y = p_y + math.sin(angle) * distance_spawn
-    return Enemy(spawn_x, spawn_y)
+#Definition des boutons
+play_button_rect=pygame.Rect(0,0,button_width,button_height)
+settings_button_rect=pygame.Rect(0,0,button_width,button_height)
+quit_button_rect=pygame.Rect(0,0,button_width,button_height)
+fullscreen_button_rect=pygame.Rect(0, 0, button_width, button_height)
+goback_button_rect=pygame.Rect(0, 0, button_width, button_height)
+input_width_rect=pygame.Rect(0, 0, button_width, button_height)
+input_height_rect=pygame.Rect(0, 0, button_width, button_height)
+#Definition de texte des boutons
+height_button_text="Hauteur"
+width_button_text="Largeur"
+#Creation de la fenetre
+screen=pygame.display.set_mode((width,height), pygame.FULLSCREEN)   ##Definition de la fenetre avec la resolution
+pygame.display.set_caption("Champ de Mars") ##Titre de la fenetre
 
-def ennemi_le_plus_proche(x,y, enemies):
-    plus_proche=None
-    distance_min=float('inf')
-    for en in enemies:
-        d=math.sqrt((en.x-x)**2+(en.y-y)**2)
-        if d<distance_min and d<portee:
-            distance_min=d
-            plus_proche=en
-    return plus_proche
-    
-x, y = 400, 300 # Position réelle du joueur dans le monde
-vitesse_joueur = 10
-couleur_joueur = (255, 0, 0)
+#Ajout du logo + redissionnement adaptatif a la resolution choisie
+logo_import=pygame.image.load("logo_champ_de_mars.png")
+logo_import_width=logo_import.get_width()
+logo_import_height=logo_import.get_height()
+logo=pygame.transform.smoothscale(logo_import,(width,int(logo_import_height/logo_import_width*width)))
+screen.fill(white)
 
-enemies = []
-enemy_spawn_time = 0
-delai_spawn = 60
-
-projectiles = []
-delai_tir_spawn=0
-delai_tir=60
+#on définit les variables pour les changement de scène du menu
+menu_main="main"
+menu_settings="settings"
+current_menu=menu_main
+play=False  ##Variable pour lancer le jeu
 
 
-clock = pygame.time.Clock()
+def refresh_ui():
+    """
+    Cette fonction sert a rafraichir l'interface utilisateur en repositionnant les boutons et le logo en recalculant leurs positions et leurs tailles
+    """
+    global play_button_rect, settings_button_rect, quit_button_rect, logo, menu_font, fullscreen_button_rect, goback_button_rect, input_width_rect,input_height_rect
+    monitor_info=pygame.display.Info()
+    monitor_width=monitor_info.current_w
+    monitor_height=monitor_info.current_h
+    if fullscreen==True:
+        screen=pygame.display.set_mode((width,height), pygame.FULLSCREEN)
+    elif fullscreen==False:
+        screen=pygame.display.set_mode((width,height))
+    #Repositionnement du logo
+    logo=pygame.transform.smoothscale(logo_import,(width,int(logo_import_height/logo_import_width*width)))
+    #Repositionnement des boutons
+    button_width=int(width*0.25)
+    button_height=int(height*0.1)
+    ##Bouton Play
+    play_button_rect=pygame.Rect(0,0,button_width,button_height)
+    play_button_rect.center=(width//2, height//3.8)
+    ##Bouton Settings
+    settings_button_rect=pygame.Rect(0,0,button_width,button_height)
+    settings_button_rect.center=(width//2, height*2//3.8)
+    ##Bouton Quit
+    quit_button_rect=pygame.Rect(0,0,button_width,button_height)
+    quit_button_rect.center=(width//2, height*3//3.8)
+    ##Bouton Settings-Fullscreen
+    fullscreen_button_rect=pygame.Rect(0, 0, button_width/1.25, button_height/1.25)
+    fullscreen_button_rect.center = (width // 2, height*2 // 3.8)
+    ##Bouton Settings-Go Back
+    goback_button_rect=pygame.Rect(0, 0, button_width, button_height)
+    goback_button_rect.center = (width//2, height*3//3.8)
+    ##Bouton Settings-Input Width
+    input_width_rect=pygame.Rect(0, 0, button_width/1.5, button_height/1.5)
+    input_width_rect.center = (width // 1.5, height // 3)   
+    ##Bouton Settings-Input Height
+    input_height_rect=pygame.Rect(0, 0, button_width/1.5, button_height/1.5)
+    input_height_rect.center = (width // 3, height // 3)
+    ##Taille de la police
+    menu_font=pygame.font.Font("font.ttf", int(height*0.05))
 
-while play == True:
-    clock.tick(60)
-    temps_actuel = pygame.time.get_ticks()
+while play!=True:   ##Boucle principale du menu
+    #Recuperation de la position de la souris
+    mouse_pos=pygame.mouse.get_pos()
+    #Raffraichissement du logo sur l'ecran
+    screen.fill(white)  ##Fond blanc
+    screen.blit(logo,(0,0))     ##Affichage du logo en haut de l'ecran
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            exit()
+    #Quitter le jeu
+    for event in pygame.event.get():    ##Recuperation des evenements
+        if event.type == pygame.QUIT:   ##Si on clique sur la croix
+            pygame.quit()       ##Quitte pygame
+            exit()      ##Quitte le programme
+        if event.type == pygame.MOUSEBUTTONDOWN:   ##Si un bouton de la souris est appuye 
+            #   Main Menu   #
+            if current_menu==menu_main: ##Si on est dans le menu principal
+                width_input_toggle,height_input_toggle=False,False
+                if play_button_rect.collidepoint(mouse_pos):   ##Si le bouton Play est appuye
+                    play=True
+                if settings_button_rect.collidepoint(mouse_pos):   ##Si le bouton Settings est appuye
+                    current_menu=menu_settings
+                if quit_button_rect.collidepoint(mouse_pos):   ##Si le bouton Quit est appuye
+                    pygame.quit()       ##Quitte pygame
+                    exit()      ##Quitte le programme
+            #   Settings Menu   #
+            elif current_menu==menu_settings: ##Si on est dans le menu des parametres
+                
+                if fullscreen_button_rect.collidepoint(mouse_pos):   ##Si le bouton Fullscreen est appuye
+                    fullscreen_change=True
+                    fullscreen=not fullscreen
+                if goback_button_rect.collidepoint(mouse_pos):   ##Si le bouton Go Back est appuye
+                    current_menu=menu_main ##on retourne au menu principal
+                if input_width_rect.collidepoint(mouse_pos):   ##Si le bouton de la largeur est appuye
+                    width_input_toggle=True
+                    width_button_text="Largeur"
+                    user_width_input=""
+                if input_height_rect.collidepoint(mouse_pos):   ##Si le bouton de la hauteur est appuye
+                    height_input_toggle=True
+                    height_button_text="Hauteur"
+                    user_height_input=""
 
-    # Dessiner le fond
-    screen.fill((255, 255, 255)) # Fond blanc
+        ##Changement de la resolution via l'input utilisateur
+        if event.type==pygame.KEYDOWN and current_menu==menu_settings and width_input_toggle==True:   ##Si une touche est appuye dans le menu des parametres
+            if event.key==pygame.K_RETURN or event.key==pygame.K_KP_ENTER:   ##Si la touche entree est appuyee
+                try:
+                    width=int(user_width_input)   ##Conversion de l'input utilisateur en entier
+                    resolution_Change=True
+                    width_input_toggle=False
+                    user_width_input=width_button_text  ##Reset de l'input utilisateur
+                except ValueError:
+                    print("Invalid width input")   ##Message d'erreur pour input invalide
+            elif event.key==pygame.K_BACKSPACE:   ##Si la touche retour est appuyee
+                user_width_input=user_width_input[:-1]   ##Supprime le dernier caractere de l'input utilisateur
+            else:
+                user_width_input+=event.unicode   ##Ajoute le caractere appuye a l'input utilisateur
 
-    #Modifie les coordonnees reelles du joueur
-    touches = pygame.key.get_pressed()
-    if touches[pygame.K_d]:
-        x += vitesse_joueur
-    if touches[pygame.K_q] or touches[pygame.K_a]:
-        x -= vitesse_joueur
-    if touches[pygame.K_s]:
-        y += vitesse_joueur
-    if touches[pygame.K_z] or touches[pygame.K_w]:
-        y -= vitesse_joueur
+        if event.type == pygame.KEYDOWN and current_menu==menu_settings and height_input_toggle==True:   ##Si une touche est appuye dans le menu des parametres
+            if event.key==pygame.K_RETURN or event.key==pygame.K_KP_ENTER:   ##Si la touche entree est appuyee
+                try:
+                    height=int(user_height_input)   ##Conversion de l'input utilisateur en entier
+                    resolution_change=True
+                    height_input_toggle=False
+                    user_height_input=height_button_text  ##Reset de l'input utilisateur
+                except ValueError:
+                    print("Invalid height input")   ##Message d'erreur pour input invalide
+            elif event.key==pygame.K_BACKSPACE:   ##Si la touche retour est appuyee
+                user_height_input=user_height_input[:-1]   ##Supprime le dernier caractere de l'input utilisateur
+            else:
+                user_height_input+=event.unicode   ##Ajoute le caractere appuye a l'input utilisateur
 
-    #Maintient le joueur au centre de l'ecran en calculant le decalage
-    offset_x = x - (width // 2)
-    offset_y = y - (height // 2)
+    #dessine les boutons et le texte
+    if current_menu==menu_main: ##les boutons dans le menu principal
+        user_width_input=width_button_text
+        user_height_input=height_button_text
+        for rect,texte in [(play_button_rect,"Play"),(settings_button_rect,"Parametres"),(quit_button_rect,"Quitter")]:
+            if rect.collidepoint(mouse_pos):    ##Si la souris est au dessus du bouton
+                button_color=hover_color    ##Change la couleur du bouton
+            else:
+                button_color=black
+            pygame.draw.rect(screen,button_color, rect)   ##Dessin du bouton
+            texte_surface=menu_font.render(texte,True,orange)    ##Creation du texte
+            texte_rect=texte_surface.get_rect(center=rect.center)   ##Centrage du texte
+            screen.blit(texte_surface, texte_rect)  ##Affichage du texte
+    if current_menu==menu_settings: #les boutons dans le menu des parametres
+        #Texte de la resolution actuelle
+        resolution_texte=menu_font.render(f"Resolution: {width}x{height}",True,black)  ##Creation du texte de la resolution
+        resolution_texte_rect=resolution_texte.get_rect(center=(width//2, height//5))   ##Centrage du texte de la resolution
+        screen.blit(resolution_texte, resolution_texte_rect)  ##Affichage du texte
+        for rect,texte in [(fullscreen_button_rect,"Plein ecran"),(goback_button_rect,"Retour"),(input_width_rect,user_width_input),(input_height_rect,user_height_input)]:
+            if rect.collidepoint(mouse_pos):    ##Si la souris est au dessus du bouton
+                button_color=hover_color    ##Change la couleur du bouton
+            else:
+                button_color=black
+            pygame.draw.rect(screen,button_color, rect)   ##Dessin du bouton
+            texte_surface=menu_font.render(texte,True,orange)    ##Creation du texte
+            texte_rect=texte_surface.get_rect(center=rect.center)   ##Centrage du texte
+            screen.blit(texte_surface, texte_rect)  ##Affichage du texte
 
-    #Gestion des spawns d'ennemis
-    enemy_spawn_time += 1
-    if enemy_spawn_time >= delai_spawn:
-        if len(enemies) < 2000:
-            enemies.append(spawn_enemy(x, y))
-        enemy_spawn_time = 0
-
-    #Gestion des tirs
-    delai_tir_spawn+=1
-    if delai_tir_spawn>= delai_tir:
-        
-        cible=ennemi_le_plus_proche(x, y, enemies)
-        if cible:
-            projectiles.append(balle_classique(x, y, cible.x, cible.y))
-        delai_tir_spawn=0
-    for proj in projectiles[:]:
-        proj.update(screen, offset_x, offset_y)
-        # Vérification des collisions avec les ennemis
-        for en in enemies:
-            if proj.rect.colliderect(en.rect):
-                enemies.remove(en)
-                if proj in projectiles:
-                    projectiles.remove(proj)
-                break
-        # Suppression des projectiles hors écran
-        if (proj.x < offset_x - 100 or proj.x > offset_x + width + 100 or
-            proj.y < offset_y - 100 or proj.y > offset_y + height + 100):
-            if proj in projectiles:
-                projectiles.remove(proj)
-
-    # Dessiner une grille pour voir le mouvement de la caméra
-    for i in range(-5000, 5000, 100):
-        pygame.draw.line(screen, (240, 240, 240), (i - offset_x, -5000 - offset_y), (i - offset_x, 5000 - offset_y))
-        pygame.draw.line(screen, (240, 240, 240), (-5000 - offset_x, i - offset_y), (5000 - offset_x, i - offset_y))
-
-    #Definir le rectangle réel du joueur pour la détection de collision
-    player_real_rect = pygame.Rect(0, 0, 50, 50)
-    player_real_rect.center = (x, y)
-
-    for en in enemies:
-        en.se_deplacer(x, y)
-        en.dessiner(screen, offset_x, offset_y)
-        
-        if player_real_rect.colliderect(en.rect):
-            print("GAME OVER")
-            play = False 
-
-    # Dessiner le joueur (Fixe au centre de l'écran)
-    player_screen_rect = pygame.Rect(0, 0, 50, 50)
-    player_screen_rect.center = (width // 2, height // 2)
-    pygame.draw.rect(screen, couleur_joueur, player_screen_rect)
-
+    #Toggle du fullscreen
+    if fullscreen_change==True or resolution_change==True:
+        fullscreen_change=False
+        resolution_change=False
+        refresh_ui()
     pygame.display.flip()
-
-pygame.quit()
 
