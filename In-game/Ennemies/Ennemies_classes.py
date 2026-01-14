@@ -1,3 +1,8 @@
+import pygame
+import math
+import random
+from Main_game import*
+
 class ennemi_main:
     """Classe principale des ennemis"""
     def __init__(self,x,y,vitesse,hp,arme=None): ##AJOUTER PLUS TARD PARAMETRES COMME VIE, SPRITE AVEC CHEMIN D'ACCES, ETC
