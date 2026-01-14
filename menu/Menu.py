@@ -68,6 +68,8 @@ menu_settings="settings"
 current_menu=menu_main
 play=False  ##Variable pour lancer le jeu
 
+pygame.mixer.music.load("Mainmenu.mp3")
+pygame.mixer.music.play()
 
 def refresh_ui():
     """
@@ -213,4 +215,5 @@ while play!=True:   ##Boucle principale du menu
         resolution_change=False
         refresh_ui()
     pygame.display.flip()
+
 
