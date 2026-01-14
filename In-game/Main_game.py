@@ -76,18 +76,19 @@ class ennemi_tireur(ennemi_main):
 
 class projectiles_general:
     """Classe principale des projectiles"""
-    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path=None,couleur=(0,255,0)):  ##AJOUTER PLUS TARD SPRITE AVEC CHEMIN D'ACCES ET COULEUR SERT SEULEMENT SI PAS DE SPRITE
+    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path=None,couleur=(0,255,0),degat=1):  ##AJOUTER PLUS TARD SPRITE AVEC CHEMIN D'ACCES ET COULEUR SERT SEULEMENT SI PAS DE SPRITE
         self.x=x
         self.y=y
         self.vitesse=vitesse
         self.cible=cible_initiale
         self.homing=homing
         self.couleur=couleur
+        self.degat=degat
 
-        self.image = None
+        self.image = sprite_path
         if sprite_path:
-            self.image = pygame.image.load(sprite_path).convert_alpha()
-            self.rect = pygame.transform.scale(self.image, (20, 20))
+            image_originale = pygame.image.load(sprite_path).convert_alpha()
+            self.image = pygame.transform.scale(image_originale, (100, 40))
             self.rect = self.image.get_rect(center=(self.x, self.y))
         else:
             self.rect = pygame.Rect(self.x, self.y, 10, 10)
@@ -102,7 +103,8 @@ class projectiles_general:
         if distance != 0:
             self.dir_x = direction_x / distance
             self.dir_y = direction_y / distance
-
+            radians=math.atan2(-direction_y, direction_x)
+            self.angle=math.degrees(radians)
     def update(self,liste_ennemis):
         if self.homing:
             #Recalcule la direction vers la cible
@@ -119,19 +121,26 @@ class projectiles_general:
     def dessiner(self,screen,offset_x,offset_y):
         pos_ecran=(self.rect.x-offset_x,self.rect.y - offset_y)
         if self.image:
-            screen.blit(self.image, pos_ecran)
+            rotated_image = pygame.transform.rotate(self.image, self.angle)
+            new_rect= rotated_image.get_rect(center=pos_ecran)
+            screen.blit(rotated_image, new_rect.center)
         else:
             pygame.draw.rect(screen,self.couleur,(pos_ecran[0],pos_ecran[1],10,10))
 
 class projectile_laser(projectiles_general):
     """Classe des projectiles laser"""
-    def __init__(self,x,y,vitesse,cible_initiale,homing=False):
-        super().__init__(x,y,vitesse,cible_initiale,homing=homing, sprite_path=None, couleur=(255,0,0))  ##Appelle le constructeur de la classe parente avec une couleur rouge
+    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path='projectile1.png',degat=1):
+        super().__init__(x,y,vitesse,cible_initiale,homing=homing, sprite_path=sprite_path, couleur=(255,0,0),degat=degat)  ##Appelle le constructeur de la classe parente avec une couleur rouge
+
+class projectile_roquette(projectiles_general):
+    """Classe des projectiles roquettes"""
+    def __init__(self,x,y,vitesse,cible_initiale,homing=True,sprite_path='projectile2.png',degat=3):
+        super().__init__(x,y,vitesse,cible_initiale,homing=homing, sprite_path=sprite_path, couleur=(255,165,0),degat=degat)  ##Appelle le constructeur de la classe parente avec une couleur orange
 
 class projectile_ennemi(projectiles_general):
     """Classe des projectiles ennemis"""
-    def __init__(self,x,y,vitesse,cible_initiale,homing=False):
-        super().__init__(x,y,vitesse,cible_initiale,homing=homing, sprite_path=None, couleur=(0,0,0))  ##Appelle le constructeur de la classe parente avec une couleur noire
+    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path=None):
+        super().__init__(x,y,vitesse,cible_initiale,homing=homing, sprite_path=sprite_path, couleur=(0,0,0))  ##Appelle le constructeur de la classe parente avec une couleur noire
 
 class weapon_main:
     """Classe principale des armes"""
@@ -159,7 +168,8 @@ derniers_spawn = {classe: 0 for classe in types_ennemis}  ##Dictionnaire pour st
 clock = pygame.time.Clock()
 liste_projectiles = []  ##Liste pour stocker les projectiles
 laser=weapon_main(500, projectile_laser,homing=False,range_max=1/2*height)  ##Crée une arme laser avec un délai de 500ms entre chaque tir et des projectiles homing
-type_armes=[laser]   ##Liste des types d'armes
+roquette=weapon_main(1500, projectile_roquette,homing=True,range_max=2/3*height)  ##Crée une arme roquette avec un délai de 1500ms entre chaque tir et des projectiles homing
+type_armes=[laser,roquette]   ##Liste des types d'armes
 liste_projectiles_ennemis=[]  ##Liste pour stocker les projectiles des ennemis
 pv_joueur=10  ##Points de vie du joueur
 
@@ -231,7 +241,7 @@ while play == True:
             if proj.rect.colliderect(ennemi.rect):
                 if proj in liste_projectiles:
                     liste_projectiles.remove(proj)
-                ennemi.hp -= 1
+                ennemi.hp -= proj.degat
                 if ennemi.hp <= 0:
                     liste_ennemis.remove(ennemi)
                 break
