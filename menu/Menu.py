@@ -190,7 +190,7 @@ while play!=True:   ##Boucle principale du menu
                 button_color=hover_color    ##Change la couleur du bouton
             else:
                 button_color=black
-            pygame.draw.rect(screen,button_color, rect, border_radius=30)   ##Dessin du bouton
+            pygame.draw.rect(screen,button_color, rect, border_radius=100)   ##Dessin du bouton
             texte_surface=menu_font.render(texte,True,orange)    ##Creation du texte
             texte_rect=texte_surface.get_rect(center=rect.center)   ##Centrage du texte
             screen.blit(texte_surface, texte_rect)  ##Affichage du texte
@@ -204,7 +204,7 @@ while play!=True:   ##Boucle principale du menu
                 button_color=hover_color    ##Change la couleur du bouton
             else:
                 button_color=black
-            pygame.draw.rect(screen,button_color, rect,border_radius=30)   ##Dessin du bouton
+            pygame.draw.rect(screen,button_color, rect,border_radius=100)   ##Dessin du bouton
             texte_surface=menu_font.render(texte,True,orange)    ##Creation du texte
             texte_rect=texte_surface.get_rect(center=rect.center)   ##Centrage du texte
             screen.blit(texte_surface, texte_rect)  ##Affichage du texte
@@ -215,4 +215,5 @@ while play!=True:   ##Boucle principale du menu
         resolution_change=False
         refresh_ui()
     pygame.display.flip()
+
 
