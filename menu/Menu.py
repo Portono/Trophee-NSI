@@ -71,7 +71,7 @@ play=False  ##Variable pour lancer le jeu
 
 def refresh_ui():
     """
-    Cette fonction sert a rafraichir l'interface utilisateur en repositionnant les boutons et le logo en recalculant leurs positions et leurs tailles
+    Cette fonction sert a rafraichir l'interface utilisateur en repositionnant les boutons et le logo en recalculant leurs positions et leurs tailles car leur position n'est calcule seulement lors de leur creation
     """
     global play_button_rect, settings_button_rect, quit_button_rect, logo, menu_font, fullscreen_button_rect, goback_button_rect, input_width_rect,input_height_rect
     monitor_info=pygame.display.Info()
@@ -103,10 +103,10 @@ def refresh_ui():
     goback_button_rect.center = (width//2, height*3//3.8)
     ##Bouton Settings-Input Width
     input_width_rect=pygame.Rect(0, 0, button_width/1.5, button_height/1.5)
-    input_width_rect.center = (width // 1.5, height // 3)   
+    input_width_rect.center = (width // 3, height // 3)   
     ##Bouton Settings-Input Height
     input_height_rect=pygame.Rect(0, 0, button_width/1.5, button_height/1.5)
-    input_height_rect.center = (width // 3, height // 3)
+    input_height_rect.center = (width // 1.5, height // 3)
     ##Taille de la police
     menu_font=pygame.font.Font("font.ttf", int(height*0.05))
 
@@ -155,7 +155,7 @@ while play!=True:   ##Boucle principale du menu
             if event.key==pygame.K_RETURN or event.key==pygame.K_KP_ENTER:   ##Si la touche entree est appuyee
                 try:
                     width=int(user_width_input)   ##Conversion de l'input utilisateur en entier
-                    resolution_Change=True
+                    resolution_change=True
                     width_input_toggle=False
                     user_width_input=width_button_text  ##Reset de l'input utilisateur
                 except ValueError:
