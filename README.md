@@ -6,4 +6,4 @@ Il faut aussi les bibliotheques:
   -pygame  
   -math  
   -random  
-  -pygame_widgets
+  -pygame_widgets(pas encore mais dans le futur surement)
