@@ -88,7 +88,7 @@ class projectiles_general:
         self.image = sprite_path
         if sprite_path:
             image_originale = pygame.image.load(sprite_path).convert_alpha()
-            self.image = pygame.transform.scale(image_originale, (100, 40))
+            self.image = pygame.transform.scale(image_originale, (90, 35))
             self.rect = self.image.get_rect(center=(self.x, self.y))
         else:
             self.rect = pygame.Rect(self.x, self.y, 10, 10)
