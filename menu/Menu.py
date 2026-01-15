@@ -112,7 +112,7 @@ def refresh_ui():
     ##Taille de la police
     menu_font=pygame.font.Font("font.ttf", int(height*0.05))
 
-while play!=True:   ##Boucle principale du menu
+while play==False:   ##Boucle principale du menu
     #Recuperation de la position de la souris
     mouse_pos=pygame.mouse.get_pos()
     #Raffraichissement du logo sur l'ecran
@@ -215,5 +215,6 @@ while play!=True:   ##Boucle principale du menu
         resolution_change=False
         refresh_ui()
     pygame.display.flip()
+
 
 
