@@ -1,7 +1,7 @@
 while running: 
-if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_p:
-                pause = not pause
+       if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_esc:
+                        pause = not pause
 
         if pause and event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = event.pos
