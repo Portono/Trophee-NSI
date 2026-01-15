@@ -257,6 +257,7 @@ while play == True:
         if proj.rect.colliderect(player_real_rect):
             liste_projectiles_ennemis.remove(proj)
             pv_joueur -= 1
+            Soundhit.play()
             if pv_joueur <= 0:
                 play = False  ##Le joueur meurt
         elif math.hypot(proj.x - player_x, proj.y - player_y) > height:
@@ -268,6 +269,7 @@ while play == True:
         if ennemi.rect.colliderect(player_real_rect):
             liste_ennemis.remove(ennemi)
             pv_joueur -= 1
+            Soundhit.play()
             if pv_joueur <= 0:
                 play = False  ##Le joueur meurt
     pygame.display.flip()
