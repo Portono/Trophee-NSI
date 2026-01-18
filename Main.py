@@ -2,6 +2,7 @@ import pygame
 from Main_game import*
 from Sounddesign import*
 from Menu import *
+from menu_pause import*
 
 def main():
     pygame.init()
