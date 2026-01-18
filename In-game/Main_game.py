@@ -3,6 +3,7 @@ import random
 import math
 from Menu import *
 from Sounddesign import*
+from menu_pause import*
 
 pygame.init()
 
@@ -161,10 +162,13 @@ class weapon_main:
             self.dernier_tir = pygame.time.get_ticks()
             return  True
         return False
+    def compenser_pause(self,duree_pause):
+        self.dernier_tir += duree_pause  ##Décale le temps du dernier tir pour compenser la pause
     
 
 def lancer_jeu(settings):
     global width, height, screen, pv_joueur, liste_projectiles_ennemis
+    en_pause=False
     width = settings["width"]
     height = settings["height"]
     screen = pygame.display.set_mode((width, height), pygame.FULLSCREEN if settings["fullscreen"] else 0)
@@ -183,29 +187,94 @@ def lancer_jeu(settings):
     type_armes=[laser,roquette]   ##Liste des types d'armes
     liste_projectiles_ennemis=[]  ##Liste pour stocker les projectiles des ennemis
     pv_joueur=10  ##Points de vie du joueur
+
+    pygame.mixer.music.stop()
     while en_jeu:
         clock.tick(60)
-        pygame.mixer.music.stop()
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    temps_debut_pause=pygame.time.get_ticks()
+                    afficher_menu_pause()
+                    duree_pause=pygame.time.get_ticks()-temps_debut_pause
+
+                    for classe in derniers_spawn:
+                        derniers_spawn[classe] += duree_pause  ##Décale les temps de spawn des ennemis pour compenser la pause
+                    for armes in type_armes:
+                        armes.compenser_pause(duree_pause)  ##Décale les temps de tir des armes pour compenser la pause
+                    for ennemi in liste_ennemis:
+                        if ennemi.arme:
+                            ennemi.arme.compenser_pause(duree_pause)  ##Décale les temps de tir des armes des ennemis pour compenser la pause
+                            
+        player_real_rect = pygame.Rect(0,0, 50, 50)
+        player_real_rect.center = (player_x, player_y)
+        #Si en jeu
+        if not en_pause:
+            #Mouvement du joueur
+            touches = pygame.key.get_pressed()
+            if touches[pygame.K_d]:
+                player_x += vitesse_joueur
+            if touches[pygame.K_q] or touches[pygame.K_a]:
+                player_x -= vitesse_joueur
+            if touches[pygame.K_s]:
+                player_y += vitesse_joueur
+            if touches[pygame.K_z] or touches[pygame.K_w]:
+                player_y -= vitesse_joueur
+            # Gérer le spawn des ennemis
+            for classe in types_ennemis:
+                if pygame.time.get_ticks() - derniers_spawn[classe] >= classe.spawn_delay:
+                    spawn_x, spawn_y = classe.calculer_pos_spawn(player_x, player_y, width, height)
+                    nouvel_ennemi = classe(spawn_x, spawn_y)
+                    liste_ennemis.append(nouvel_ennemi)
+                    derniers_spawn[classe] = pygame.time.get_ticks()
+            # Mettre à jour les ennemis
+            for ennemi in liste_ennemis:
+                ennemi.update(player_x, player_y)
+            # Gérer les tirs du joueur
+            if liste_ennemis:
+                cible_proche= min(liste_ennemis, key=lambda ennemi: math.hypot(ennemi.x - player_x, ennemi.y - player_y))
+                for armes in type_armes:
+                    if armes.tirer() and math.hypot(cible_proche.x - player_x, cible_proche.y - player_y)<=armes.range_balle:
+                        nouveau_projectile = armes.classe(player_x, player_y, armes.vitesse, cible_proche, homing=armes.homing,range=armes.range_balle)
+                        liste_projectiles.append(nouveau_projectile)
+            # Mettre à jour les projectiles du joueur
+            for proj in liste_projectiles[:]:
+                proj.update(liste_ennemis)
+                for ennemi in liste_ennemis:
+                    if proj.rect.colliderect(ennemi.rect):
+                        if proj in liste_projectiles:
+                            liste_projectiles.remove(proj)
+                        ennemi.hp -= proj.degat
+                        if ennemi.hp <= 0:
+                            liste_ennemis.remove(ennemi)
+                        break
+                    elif proj.est_trop_loin():
+                        if proj in liste_projectiles:
+                            liste_projectiles.remove(proj)
+            # Mettre à jour les projectiles des ennemis
+            for proj in liste_projectiles_ennemis[:]:
+                proj.update([])
+                if proj.rect.colliderect(player_real_rect):
+                    liste_projectiles_ennemis.remove(proj)
+                    pv_joueur -= 1
+                    Soundhit.play()
+                elif proj.est_trop_loin():
+                    if proj in liste_projectiles_ennemis:
+                        liste_projectiles_ennemis.remove(proj)
+            #Gerer collisions ennemis-joueur
+            for ennemi in liste_ennemis[:]:
+                if ennemi.rect.colliderect(player_real_rect):
+                    liste_ennemis.remove(ennemi)
+                    pv_joueur -= 1
+                    Soundhit.play()
+            if pv_joueur <= 0:
+                en_jeu = False  ##Le joueur a perdu
 
         # Dessiner le fond
         screen.fill((255, 255, 255)) # Fond blanc
-
-        #Modifie les coordonnees reelles du joueur
-        touches = pygame.key.get_pressed()
-        if touches[pygame.K_d]:
-            player_x += vitesse_joueur
-        if touches[pygame.K_q] or touches[pygame.K_a]:
-            player_x -= vitesse_joueur
-        if touches[pygame.K_s]:
-            player_y += vitesse_joueur
-        if touches[pygame.K_z] or touches[pygame.K_w]:
-            player_y -= vitesse_joueur
-
         #Maintient le joueur au centre de l'ecran en calculant le decalage
         offset_x = player_x - (width // 2)
         offset_y = player_y - (height // 2)
@@ -215,70 +284,22 @@ def lancer_jeu(settings):
             pygame.draw.line(screen, (240, 240, 240), (i - offset_x, -5000 - offset_y), (i - offset_x, 5000 - offset_y))
             pygame.draw.line(screen, (240, 240, 240), (-5000 - offset_x, i - offset_y), (5000 - offset_x, i - offset_y))
 
-        # Gérer le spawn des ennemis
-        for classe in types_ennemis:
-            if pygame.time.get_ticks() - derniers_spawn[classe] >= classe.spawn_delay:
-                spawn_x, spawn_y = classe.calculer_pos_spawn(player_x, player_y, width, height)
-                nouvel_ennemi = classe(spawn_x, spawn_y)
-                liste_ennemis.append(nouvel_ennemi)
-                derniers_spawn[classe] = pygame.time.get_ticks()
-        # Mettre à jour et dessiner les ennemis
+        #Dessiner les ennemis
         for ennemi in liste_ennemis:
-            ennemi.update(player_x, player_y)
             ennemi.dessiner(screen, offset_x, offset_y)
-        # Dessiner le joueur au centre de l'écran (Vraies coordonnees)
-        player_real_rect = pygame.Rect(0,0, 50, 50)
-        player_real_rect.center = (player_x, player_y)
         #Dessine le joueur
         player_screen_rect = pygame.Rect(width // 2, height // 2, 50, 50)
         player_screen_rect.center = (width // 2, height // 2)
         pygame.draw.rect(screen, couleur_joueur, player_screen_rect)
-        #Gerer le tir du joueur
-        if liste_ennemis:
-            cible_proche= min(liste_ennemis, key=lambda ennemi: math.hypot(ennemi.x - player_x, ennemi.y - player_y))
-            for armes in type_armes:
-                if armes.tirer() and math.hypot(cible_proche.x - player_x, cible_proche.y - player_y)<=armes.range_balle:
-                    nouveau_projectile = armes.classe(player_x, player_y, armes.vitesse, cible_proche, homing=armes.homing,range=armes.range_balle)
-                    liste_projectiles.append(nouveau_projectile)
 
         #Dessiner les projectiles du joueur
         for proj in liste_projectiles[:]:
-            proj.update(liste_ennemis)
             proj.dessiner(screen, offset_x, offset_y)
-
-            for ennemi in liste_ennemis:
-                if proj.rect.colliderect(ennemi.rect):
-                    if proj in liste_projectiles:
-                        liste_projectiles.remove(proj)
-                    ennemi.hp -= proj.degat
-                    if ennemi.hp <= 0:
-                        liste_ennemis.remove(ennemi)
-                    break
-                elif proj.est_trop_loin():
-                    if proj in liste_projectiles:
-                        liste_projectiles.remove(proj)
 
         #Gerer les tirs des ennemis
         for proj in liste_projectiles_ennemis[:]:
-            proj.update([])
             proj.dessiner(screen, offset_x, offset_y)
 
-            if proj.rect.colliderect(player_real_rect):
-                liste_projectiles_ennemis.remove(proj)
-                pv_joueur -= 1
-                Soundhit.play()
-            elif proj.est_trop_loin():
-                if proj in liste_projectiles_ennemis:
-                    liste_projectiles_ennemis.remove(proj)
-
-        #Gerer collisions ennemis-joueur
-        for ennemi in liste_ennemis[:]:
-            if ennemi.rect.colliderect(player_real_rect):
-                liste_ennemis.remove(ennemi)
-                pv_joueur -= 1
-                Soundhit.play()
-        if pv_joueur <= 0:
-            en_jeu = False  ##Le joueur a perdu
         pygame.display.flip()
 
 pygame.quit()
