@@ -114,7 +114,7 @@ def afficher_menu():
     refresh_ui()
     return boucle_menu()
 
-def boucle_menu():
+def boucle_menu(pause=False):
     global current_menu, play, fullscreen, fullscreen_change, resolution_change, width, height, user_width_input, width_input_toggle, user_height_input, height_input_toggle,screen,width_button_text,height_button_text
     play=False
     #Recuperation de la position de la souris
@@ -133,6 +133,8 @@ def boucle_menu():
                 if current_menu==menu_main: ##Si on est dans le menu principal
                     width_input_toggle,height_input_toggle=False,False
                     if play_button_rect.collidepoint(mouse_pos):   ##Si le bouton Play est appuye
+                        if __name__=="Main":
+                            return
                         play=True
                     if settings_button_rect.collidepoint(mouse_pos):   ##Si le bouton Settings est appuye
                         current_menu=menu_settings
@@ -165,7 +167,7 @@ def boucle_menu():
                         width_input_toggle=False
                         user_width_input=width_button_text  ##Reset de l'input utilisateur
                     except ValueError:
-                        print("Invalid width input")   ##Message d'erreur pour input invalide
+                        pass
                 elif event.key==pygame.K_BACKSPACE:   ##Si la touche retour est appuyee
                     user_width_input=user_width_input[:-1]   ##Supprime le dernier caractere de l'input utilisateur
                 else:
@@ -177,9 +179,9 @@ def boucle_menu():
                         height=int(user_height_input)   ##Conversion de l'input utilisateur en entier
                         resolution_change=True
                         height_input_toggle=False
-                        user_height_input=height_button_text  ##Reset de l'input utilisateur
+                        user_height_input=height_button_text  ##Reset de l'input utilisateure
                     except ValueError:
-                        print("Invalid height input")   ##Message d'erreur pour input invalide
+                        pass
                 elif event.key==pygame.K_BACKSPACE:   ##Si la touche retour est appuyee
                     user_height_input=user_height_input[:-1]   ##Supprime le dernier caractere de l'input utilisateur
                 else:
@@ -189,7 +191,7 @@ def boucle_menu():
         if current_menu==menu_main: ##les boutons dans le menu principal
             user_width_input=width_button_text
             user_height_input=height_button_text
-            for rect,texte in [(play_button_rect,"Play"),(settings_button_rect,"Parametres"),(quit_button_rect,"Quitter")]:
+            for rect,texte in [(play_button_rect,"Reprendre" if pause else "Jouer"),(settings_button_rect,"Parametres"),(quit_button_rect,"Quitter")]:
                 if rect.collidepoint(mouse_pos):    ##Si la souris est au dessus du bouton
                     button_color=hover_color    ##Change la couleur du bouton
                 else:
