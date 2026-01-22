@@ -2,25 +2,93 @@ import pygame
 import random
 import math
 
-def obtenir_upgrade(stat_chance, inventaire_joueur):
-    upgrades=["hp","vitesse","portee","vitesse balles","taille balles","regen","degat","cadence","multishot"]
+dico_upgrades={"chance":0,
+               "xp_gain":0,
+               "hp":0,
+               "vitesse":0,
+               "vitesse_balles":0,
+               "fire_rate":0,
+               "degats":0,
+               "portee":0,
+               "regen_hp":0,
+               "lifesteal":0,
+               "taille_projectiles":0,
+               "multishot":0,
+               "bigger_aoe":0,
+               "dodge":0,
+               "deflect":0,
+               "piercing":0,
+               "arc_degats":0,
+               "tirs_ralentissants":0,
+               "aoe_joueur":0,
+               "resistance":0,
+               "summon_allies":0,
+               "distance_damage":0,
+               }
 
-    poids_calcule=[]
+dico_rarete_upgrades={"chance":"commun",
+                      "hp":"commun",
+                      "vitesse":"commun",
+                      "vitesse_balles":"commun",
+                      "degats":"commun",
+                      "portee":"commun",
+                      "fire_rate":"commun",
+                      "xp_gain":"rare",
+                      "regen_hp":"rare",
+                      "taille_projectiles":"rare",
+                      "aoe_joueur":"rare",
+                      "resistance":"rare",
+                      "bigger_aoe":"rare",
+                      "lifesteal":"epique",
+                      "deflect":"epique",
+                      "piercing":"epique",
+                      "arc_degats":"epique",
+                      "tirs_ralentissants":"epique",
+                      "distance_damage":"epique",
+                      "dodge":"epique",
+                      "multishot":"legendaire",
+                      "summon_allies":"legendaire"
+                      }
 
-    for i,nom in enumerate(upgrades):
-        position_courbe=(i+1)/len(upgrades)
-        poids_base=position_courbe**(4.0/stat_chance)
+dico_poids_upgrade={"chance":0,
+                    "xp_gain":0,
+                    "hp":0,
+                    "vitesse":0,
+                    "vitesse_balles":0,
+                    "fire_rate":0,
+                    "degats":0,
+                    "portee":0,
+                    "regen_hp":0,
+                    "lifesteal":0,
+                    "taille_projectiles":0,
+                    "multishot":0,
+                    "bigger_aoe":0,
+                    "dodge":0,
+                    "deflect":0,
+                    "piercing":0,
+                    "arc_degats":0,
+                    "tirs_ralentissants":0,
+                    "aoe_joueur":0,
+                    "resistance":0,
+                    "summon_allies":0,
+                    "distance_damage":0,
+                    }
 
-        multiplicateur=max(0,1.0-(inventaire_joueur.get(nom,0)*0.01))
+def get_coef_rarete(upgrade):
+    if dico_rarete_upgrades[upgrade]=="commun":
+        return 9
+    if dico_rarete_upgrades[upgrade]=="rare":
+        return 6
+    if dico_rarete_upgrades[upgrade]=="epique":
+        return 3
+    if dico_rarete_upgrades[upgrade]=="legendaire":
+        return 1
 
-        poids_final=poids_base*multiplicateur
-        poids_calcule.append(poids_final)
-    if sum(poids_calcule)<=0:
-        poids_calcule=[]
-        for i in range(len(upgrades)):
-            position_courbe=(i+1)/len(upgrades)
-            poids_calcule.append(position_courbe**(4.0/stat_chance))
-            
-    selection=random.choices(upgrades,weights=poids_calcule,k=1)[0]
-
-    return selection
+def random_upgrade():
+    sum_upgrades=0
+    for upgrades in dico_upgrades:
+        sum_upgrades+=dico_upgrades[upgrades]
+        poids_upgrade_dico[upgrades]=get_coef_rarete(upgrades)*(1-(dico_upgrades[upgrades]/(sum_upgrades*
+        
+        
+    
