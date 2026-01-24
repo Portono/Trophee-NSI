@@ -134,6 +134,7 @@ def boucle_menu(pause=False):
                     if play_button_rect.collidepoint(mouse_pos):   ##Si le bouton Play est appuye
                         if __name__=="Main":
                             return
+                        pygame.mixer.music.stop()
                         play=True
                     if settings_button_rect.collidepoint(mouse_pos):   ##Si le bouton Settings est appuye
                         current_menu=menu_settings
