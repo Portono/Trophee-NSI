@@ -77,7 +77,7 @@ class ennemi_tireur(ennemi_main):
 
 class projectiles_general:
     """Classe principale des projectiles"""
-    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path=None,couleur=(0,255,0),degat=1,range=10):  ##AJOUTER PLUS TARD SPRITE AVEC CHEMIN D'ACCES ET COULEUR SERT SEULEMENT SI PAS DE SPRITE
+    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path=None,couleur=(0,255,0),degat=1,range=10,aoe=False,aoe_rayon=width/10):  ##AJOUTER PLUS TARD SPRITE AVEC CHEMIN D'ACCES ET COULEUR SERT SEULEMENT SI PAS DE SPRITE
         self.x=x
         self.y=y
         self.start_x=x
@@ -89,6 +89,8 @@ class projectiles_general:
         self.degat=degat
         self.range=range
         self.image = sprite_path
+        self.aoe=aoe
+        self.aoe_rayon=aoe_rayon
         if sprite_path:
             image_originale = pygame.image.load(sprite_path).convert_alpha()
             self.image = pygame.transform.scale(image_originale, (90, 35))
@@ -139,8 +141,8 @@ class projectile_laser(projectiles_general):
 
 class projectile_roquette(projectiles_general):
     """Classe des projectiles roquettes"""
-    def __init__(self,x,y,vitesse,cible_initiale,homing=True,sprite_path='projectile2.png',degat=3,range=10):
-        super().__init__(x,y,vitesse,cible_initiale,homing=homing, sprite_path=sprite_path, couleur=(255,165,0),degat=degat,range=range)  ##Appelle le constructeur de la classe parente avec une couleur orange
+    def __init__(self,x,y,vitesse,cible_initiale,homing=True,sprite_path='projectile2.png',degat=3,range=10,aoe=True,aoe_rayon=width/10):
+        super().__init__(x,y,vitesse,cible_initiale,homing=homing, sprite_path=sprite_path, couleur=(255,165,0),degat=degat,range=range,aoe=aoe,aoe_rayon=aoe_rayon)  ##Appelle le constructeur de la classe parente avec une couleur orange
 
 class projectile_ennemi(projectiles_general):
     """Classe des projectiles ennemis"""
@@ -149,7 +151,7 @@ class projectile_ennemi(projectiles_general):
 
 class weapon_main:
     """Classe principale des armes"""
-    def __init__(self,delai,classe_projectile,homing=False,portee_detection=1/2*height,vitesse=10):
+    def __init__(self,delai,classe_projectile,homing=False,portee_detection=1/2*height,vitesse=10,aoe=False,aoe_rayon=width/10):
         self.delai=delai  ##Temps entre chaque tir en millisecondes
         self.dernier_tir=0  ##Temps du dernier tir
         self.classe=classe_projectile  ##Classe du projectile tiré
@@ -157,6 +159,7 @@ class weapon_main:
         self.range=portee_detection  ##Portée maximale de l'arme
         self.vitesse=vitesse  ##Vitesse des projectiles tirés
         self.range_balle=portee_detection*2  ##Portée maximale des projectiles tirés
+        self.aoe=aoe
     def tirer(self):
         if pygame.time.get_ticks() - self.dernier_tir >= self.delai:
             self.dernier_tir = pygame.time.get_ticks()
@@ -182,7 +185,7 @@ def lancer_jeu(settings):
     clock = pygame.time.Clock()
     liste_projectiles = []  ##Liste pour stocker les projectiles
     laser=weapon_main(500, projectile_laser,homing=False,portee_detection=height/5,vitesse=width/200)  ##Crée une arme laser avec un délai de 500ms entre chaque tir et des projectiles homing
-    roquette=weapon_main(1500, projectile_roquette,homing=True,portee_detection=width/5,vitesse=width/300)  ##Crée une arme roquette avec un délai de 1500ms entre chaque tir et des projectiles homing
+    roquette=weapon_main(1500, projectile_roquette,homing=True,portee_detection=width/5,vitesse=width/300,aoe=True,aoe_rayon=width/10)  ##Crée une arme roquette avec un délai de 1500ms entre chaque tir et des projectiles homing
     type_armes=[laser,roquette]   ##Liste des types d'armes
     liste_projectiles_ennemis=[]  ##Liste pour stocker les projectiles des ennemis
     pv_joueur=10  ##Points de vie du joueur
@@ -242,17 +245,26 @@ def lancer_jeu(settings):
             # Mettre à jour les projectiles du joueur
             for proj in liste_projectiles[:]:
                 proj.update(liste_ennemis)
+                hit_ennemi=None
+
                 for ennemi in liste_ennemis:
                     if proj.rect.colliderect(ennemi.rect):
-                        if proj in liste_projectiles:
-                            liste_projectiles.remove(proj)
-                        ennemi.hp -= proj.degat
-                        if ennemi.hp <= 0:
-                            liste_ennemis.remove(ennemi)
+                        hit_ennemi=ennemi
                         break
-                    elif proj.est_trop_loin():
-                        if proj in liste_projectiles:
-                            liste_projectiles.remove(proj)
+
+
+                if hit_ennemi or proj.est_trop_loin():
+                    if proj.aoe:
+                        for e in liste_ennemis:
+                            if math.hypot(proj.x-e.x,proj.y-e.y)<=proj.aoe_rayon:
+                                    e.hp-=proj.degat
+                    elif hit_ennemi:
+                        hit_ennemi.hp-=proj.degat
+
+                    if proj in liste_projectiles:
+                        liste_projectiles.remove(proj)
+            liste_ennemis[:]=[e for e in liste_ennemis if e.hp>0]
+
             # Mettre à jour les projectiles des ennemis
             for proj in liste_projectiles_ennemis[:]:
                 proj.update([])
@@ -304,6 +316,9 @@ def lancer_jeu(settings):
             rect=pygame.Rect(width/2,height/2,width/8 if rect=="max_health_bar_rect" else pv_joueur/pv_max_joueur*width/8,height/100)
             rect.topleft=(width/150,height/150)
             pygame.draw.rect(screen,color,rect)
+        
+        #Gerer les upgrades
+
 
 
         pygame.display.flip()
