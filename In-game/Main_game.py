@@ -4,6 +4,7 @@ import math
 from Menu import *
 from Sounddesign import*
 from menu_pause import*
+from random_module import*
 
 pygame.init()
 
@@ -225,6 +226,8 @@ def lancer_jeu(settings):
                 player_y += vitesse_joueur
             if touches[pygame.K_z] or touches[pygame.K_w]:
                 player_y -= vitesse_joueur
+            if touches[pygame.K_e]:
+                level_up(screen,width,height)
             # Gérer le spawn des ennemis
             for classe in types_ennemis:
                 if pygame.time.get_ticks() - derniers_spawn[classe] >= classe.spawn_delay:
@@ -283,6 +286,7 @@ def lancer_jeu(settings):
                     Soundhit.play()
             if pv_joueur <= 0:
                 en_jeu = False  ##Le joueur a perdu
+            
 
         # Dessiner le fond
         screen.fill((255, 255, 255)) # Fond blanc
@@ -317,8 +321,13 @@ def lancer_jeu(settings):
             rect.topleft=(width/150,height/150)
             pygame.draw.rect(screen,color,rect)
         
-        #Gerer les upgrades
-
+        centre=pygame.Rect(0,0,width/4,height/4)
+        centre.center=(0-offset_x,0-offset_y)
+        font=pygame.font.Font(None,150)
+        texte_base=font.render("Base", True,orange)
+        texte_base_rect=texte_base.get_rect(center=centre.center)
+        pygame.draw.rect(screen,black,centre)
+        screen.blit(texte_base,texte_base_rect)
 
 
         pygame.display.flip()
