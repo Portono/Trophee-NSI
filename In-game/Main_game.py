@@ -165,21 +165,6 @@ class weapon_main:
     def compenser_pause(self,duree_pause):
         self.dernier_tir += duree_pause  ##Décale le temps du dernier tir pour compenser la pause
     
-class health_bar():
-    def __init__(self, x, y, w, h, max_hp):
-        self.x = 20
-        self.y = 20
-        self.w = w
-        self.h = h
-        self.hp = max_hp
-        self.max_hp = max_hp
-        
-    def draw(self, surface):
-        ratio = self.hp / self.max_hp
-        pygame.draw.rect(surface, (255, 0, 0), (self.x, self.y, self.w, self.h))
-        pygame.draw.rect(surface, (0, 255, 0), (self.x, self.y, self.w * ratio, self.h))
-
-
 def lancer_jeu(settings):
     global width, height, screen, pv_joueur, liste_projectiles_ennemis
     en_pause=False
@@ -201,7 +186,7 @@ def lancer_jeu(settings):
     type_armes=[laser,roquette]   ##Liste des types d'armes
     liste_projectiles_ennemis=[]  ##Liste pour stocker les projectiles des ennemis
     pv_joueur=10  ##Points de vie du joueur
-    barre_vie = health_bar(20, 20, 200, 20, pv_joueur)
+    pv_max_joueur=10
     pygame.mixer.music.stop()
     while en_jeu:
         clock.tick(60)
@@ -313,6 +298,15 @@ def lancer_jeu(settings):
         #Gerer les tirs des ennemis
         for proj in liste_projectiles_ennemis[:]:
             proj.dessiner(screen, offset_x, offset_y)
+
+        #Dessiner la barre de vie
+        max_health_bar_rect=pygame.Rect(width/2,height/2,width/8,height/100)
+        max_health_bar_rect.topleft=(width/150,height/150)
+        pygame.draw.rect(screen,red,max_health_bar_rect)
+        health_bar_rect=pygame.Rect(width/2,height/2, pv_joueur/pv_max_joueur*width/8,height/100)
+        health_bar_rect.topleft=(width/150,height/150)
+        pygame.draw.rect(screen,green,health_bar_rect)
+
 
         pygame.display.flip()
 
