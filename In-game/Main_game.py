@@ -300,12 +300,10 @@ def lancer_jeu(settings):
             proj.dessiner(screen, offset_x, offset_y)
 
         #Dessiner la barre de vie
-        max_health_bar_rect=pygame.Rect(width/2,height/2,width/8,height/100)
-        max_health_bar_rect.topleft=(width/150,height/150)
-        pygame.draw.rect(screen,red,max_health_bar_rect)
-        health_bar_rect=pygame.Rect(width/2,height/2, pv_joueur/pv_max_joueur*width/8,height/100)
-        health_bar_rect.topleft=(width/150,height/150)
-        pygame.draw.rect(screen,green,health_bar_rect)
+        for rect,color in [("max_health_bar_rect",red),("health_bar_rect",green)]:
+            rect=pygame.Rect(width/2,height/2,width/8 if rect=="max_health_bar_rect" else pv_joueur/pv_max_joueur*width/8,height/100)
+            rect.topleft=(width/150,height/150)
+            pygame.draw.rect(screen,color,rect)
 
 
         pygame.display.flip()
