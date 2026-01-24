@@ -2,6 +2,8 @@ import pygame
 import random
 import math
 
+pygame.init()
+
 dico_upgrades={"chance":1,
                "xp_gain":0,
                "hp":0,
@@ -95,11 +97,11 @@ def random_upgrade():
         dico_poids_upgrade[upgrade]=max(0,poids)
     return dico_poids_upgrade
 
-def choisir_upgrades(n):
+def choisir_upgrades():
     random_upgrade()
     options=[]
     poids_temp=dico_poids_upgrade.copy()
-    for _ in range(n):
+    for _ in range(3):
         noms=list(poids_temp.keys())
         poids=list(poids_temp.values())
         if sum(poids)==0:
@@ -109,8 +111,22 @@ def choisir_upgrades(n):
         poids_temp[choix]=0
     return options
 
-
-
-
-mes_options=choisir_upgrades(3)
-print(f"Options pour le joueur:{mes_options}")
+def level_up(screen,width,height):
+    upgrading=True
+    options=choisir_upgrades()
+    while upgrading:
+        for event in pygame.event.get():
+            if event.type==pygame.QUIT:
+                pygame.quit()
+                exit()
+        screen.fill((255,255,255))
+        option1_rect=pygame.Rect(0,0,width/6,height/1.5)
+        option2_rect=option1_rect.copy()
+        option3_rect=option1_rect.copy()
+        option1_rect.center=((width-3*(width/6))/4+(width/12),height/2)
+        option2_rect.center=(2*(width-3*(width/6))/4+3*(width/12),height/2)
+        option3_rect.center=(3*(width-3*(width/6))/4+5*(width/12),height/2)
+        pygame.draw.rect(screen,(0,0,0),option1_rect)
+        pygame.draw.rect(screen,(255,0,0),option2_rect)
+        pygame.draw.rect(screen,(0,255,0),option3_rect)
+        pygame.display.flip()
