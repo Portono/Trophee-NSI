@@ -2,7 +2,7 @@ import pygame
 import random
 import math
 
-dico_upgrades={"chance":0,
+dico_upgrades={"chance":1,
                "xp_gain":0,
                "hp":0,
                "vitesse":0,
@@ -75,20 +75,42 @@ dico_poids_upgrade={"chance":0,
                     }
 
 def get_coef_rarete(upgrade):
-    if dico_rarete_upgrades[upgrade]=="commun":
-        return 9
-    if dico_rarete_upgrades[upgrade]=="rare":
-        return 6
-    if dico_rarete_upgrades[upgrade]=="epique":
-        return 3
-    if dico_rarete_upgrades[upgrade]=="legendaire":
-        return 1
+    table_rarete={"commun":9,"rare":6,"epique":3,"legendaire":1}
+    return table_rarete.get(dico_rarete_upgrades[upgrade],1)
 
 def random_upgrade():
-    sum_upgrades=0
-    for upgrades in dico_upgrades:
-        sum_upgrades+=dico_upgrades[upgrades]
-        poids_upgrade_dico[upgrades]=get_coef_rarete(upgrades)*(1-(dico_upgrades[upgrades]/(sum_upgrades*
-        
-        
-    
+    total_points=sum(v for k,v in dico_upgrades.items() if k!="chance")
+    multipl_rarete=dico_upgrades["chance"]
+    for upgrade in dico_upgrades:
+        if upgrade=="chance":
+            dico_poids_upgrade[upgrade]=1
+            continue
+        r=get_coef_rarete(upgrade)
+        if total_points>0:
+            ratio=dico_upgrades[upgrade]/total_points
+            malus=(ratio/multipl_rarete)
+            poids=r*(1-malus)
+        else:
+            poids=r
+        dico_poids_upgrade[upgrade]=max(0,poids)
+    return dico_poids_upgrade
+
+def choisir_upgrades(n):
+    random_upgrade()
+    options=[]
+    poids_temp=dico_poids_upgrade.copy()
+    for _ in range(n):
+        noms=list(poids_temp.keys())
+        poids=list(poids_temp.values())
+        if sum(poids)==0:
+            break   ##au cas ou tous les poids serait a 0, on sait jamais
+        choix=random.choices(noms,weights=poids,k=1)[0] ##renvoie une selection au hasard de facon aleatoire en prenant compte le poids
+        options.append(choix)
+        poids_temp[choix]=0
+    return options
+
+
+
+
+mes_options=choisir_upgrades(3)
+print(f"Options pour le joueur:{mes_options}")
