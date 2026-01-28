@@ -9,16 +9,16 @@ from random_module import*
 pygame.init()
 
 ennemy_spawn_delay=2000  ##Délai entre chaque spawn d'ennemi en millisecondes TEMPORAIRE
-
+vitesse_joueur = width/300  ##Vitesse de deplacement du joueur
 
 #Classes
 
 class ennemi_main:
     """Classe principale des ennemis"""
-    def __init__(self,x,y,vitesse,hp,arme=None): ##AJOUTER PLUS TARD PARAMETRES COMME VIE, SPRITE AVEC CHEMIN D'ACCES, ETC
+    def __init__(self,x,y,vitesse=1,hp=1,arme=None): ##AJOUTER PLUS TARD PARAMETRES COMME VIE, SPRITE AVEC CHEMIN D'ACCES, ETC
         self.x=x    ##Coordonnees reelles de l'ennemi
         self.y=y    ##Coordonnees reelles de l'ennemi
-        self.vitesse=vitesse    ##Vitesse de deplacement de l'ennemi
+        self.vitesse=vitesse*vitesse_joueur    ##Vitesse de deplacement de l'ennemi
         self.hp=hp  ##Points de vie de l'ennemi
         self.arme=arme  ##Arme de l'ennemi
         self.rect = pygame.Rect(self.x, self.y, 50, 50) ##Rectangle de collision de l'ennemi
@@ -60,21 +60,21 @@ class ennemi_simple(ennemi_main):
     """Classe des ennemis simples"""
     spawn_delay=ennemy_spawn_delay
     def __init__(self,x,y):
-        super().__init__(x,y,2,2)  ##Appelle le constructeur de la classe parente avec une vitesse de 2
+        super().__init__(x,y,vitesse=0.5,hp=3)  ##Appelle le constructeur de la classe parente avec une vitesse de 2
 
 
 class ennemi_rapide(ennemi_main):
     """Classe des ennemis rapides"""
     spawn_delay=ennemy_spawn_delay//2
     def __init__(self,x,y,):
-        super().__init__(x,y,4,3)  ##Appelle le constructeur de la classe parente avec une vitesse de 4
+        super().__init__(x,y,vitesse=1,hp=2)  ##Appelle le constructeur de la classe parente avec une vitesse de 4
 
 class ennemi_tireur(ennemi_main):
     """Classe des ennemis tireurs"""
     spawn_delay=ennemy_spawn_delay*2
     def __init__(self,x,y):
         arme_ennemi=weapon_main(1000, projectile_ennemi,homing=False,portee_detection=1/3*height)  ##Crée une arme pour l'ennemi avec un délai de 1000ms entre chaque tir et des projectiles non homing
-        super().__init__(x,y,1,1,arme=arme_ennemi)  ##Appelle le constructeur de la classe parente avec une vitesse de 1 et une arme
+        super().__init__(x,y,vitesse=0.5,hp=1,arme=arme_ennemi)  ##Appelle le constructeur de la classe parente avec une vitesse de 1 et une arme
 
 class projectiles_general:
     """Classe principale des projectiles"""
@@ -171,6 +171,7 @@ class weapon_main:
     
 def lancer_jeu(settings):
     global width, height, screen, pv_joueur, liste_projectiles_ennemis
+    upgrades_joueur=dico_upgrades
     en_pause=False
     width = settings["width"]
     height = settings["height"]
@@ -227,7 +228,17 @@ def lancer_jeu(settings):
             if touches[pygame.K_z] or touches[pygame.K_w]:
                 player_y -= vitesse_joueur
             if touches[pygame.K_e]:
-                level_up(screen,width,height)
+                temps_debut_pause=pygame.time.get_ticks()
+                upgrades_joueur=level_up(screen,width,height)
+                duree_pause=pygame.time.get_ticks()-temps_debut_pause
+                for classe in derniers_spawn:
+                    derniers_spawn[classe]+=duree_pause
+                for armes in type_armes:
+                        armes.compenser_pause(duree_pause)  ##Décale les temps de tir des armes pour compenser la pause
+                for ennemi in liste_ennemis:
+                    if ennemi.arme:
+                        ennemi.arme.compenser_pause(duree_pause)  ##Décale les temps de tir des armes des ennemis pour compenser la pause
+                
             # Gérer le spawn des ennemis
             for classe in types_ennemis:
                 if pygame.time.get_ticks() - derniers_spawn[classe] >= classe.spawn_delay:
