@@ -62,9 +62,6 @@ menu_main="main"
 menu_settings="settings"
 current_menu=menu_main
 play=False  ##Variable pour lancer le jeu
-screen=None
-logo=None
-menu_font=None
 
 def refresh_ui():
     """
