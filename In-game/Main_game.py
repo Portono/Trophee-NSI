@@ -12,15 +12,17 @@ ennemy_spawn_delay=2000  ##Délai entre chaque spawn d'ennemi en millisecondes T
 vitesse_joueur = width/300  ##Vitesse de deplacement du joueur
 
 #Classes
-
+def retour_menu():
+    en_jeu=False
 class ennemi_main:
     """Classe principale des ennemis"""
-    def __init__(self,x,y,vitesse=1,hp=1,arme=None): ##AJOUTER PLUS TARD PARAMETRES COMME VIE, SPRITE AVEC CHEMIN D'ACCES, ETC
+    def __init__(self,x,y,vitesse=1,hp=1,arme=None,xp=0): ##AJOUTER PLUS TARD PARAMETRES COMME VIE, SPRITE AVEC CHEMIN D'ACCES, ETC
         self.x=x    ##Coordonnees reelles de l'ennemi
         self.y=y    ##Coordonnees reelles de l'ennemi
         self.vitesse=vitesse*vitesse_joueur    ##Vitesse de deplacement de l'ennemi
         self.hp=hp  ##Points de vie de l'ennemi
         self.arme=arme  ##Arme de l'ennemi
+        self.xp=xp	##xp de l'ennemi
         self.rect = pygame.Rect(self.x, self.y, 50, 50) ##Rectangle de collision de l'ennemi
         self.rect.center = (self.x, self.y) ##Centre le rectangle de collision sur les coordonnees reelles de l'ennemi
 
@@ -60,21 +62,21 @@ class ennemi_simple(ennemi_main):
     """Classe des ennemis simples"""
     spawn_delay=ennemy_spawn_delay
     def __init__(self,x,y):
-        super().__init__(x,y,vitesse=0.5,hp=3)  ##Appelle le constructeur de la classe parente avec une vitesse de 2
+        super().__init__(x,y,vitesse=0.5,hp=3,xp=2)  ##Appelle le constructeur de la classe parente avec une vitesse de 2
 
 
 class ennemi_rapide(ennemi_main):
     """Classe des ennemis rapides"""
     spawn_delay=ennemy_spawn_delay//2
     def __init__(self,x,y,):
-        super().__init__(x,y,vitesse=1,hp=2)  ##Appelle le constructeur de la classe parente avec une vitesse de 4
+        super().__init__(x,y,vitesse=1,hp=2,xp=2)  ##Appelle le constructeur de la classe parente avec une vitesse de 4
 
 class ennemi_tireur(ennemi_main):
     """Classe des ennemis tireurs"""
     spawn_delay=ennemy_spawn_delay*2
     def __init__(self,x,y):
         arme_ennemi=weapon_main(1000, projectile_ennemi,homing=False,portee_detection=1/3*height)  ##Crée une arme pour l'ennemi avec un délai de 1000ms entre chaque tir et des projectiles non homing
-        super().__init__(x,y,vitesse=0.5,hp=1,arme=arme_ennemi)  ##Appelle le constructeur de la classe parente avec une vitesse de 1 et une arme
+        super().__init__(x,y,vitesse=0.5,hp=1,arme=arme_ennemi,xp=1)  ##Appelle le constructeur de la classe parente avec une vitesse de 1 et une arme
 
 class projectiles_general:
     """Classe principale des projectiles"""
@@ -187,12 +189,14 @@ def lancer_jeu(settings):
     clock = pygame.time.Clock()
     liste_projectiles = []  ##Liste pour stocker les projectiles
     laser=weapon_main(500, projectile_laser,homing=False,portee_detection=height/5,vitesse=width/200)  ##Crée une arme laser avec un délai de 500ms entre chaque tir et des projectiles homing
-    roquette=weapon_main(1500, projectile_roquette,homing=True,portee_detection=width/5,vitesse=width/300,aoe=True,aoe_rayon=width/10)  ##Crée une arme roquette avec un délai de 1500ms entre chaque tir et des projectiles homing
+    roquette=weapon_main(10000, projectile_roquette,homing=True,portee_detection=width/5,vitesse=width/300,aoe=True,aoe_rayon=width/10)  ##Crée une arme roquette avec un délai de 1500ms entre chaque tir et des projectiles homing
     type_armes=[laser,roquette]   ##Liste des types d'armes
     liste_projectiles_ennemis=[]  ##Liste pour stocker les projectiles des ennemis
     pv_joueur=10  ##Points de vie du joueur
     pv_max_joueur=10
     pygame.mixer.music.stop()
+    xp=0
+    xp_for_level=10
     while en_jeu:
         clock.tick(60)
         for event in pygame.event.get():
@@ -203,6 +207,8 @@ def lancer_jeu(settings):
                 if event.key == pygame.K_ESCAPE:
                     temps_debut_pause=pygame.time.get_ticks()
                     afficher_menu_pause()
+                    if pygame.get_init():
+                        afficher_menu_pause(pause=False)
                     duree_pause=pygame.time.get_ticks()-temps_debut_pause
 
                     for classe in derniers_spawn:
@@ -274,10 +280,12 @@ def lancer_jeu(settings):
                                     e.hp-=proj.degat
                     elif hit_ennemi:
                         hit_ennemi.hp-=proj.degat
-
                     if proj in liste_projectiles:
                         liste_projectiles.remove(proj)
-            liste_ennemis[:]=[e for e in liste_ennemis if e.hp>0]
+            for e in liste_ennemis[:]:
+                if e.hp<0:
+                    xp+=e.xp
+                    liste_ennemis.remove(e)
 
             # Mettre à jour les projectiles des ennemis
             for proj in liste_projectiles_ennemis[:]:
@@ -331,6 +339,11 @@ def lancer_jeu(settings):
             rect=pygame.Rect(width/2,height/2,width/8 if rect=="max_health_bar_rect" else pv_joueur/pv_max_joueur*width/8,height/100)
             rect.topleft=(width/150,height/150)
             pygame.draw.rect(screen,color,rect)
+        #dDessiner la barre d'exp
+        for rect,color in [("xp_for_level_rect",black),("current_xp",blue)]:
+            rect=pygame.Rect(width/2,height/2,width/8 if rect=="xp_for_level" else xp/xp_for_level*width/8,height/100)
+            rect.topleft=(width/150,height/120)
+            pygame.draw.rect(screen,color,rect)
         
         centre=pygame.Rect(0,0,width/4,height/4)
         centre.center=(0-offset_x,0-offset_y)
@@ -344,4 +357,5 @@ def lancer_jeu(settings):
         pygame.display.flip()
 
 pygame.quit()
+
 
