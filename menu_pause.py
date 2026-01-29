@@ -10,3 +10,4 @@ def afficher_menu_pause():
                    exit()
        if boucle_menu(pause=True):
              return  # Quitter le menu pause
+
