@@ -48,6 +48,7 @@ fullscreen_button_rect=pygame.Rect(0, 0, button_width, button_height)
 goback_button_rect=pygame.Rect(0, 0, button_width, button_height)
 input_width_rect=pygame.Rect(0, 0, button_width, button_height)
 input_height_rect=pygame.Rect(0, 0, button_width, button_height)
+astropedia_button_rect=pygame.Rect(0,0,button_width,button_height)
 #Definition de texte des boutons
 height_button_text="Hauteur"
 width_button_text="Largeur"
@@ -60,6 +61,7 @@ logo=pygame.transform.smoothscale(logo_import,(width,int(logo_import_height/logo
 #on définit les variables pour les changement de scène du menu
 menu_main="main"
 menu_settings="settings"
+menu_astropedia="astropedia"
 current_menu=menu_main
 play=False  ##Variable pour lancer le jeu
 
@@ -101,6 +103,9 @@ def refresh_ui():
     ##Bouton Settings-Input Height
     input_height_rect=pygame.Rect(0, 0, button_width/1.5, button_height/1.5)
     input_height_rect.center = (width // 1.5, height // 3)
+    ##Bouton Astropedia
+    astropedia_button_rect=pygame.Rect(0,0,button_width,button_height)
+    astropedia_button_rect.center=(width//2,height//4.5)
     ##Taille de la police
     menu_font=pygame.font.Font("font.ttf", int(height*0.05))
 
@@ -117,7 +122,8 @@ def boucle_menu(pause=False):
     #Raffraichissement du logo sur l'ecran
     while not play:
         screen.fill(white)  ##Fond blanc
-        screen.blit(logo,(0,0))     ##Affichage du logo en haut de l'ecran
+        if current_menu!=menu_astropedia:
+            screen.blit(logo,(0,0))     ##Affichage du logo en haut de l'ecran
         mouse_pos=pygame.mouse.get_pos()
         #Quitter le jeu
         for event in pygame.event.get():    ##Recuperation des evenements
@@ -138,6 +144,8 @@ def boucle_menu(pause=False):
                     if quit_button_rect.collidepoint(mouse_pos):   ##Si le bouton Quit est appuye
                         pygame.quit()       ##Quitte pygame
                         exit()      ##Quitte le programme
+                    if astropedia_button_rect.collidepoint(mouse_pos):
+                        current_menu=menu_astropedia
                 #   Settings Menu   #
                 elif current_menu==menu_settings: ##Si on est dans le menu des parametres
                     
@@ -154,6 +162,8 @@ def boucle_menu(pause=False):
                         height_input_toggle=True
                         height_button_text="Hauteur"
                         user_height_input=""
+                elif current==menu_astropedia:
+                    pass						##TEMPORAIRE
 
             ##Changement de la resolution via l'input utilisateur
             if event.type==pygame.KEYDOWN and current_menu==menu_settings and width_input_toggle==True:   ##Si une touche est appuye dans le menu des parametres
@@ -188,7 +198,7 @@ def boucle_menu(pause=False):
         if current_menu==menu_main: ##les boutons dans le menu principal
             user_width_input=width_button_text
             user_height_input=height_button_text
-            for rect,texte in [(play_button_rect,"Reprendre" if pause else "Jouer"),(settings_button_rect,"Parametres"),(quit_button_rect,"Quitter")]:
+            for rect,texte in [(play_button_rect,"Reprendre" if pause else "Jouer"),(settings_button_rect,"Parametres"),(quit_button_rect,"Quitter"),(astropedia_button_rect,"Astropedia")]:
                 if rect.collidepoint(mouse_pos):    ##Si la souris est au dessus du bouton
                     button_color=hover_color    ##Change la couleur du bouton
                 else:
@@ -211,7 +221,10 @@ def boucle_menu(pause=False):
                 texte_surface=menu_font.render(texte,True,orange)    ##Creation du texte
                 texte_rect=texte_surface.get_rect(center=rect.center)   ##Centrage du texte
                 screen.blit(texte_surface, texte_rect)  ##Affichage du texte
-
+        if current_menu==menu_astropedia:
+            astropedia_text=menu_font.render("coucou",True,black)
+            astropedia_text_rect=astropedia_text.get_rect(center=(width//2,height//2))
+            screen.blit(astropedia_text,astropedia_text_rect)
         #Toggle du fullscreen
         if fullscreen_change==True or resolution_change==True:
             fullscreen_change=False
@@ -219,6 +232,7 @@ def boucle_menu(pause=False):
             refresh_ui()
         pygame.display.flip()
     return {"width": width, "height": height, "fullscreen": fullscreen, "play": play}
+
 
 
 
