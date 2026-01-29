@@ -207,8 +207,6 @@ def lancer_jeu(settings):
                 if event.key == pygame.K_ESCAPE:
                     temps_debut_pause=pygame.time.get_ticks()
                     afficher_menu_pause()
-                    if pygame.get_init():
-                        afficher_menu_pause(pause=False)
                     duree_pause=pygame.time.get_ticks()-temps_debut_pause
 
                     for classe in derniers_spawn:
