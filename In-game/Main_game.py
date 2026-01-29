@@ -196,7 +196,9 @@ def lancer_jeu(settings):
     pv_max_joueur=10
     pygame.mixer.music.stop()
     xp=0
+    xp_visuel=xp
     xp_for_level=10
+    xp_niveau_precedent=0
     while en_jeu:
         clock.tick(60)
         for event in pygame.event.get():
@@ -340,8 +342,15 @@ def lancer_jeu(settings):
         #dDessiner la barre d'exp
         for rect,color in [("xp_for_level_rect",black),("current_xp",blue)]:
             rect=pygame.Rect(width/2,height/2,width/8 if rect=="xp_for_level" else xp/xp_for_level*width/8,height/100)
-            rect.topleft=(width/150,height/120)
+            rect.topleft=(width/150,height/60)
             pygame.draw.rect(screen,color,rect)
+             
+        if xp>=xp_for_level:
+            xp_niveau_precedent=xp_for_level
+            xp_for_level=int(xp_for_level*2)
+        
+        xp=xp-xp_niveau_precedent
+        
         
         centre=pygame.Rect(0,0,width/4,height/4)
         centre.center=(0-offset_x,0-offset_y)
