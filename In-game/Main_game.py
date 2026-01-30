@@ -216,7 +216,7 @@ def lancer_jeu(settings):
     niveau=0
     for i in range(1,5):
         image_marcel=image_marcel=pygame.image.load(f"Marcel({i}).png").convert_alpha()
-        image_marcel=pygame.transform.scale(image_marcel,(50,50))
+        image_marcel=pygame.transform.scale(image_marcel,(85,85))
         image_marcel_liste.append(image_marcel)
     
     while en_jeu:
