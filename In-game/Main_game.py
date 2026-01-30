@@ -10,25 +10,41 @@ pygame.init()
 
 ennemy_spawn_delay=2000  ##Délai entre chaque spawn d'ennemi en millisecondes TEMPORAIRE
 vitesse_joueur = width/300  ##Vitesse de deplacement du joueur
+image_marcel=None
+image_marcel_liste=[]
 
 #Classes
 def retour_menu():
     en_jeu=False
 class ennemi_main:
     """Classe principale des ennemis"""
-    def __init__(self,x,y,vitesse=1,hp=1,arme=None,xp=0): ##AJOUTER PLUS TARD PARAMETRES COMME VIE, SPRITE AVEC CHEMIN D'ACCES, ETC
+    def __init__(self,x,y,vitesse=1,hp=1,arme=None,xp=0,sprite=None): ##AJOUTER PLUS TARD PARAMETRES COMME VIE, SPRITE AVEC CHEMIN D'ACCES, ETC
         self.x=x    ##Coordonnees reelles de l'ennemi
         self.y=y    ##Coordonnees reelles de l'ennemi
         self.vitesse=vitesse*vitesse_joueur    ##Vitesse de deplacement de l'ennemi
         self.hp=hp  ##Points de vie de l'ennemi
         self.arme=arme  ##Arme de l'ennemi
         self.xp=xp	##xp de l'ennemi
-        self.rect = pygame.Rect(self.x, self.y, 50, 50) ##Rectangle de collision de l'ennemi
-        self.rect.center = (self.x, self.y) ##Centre le rectangle de collision sur les coordonnees reelles de l'ennemi
+
+        self.sprite_list=sprite if isinstance(sprite,list) else ([sprite] if sprite else [])
+        self.animation_index=0
+        self.vitesse_animation=0.15
+
+        self.rect=pygame.Rect(self.x,self.y,50,50)
+        self.rect.center=(self.x,self.y)
 
     def dessiner(self,screen,offset_x,offset_y):    ##Dessine l'ennemi a l'ecran en fonction du decalage de la camera
-        pygame.draw.rect(screen,(0,0,255),(self.rect.x - offset_x,self.rect.y - offset_y,50,50))  ##Dessine un rectangle bleu representant l'ennemi(LE BLEU EST TEMPORAIRE), on utilise le self.rect.x pour avoir les coordonnees du centre de l'ennemi sinon, les coordonnees sont egal au coin en haut a gauche du rectangle
+        pos_ecran=(self.rect.x-offset_x,self.rect.y-offset_y)
 
+        if self.sprite_list:
+            if len(self.sprite_list)>1:
+                self.animation_index+=self.vitesse_animation
+                if self.animation_index>=len(self.sprite_list):
+                    self.animation_index=0
+            image_a_afficher=self.sprite_list[int(self.animation_index)]
+            screen.blit(image_a_afficher,pos_ecran)
+        else:
+            pygame.draw.rect(screen,(0,255,255),(pos_ecran[0],pos_ecran[1],50,50))
     def update(self, player_x, player_y):   ##Met a jour la position de l'ennemi pour qu'il suive le joueur
         # Calculer la direction vers le joueur
         direction_x = player_x - self.x ##Difference de x
@@ -69,7 +85,7 @@ class ennemi_rapide(ennemi_main):
     """Classe des ennemis rapides"""
     spawn_delay=ennemy_spawn_delay//2
     def __init__(self,x,y,):
-        super().__init__(x,y,vitesse=1,hp=2,xp=2)  ##Appelle le constructeur de la classe parente avec une vitesse de 4
+        super().__init__(x,y,vitesse=1,hp=2,xp=2,sprite=image_marcel_liste)  ##Appelle le constructeur de la classe parente avec une vitesse de 4
 
 class ennemi_tireur(ennemi_main):
     """Classe des ennemis tireurs"""
@@ -172,7 +188,7 @@ class weapon_main:
         self.dernier_tir += duree_pause  ##Décale le temps du dernier tir pour compenser la pause
     
 def lancer_jeu(settings):
-    global width, height, screen, pv_joueur, liste_projectiles_ennemis
+    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste
     upgrades_joueur=dico_upgrades
     en_pause=False
     width = settings["width"]
@@ -196,9 +212,13 @@ def lancer_jeu(settings):
     pv_max_joueur=10
     pygame.mixer.music.stop()
     xp=0
-    xp_visuel=xp
     xp_for_level=10
-    xp_niveau_precedent=0
+    niveau=0
+    for i in range(1,5):
+        image_marcel=image_marcel=pygame.image.load(f"Marcel({i}).png").convert_alpha()
+        image_marcel=pygame.transform.scale(image_marcel,(50,50))
+        image_marcel_liste.append(image_marcel)
+    
     while en_jeu:
         clock.tick(60)
         for event in pygame.event.get():
@@ -346,10 +366,10 @@ def lancer_jeu(settings):
             pygame.draw.rect(screen,color,rect)
              
         if xp>=xp_for_level:
-            xp_niveau_precedent=xp_for_level
-            xp_for_level=int(xp_for_level*2)
+            xp-=xp_for_level
+            xp_for_level=int(xp_for_level*1.5)
+            niveau+=1
         
-        xp=xp-xp_niveau_precedent
         
         
         centre=pygame.Rect(0,0,width/4,height/4)
