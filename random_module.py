@@ -113,6 +113,7 @@ def choisir_upgrades():
     return options
 
 def level_up(screen,width,height):
+    global dico_upgrades
     clock=pygame.time.Clock()
     font=pygame.font.Font(None,int(height*0.05))
     upgrading=True
