@@ -214,9 +214,14 @@ def lancer_jeu(settings):
     xp=0
     xp_for_level=10
     niveau=0
-    for i in range(1,5):
+    astro=pygame.image.load("Astro.png").convert_alpha()
+    astro_width=astro.get_width()
+    astro_height=astro.get_height()
+    astro=pygame.transform.scale(astro,(width/20,int(astro_height/astro_width*width/20)))
+    font=pygame.font.Font(None,150)
+    for i in range(1,7):
         image_marcel=image_marcel=pygame.image.load(f"Marcel({i}).png").convert_alpha()
-        image_marcel=pygame.transform.scale(image_marcel,(85,85))
+        image_marcel=pygame.transform.scale(image_marcel,(50,50))
         image_marcel_liste.append(image_marcel)
     
     while en_jeu:
@@ -239,7 +244,7 @@ def lancer_jeu(settings):
                         if ennemi.arme:
                             ennemi.arme.compenser_pause(duree_pause)  ##Décale les temps de tir des armes des ennemis pour compenser la pause
                             
-        player_real_rect = pygame.Rect(0,0, 50, 50)
+        player_real_rect = pygame.Rect(0,0,astro.get_width()/1.4,astro.get_height())
         player_real_rect.center = (player_x, player_y)
         #Si en jeu
         if not en_pause:
@@ -342,9 +347,9 @@ def lancer_jeu(settings):
         for ennemi in liste_ennemis:
             ennemi.dessiner(screen, offset_x, offset_y)
         #Dessine le joueur
-        player_screen_rect = pygame.Rect(width // 2, height // 2, 50, 50)
-        player_screen_rect.center = (width // 2, height // 2)
-        pygame.draw.rect(screen, couleur_joueur, player_screen_rect)
+        astro_rect=astro.get_rect()
+        astro_rect.center=(width/2,height/2)
+        screen.blit(astro,astro_rect)
 
         #Dessiner les projectiles du joueur
         for proj in liste_projectiles[:]:
@@ -364,6 +369,9 @@ def lancer_jeu(settings):
             rect=pygame.Rect(width/2,height/2,width/8 if rect=="xp_for_level" else xp/xp_for_level*width/8,height/100)
             rect.topleft=(width/150,height/60)
             pygame.draw.rect(screen,color,rect)
+            texte_hp=font.render(f"hp:{pv_joueur}/{pv_max_joueur}",True,green)
+            texte_hp_rect=texte_hp.get_rect(center=(width/2,height/4))
+            screen.blit(texte_hp,texte_hp_rect)
              
         if xp>=xp_for_level:
             xp-=xp_for_level
@@ -374,7 +382,6 @@ def lancer_jeu(settings):
         
         centre=pygame.Rect(0,0,width/4,height/4)
         centre.center=(0-offset_x,0-offset_y)
-        font=pygame.font.Font(None,150)
         texte_base=font.render("Base", True,orange)
         texte_base_rect=texte_base.get_rect(center=centre.center)
         pygame.draw.rect(screen,black,centre)
