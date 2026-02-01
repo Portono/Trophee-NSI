@@ -56,7 +56,7 @@ width_button_text="Largeur"
 logo_import=pygame.image.load("logo_champ_de_mars.png")
 logo_import_width=logo_import.get_width()
 logo_import_height=logo_import.get_height()
-logo=pygame.transform.smoothscale(logo_import,(width,int(logo_import_height/logo_import_width*width)))
+logo=pygame.transform.scale(logo_import,(width,int(logo_import_height/logo_import_width*width)))
 
 #on définit les variables pour les changement de scène du menu
 menu_main="main"
@@ -162,7 +162,7 @@ def boucle_menu(pause=False):
                         height_input_toggle=True
                         height_button_text="Hauteur"
                         user_height_input=""
-                elif current==menu_astropedia:
+                elif current_menu==menu_astropedia:
                     pass						##TEMPORAIRE
 
             ##Changement de la resolution via l'input utilisateur
