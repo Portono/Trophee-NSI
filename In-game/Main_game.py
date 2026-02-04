@@ -12,29 +12,33 @@ ennemy_spawn_delay=2000  ##Délai entre chaque spawn d'ennemi en millisecondes T
 vitesse_joueur = width/300  ##Vitesse de deplacement du joueur
 image_marcel=None
 image_marcel_liste=[]
+image_philippe=None
+image_philippe_liste=[]
 
 #Classes
 def retour_menu():
     en_jeu=False
 class ennemi_main:
     """Classe principale des ennemis"""
-    def __init__(self,x,y,vitesse=1,hp=1,arme=None,xp=0,sprite=None): ##AJOUTER PLUS TARD PARAMETRES COMME VIE, SPRITE AVEC CHEMIN D'ACCES, ETC
+    def __init__(self,x,y,vitesse=1,hp=1,arme=None,xp=0,sprite=None,vitesse_animation=0.15,taille_hitbox=[50,50]): ##AJOUTER PLUS TARD PARAMETRES COMME VIE, SPRITE AVEC CHEMIN D'ACCES, ETC
         self.x=x    ##Coordonnees reelles de l'ennemi
         self.y=y    ##Coordonnees reelles de l'ennemi
         self.vitesse=vitesse*vitesse_joueur    ##Vitesse de deplacement de l'ennemi
         self.hp=hp  ##Points de vie de l'ennemi
         self.arme=arme  ##Arme de l'ennemi
         self.xp=xp	##xp de l'ennemi
+        self.hitbox=taille_hitbox
 
         self.sprite_list=sprite if isinstance(sprite,list) else ([sprite] if sprite else [])
         self.animation_index=0
         self.vitesse_animation=0.15
 
-        self.rect=pygame.Rect(self.x,self.y,50,50)
+        self.rect=pygame.Rect(self.x,self.y,self.hitbox[0],self.hitbox[1])
         self.rect.center=(self.x,self.y)
 
     def dessiner(self,screen,offset_x,offset_y):    ##Dessine l'ennemi a l'ecran en fonction du decalage de la camera
         pos_ecran=(self.rect.x-offset_x,self.rect.y-offset_y)
+        pygame.draw.rect(screen,(0,0,255),pygame.Rect(self.rect.x-offset_x,self.rect.y-offset_y,self.hitbox[0],self.hitbox[1]))
 
         if self.sprite_list:
             if len(self.sprite_list)>1:
@@ -81,18 +85,24 @@ class ennemi_simple(ennemi_main):
         super().__init__(x,y,vitesse=0.5,hp=3,xp=2)  ##Appelle le constructeur de la classe parente avec une vitesse de 2
 
 
-class ennemi_rapide(ennemi_main):
+class Marcel(ennemi_main):
     """Classe des ennemis rapides"""
-    spawn_delay=ennemy_spawn_delay//2
-    def __init__(self,x,y,):
-        super().__init__(x,y,vitesse=1,hp=2,xp=2,sprite=image_marcel_liste)  ##Appelle le constructeur de la classe parente avec une vitesse de 4
+    spawn_delay=ennemy_spawn_delay*1.5
+    def __init__(self,x,y):
+        super().__init__(x,y,vitesse=1,hp=2,xp=2,sprite=image_marcel_liste,taille_hitbox=[image_marcel_liste[0].get_width(),image_marcel_liste[0].get_height()])  ##Appelle le constructeur de la classe parente avec une vitesse de 4
 
 class ennemi_tireur(ennemi_main):
     """Classe des ennemis tireurs"""
-    spawn_delay=ennemy_spawn_delay*2
+    spawn_delay=ennemy_spawn_delay*3
     def __init__(self,x,y):
         arme_ennemi=weapon_main(1000, projectile_ennemi,homing=False,portee_detection=1/3*height)  ##Crée une arme pour l'ennemi avec un délai de 1000ms entre chaque tir et des projectiles non homing
         super().__init__(x,y,vitesse=0.5,hp=1,arme=arme_ennemi,xp=1)  ##Appelle le constructeur de la classe parente avec une vitesse de 1 et une arme
+
+class Philippe(ennemi_main):
+    """Classe des ennemis lourds"""
+    spawn_delay=ennemy_spawn_delay*2
+    def __init__(self,x,y):
+        super().__init__(x,y,vitesse=0.33,hp=5,xp=3,sprite=image_philippe_liste,taille_hitbox=[image_philippe_liste[0].get_width(),image_philippe_liste[0].get_height()])
 
 class projectiles_general:
     """Classe principale des projectiles"""
@@ -199,7 +209,7 @@ def lancer_jeu(settings):
     player_x, player_y = 0, 0 # Position réelle du joueur dans le monde
     vitesse_joueur = width/300  ##Vitesse de deplacement du joueur
     couleur_joueur = (255, 0, 0)
-    types_ennemis = [ennemi_simple, ennemi_rapide,ennemi_tireur]  ##Liste des types d'ennemis
+    types_ennemis = [ennemi_simple, Marcel,ennemi_tireur,Philippe]  ##Liste des types d'ennemis
     liste_ennemis = []  ##Liste pour stocker les ennemis
     derniers_spawn = {classe: 0 for classe in types_ennemis}  ##Dictionnaire pour stocker le dernier spawn de chaque type d'ennemi
     clock = pygame.time.Clock()
@@ -215,15 +225,18 @@ def lancer_jeu(settings):
     xp_for_level=10
     niveau=0
     astro=pygame.image.load("Astro.png").convert_alpha()
-    astro_width=astro.get_width()
-    astro_height=astro.get_height()
-    astro=pygame.transform.scale(astro,(width/20,int(astro_height/astro_width*width/20)))
+    astro=pygame.transform.scale(astro,(width/20,int(astro.get_height()/astro.get_width()*width/20)))
     font=pygame.font.Font(None,150)
+    #Importation des sprites de Marcel
     for i in range(1,7):
-        image_marcel=image_marcel=pygame.image.load(f"Marcel({i}).png").convert_alpha()
-        image_marcel=pygame.transform.scale(image_marcel,(50,50))
+        image_marcel=pygame.image.load(f"Marcel({i}).png").convert_alpha()
+        image_marcel=pygame.transform.scale(image_marcel,(width/20,int(image_marcel.get_height()/image_marcel.get_width()*width/20)))
         image_marcel_liste.append(image_marcel)
-    
+    #Importation des sprites de Philippe
+    for i in range(1,7):
+        image_philippe=pygame.image.load(f"Philippe({i}).png").convert_alpha()
+        image_philippe=pygame.transform.scale(image_philippe,(width/20,int(image_philippe.get_height()/image_philippe.get_width()*width/20)))
+        image_philippe_liste.append(image_philippe)
     while en_jeu:
         clock.tick(60)
         for event in pygame.event.get():
