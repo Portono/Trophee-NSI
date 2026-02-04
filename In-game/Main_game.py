@@ -14,6 +14,7 @@ image_marcel=None
 image_marcel_liste=[]
 image_philippe=None
 image_philippe_liste=[]
+upgrades_joueur=dico_upgrades
 
 #Classes
 def retour_menu():
@@ -23,7 +24,7 @@ class ennemi_main:
     def __init__(self,x,y,vitesse=1,hp=1,arme=None,xp=0,sprite=None,vitesse_animation=0.15,taille_hitbox=[50,50]): ##AJOUTER PLUS TARD PARAMETRES COMME VIE, SPRITE AVEC CHEMIN D'ACCES, ETC
         self.x=x    ##Coordonnees reelles de l'ennemi
         self.y=y    ##Coordonnees reelles de l'ennemi
-        self.vitesse=vitesse+echelle_difficulte/20    ##Vitesse de deplacement de l'ennemi
+        self.vitesse=vitesse+echelle_difficulte    ##Vitesse de deplacement de l'ennemi
         self.hp=hp+echelle_difficulte  ##Points de vie de l'ennemi
         self.arme=arme  ##Arme de l'ennemi
         self.xp=xp	##xp de l'ennemi
@@ -168,17 +169,17 @@ class projectiles_general:
 class projectile_laser(projectiles_general):
     """Classe des projectiles laser"""
     def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path='projectile1.png',degat=1,range=10):
-        super().__init__(x,y,vitesse,cible_initiale,homing=homing, sprite_path=sprite_path, couleur=(255,0,0),degat=degat,range=range)  ##Appelle le constructeur de la classe parente avec une couleur rouge
+        super().__init__(x,y,vitesse,cible_initiale,homing=homing, sprite_path=sprite_path, couleur=(255,0,0),degat=degat+upgrades_joueur["degats"],range=range)  ##Appelle le constructeur de la classe parente avec une couleur rouge
 
 class projectile_roquette(projectiles_general):
     """Classe des projectiles roquettes"""
     def __init__(self,x,y,vitesse,cible_initiale,homing=True,sprite_path='projectile2.png',degat=3,range=10,aoe=True,aoe_rayon=width/10):
-        super().__init__(x,y,vitesse,cible_initiale,homing=homing, sprite_path=sprite_path, couleur=(255,165,0),degat=degat,range=range,aoe=aoe,aoe_rayon=aoe_rayon)  ##Appelle le constructeur de la classe parente avec une couleur orange
+        super().__init__(x,y,vitesse,cible_initiale,homing=homing, sprite_path=sprite_path, couleur=(255,165,0),degat=degat+upgrades_joueur["degats"],range=range,aoe=aoe,aoe_rayon=aoe_rayon)  ##Appelle le constructeur de la classe parente avec une couleur orange
 
 class projectile_ennemi(projectiles_general):
     """Classe des projectiles ennemis"""
     def __init__(self,x,y,vitesse,cible_initiale,homing=True,sprite_path=None,degat=1,range=10):
-        super().__init__(x,y,vitesse,cible_initiale,homing=homing, sprite_path=sprite_path, couleur=(0,0,0),degat=degat,range=range)  ##Appelle le constructeur de la classe parente avec une couleur noire
+        super().__init__(x,y,vitesse+echelle_difficulte,cible_initiale,homing=homing, sprite_path=sprite_path, couleur=(0,0,0),degat=degat+echelle_difficulte,range=range)  ##Appelle le constructeur de la classe parente avec une couleur noire
 
 class weapon_main:
     """Classe principale des armes"""
@@ -230,6 +231,7 @@ def lancer_jeu(settings):
     astro=pygame.image.load("Astro.png").convert_alpha()
     astro=pygame.transform.scale(astro,(width/20,int(astro.get_height()/astro.get_width()*width/20)))
     font=pygame.font.Font(None,150)
+    pv_heal_cooldown=0
     #Importation des sprites de Marcel
     for i in range(1,7):
         image_marcel=pygame.image.load(f"Marcel({i}).png").convert_alpha()
@@ -274,12 +276,14 @@ def lancer_jeu(settings):
                 player_y += vitesse_joueur
             if touches[pygame.K_z] or touches[pygame.K_w]:
                 player_y -= vitesse_joueur
-            if touches[pygame.K_e]:
+            if touches[pygame.K_e] and math.hypot(abs(player_x),abs(player_y))<width/4:
                 temps_debut_pause=pygame.time.get_ticks()
-                upgrades_joueur=level_up(screen,width,height)
+                for _ in range(niveau):
+                    upgrades_joueur=level_up(screen,width,height)
+                    echelle_difficulte+=1
+                    niveau-=1
                 pv_max_joueur=10+(upgrades_joueur["pv"])
-                pv_joueur=pv_joueur+1 if pv_joueur+1<=pv_max_joueur else pv_joueur
-                echelle_difficulte+=20
+                pv_joueur=pv_max_joueur
                 duree_pause=pygame.time.get_ticks()-temps_debut_pause
                 for classe in derniers_spawn:
                     derniers_spawn[classe]+=duree_pause
@@ -382,6 +386,9 @@ def lancer_jeu(settings):
             rect=pygame.Rect(width/2,height/2,width/8 if rect=="max_health_bar_rect" else pv_joueur/pv_max_joueur*width/8,height/100)
             rect.topleft=(width/150,height/150)
             pygame.draw.rect(screen,color,rect)
+            texte_xp=font.render(f"niveaux:{niveau}",True,blue)
+            texte_xp_rect=texte_xp.get_rect(center=(width/2,height/6))
+            screen.blit(texte_xp,texte_xp_rect)
         #dDessiner la barre d'exp
         for rect,color in [("xp_for_level_rect",black),("current_xp",blue)]:
             rect=pygame.Rect(width/2,height/2,width/8 if rect=="xp_for_level" else xp/xp_for_level*width/8,height/100)
@@ -404,6 +411,17 @@ def lancer_jeu(settings):
         texte_base_rect=texte_base.get_rect(center=centre.center)
         pygame.draw.rect(screen,black,centre)
         screen.blit(texte_base,texte_base_rect)
+
+        if pv_heal_cooldown>=1000:
+            if pv_joueur==pv_max_joueur:
+                break
+            if pv_joueur+upgrades_joueur["regen_pv"]>=pv_max_joueur:
+                pv_joueur=pv_max_joueur
+                pv_heal_cooldown=0
+            else:
+                pv_joueur+=upgrades_joueur["regen_pv"]
+                pv_heal_cooldown=0
+        pv_heal_cooldown+=1
 
 
         pygame.display.flip()
