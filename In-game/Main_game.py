@@ -95,7 +95,7 @@ class ennemi_tireur(ennemi_main):
     """Classe des ennemis tireurs"""
     spawn_delay=ennemy_spawn_delay*3
     def __init__(self,x,y):
-        arme_ennemi=weapon_main(1000, projectile_ennemi,homing=False,portee_detection=1/3*height)  ##Crée une arme pour l'ennemi avec un délai de 1000ms entre chaque tir et des projectiles non homing
+        arme_ennemi=weapon_main(1000, projectile_ennemi,homing=False,portee_detection=1/3*height,vitesse=width/400)  ##Crée une arme pour l'ennemi avec un délai de 1000ms entre chaque tir et des projectiles non homing
         super().__init__(x,y,vitesse=0.5,hp=1,arme=arme_ennemi,xp=1)  ##Appelle le constructeur de la classe parente avec une vitesse de 1 et une arme
 
 class Philippe(ennemi_main):
@@ -139,10 +139,12 @@ class projectiles_general:
             self.dir_y = direction_y / distance
             radians=math.atan2(-direction_y, direction_x)
             self.angle=math.degrees(radians)
-    def update(self,liste_ennemis):
+    def update(self,liste_ennemis,player_pos=None):
         if self.homing:
             #Recalcule la direction vers la cible
-            if self.cible in liste_ennemis:
+            if player_pos:
+                self.calculer_direction(player_pos[0],player_pos[1])
+            elif self.cible in liste_ennemis:
                 self.calculer_direction(self.cible.x, self.cible.y)
             else:
                 if liste_ennemis:
@@ -159,7 +161,7 @@ class projectiles_general:
         if self.image:
             rotated_image = pygame.transform.rotate(self.image, self.angle)
             new_rect= rotated_image.get_rect(center=(pos_ecran_x, pos_ecran_y))
-            screen.blit(rotated_image, new_rect.center)
+            screen.blit(rotated_image, new_rect)
         else:
             pygame.draw.rect(screen,self.couleur,(pos_ecran_x,pos_ecran_y,10,10))
 
@@ -175,7 +177,7 @@ class projectile_roquette(projectiles_general):
 
 class projectile_ennemi(projectiles_general):
     """Classe des projectiles ennemis"""
-    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path=None,degat=1,range=10):
+    def __init__(self,x,y,vitesse,cible_initiale,homing=True,sprite_path=None,degat=1,range=10):
         super().__init__(x,y,vitesse,cible_initiale,homing=homing, sprite_path=sprite_path, couleur=(0,0,0),degat=degat,range=range)  ##Appelle le constructeur de la classe parente avec une couleur noire
 
 class weapon_main:
@@ -310,7 +312,6 @@ def lancer_jeu(settings):
                         hit_ennemi=ennemi
                         break
 
-
                 if hit_ennemi or proj.est_trop_loin():
                     if proj.aoe:
                         for e in liste_ennemis:
@@ -327,7 +328,7 @@ def lancer_jeu(settings):
 
             # Mettre à jour les projectiles des ennemis
             for proj in liste_projectiles_ennemis[:]:
-                proj.update([])
+                proj.update([],player_pos=(player_x,player_y))
                 if proj.rect.colliderect(player_real_rect):
                     liste_projectiles_ennemis.remove(proj)
                     pv_joueur -= 1
