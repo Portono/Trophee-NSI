@@ -117,7 +117,7 @@ def boucle_menu(pause=False):
     global current_menu, play, fullscreen, fullscreen_change, resolution_change, width, height, user_width_input, width_input_toggle, user_height_input, height_input_toggle,screen,width_button_text,height_button_text
     play=False
     pygame.mixer.music.load("Mainmenu.mp3")
-    pygame.mixer.music.play()
+    pygame.mixer.music.play(-1)
     #Recuperation de la position de la souris
     #Raffraichissement du logo sur l'ecran
     while not play:
@@ -232,6 +232,7 @@ def boucle_menu(pause=False):
             refresh_ui()
         pygame.display.flip()
     return {"width": width, "height": height, "fullscreen": fullscreen, "play": play}
+
 
 
 
