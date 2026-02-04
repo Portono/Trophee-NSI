@@ -23,7 +23,7 @@ class ennemi_main:
     def __init__(self,x,y,vitesse=1,hp=1,arme=None,xp=0,sprite=None,vitesse_animation=0.15,taille_hitbox=[50,50]): ##AJOUTER PLUS TARD PARAMETRES COMME VIE, SPRITE AVEC CHEMIN D'ACCES, ETC
         self.x=x    ##Coordonnees reelles de l'ennemi
         self.y=y    ##Coordonnees reelles de l'ennemi
-        self.vitesse=vitesse+echelle_difficulte    ##Vitesse de deplacement de l'ennemi
+        self.vitesse=vitesse+echelle_difficulte/20    ##Vitesse de deplacement de l'ennemi
         self.hp=hp+echelle_difficulte  ##Points de vie de l'ennemi
         self.arme=arme  ##Arme de l'ennemi
         self.xp=xp	##xp de l'ennemi
@@ -95,7 +95,7 @@ class ennemi_tireur(ennemi_main):
     """Classe des ennemis tireurs"""
     spawn_delay=ennemy_spawn_delay*3
     def __init__(self,x,y):
-        arme_ennemi=weapon_main(1000, projectile_ennemi,homing=False,portee_detection=1/3*height,vitesse=width/400)  ##Crée une arme pour l'ennemi avec un délai de 1000ms entre chaque tir et des projectiles non homing
+        arme_ennemi=weapon_main(1000-echelle_difficulte, projectile_ennemi,homing=False,portee_detection=1/3*height,vitesse=width/400+echelle_difficulte)  ##Crée une arme pour l'ennemi avec un délai de 1000ms entre chaque tir et des projectiles non homing
         super().__init__(x,y,vitesse=width/600,hp=1,arme=arme_ennemi,xp=1)  ##Appelle le constructeur de la classe parente avec une vitesse de 1 et une arme
 
 class Philippe(ennemi_main):
@@ -200,7 +200,8 @@ class weapon_main:
         self.dernier_tir += duree_pause  ##Décale le temps du dernier tir pour compenser la pause
     
 def lancer_jeu(settings):
-    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste
+    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte
+    echelle_difficulte=0
     upgrades_joueur=dico_upgrades
     en_pause=False
     width = settings["width"]
@@ -276,8 +277,9 @@ def lancer_jeu(settings):
             if touches[pygame.K_e]:
                 temps_debut_pause=pygame.time.get_ticks()
                 upgrades_joueur=level_up(screen,width,height)
-                pv_max_joueur=10+(upgrades_joueur["hp"])
+                pv_max_joueur=10+(upgrades_joueur["pv"])
                 pv_joueur=pv_joueur+1 if pv_joueur+1<=pv_max_joueur else pv_joueur
+                echelle_difficulte+=20
                 duree_pause=pygame.time.get_ticks()-temps_debut_pause
                 for classe in derniers_spawn:
                     derniers_spawn[classe]+=duree_pause
