@@ -203,6 +203,8 @@ class weapon_main:
     
 def lancer_jeu(settings):
     global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte
+    image_marcel_liste.clear()
+    image_philippe_liste.clear()
     echelle_difficulte=0
     upgrades_joueur=dico_upgrades
     en_pause=False
