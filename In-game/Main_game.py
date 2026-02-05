@@ -235,12 +235,12 @@ def lancer_jeu(settings):
     #Importation des sprites de Marcel
     for i in range(1,7):
         image_marcel=pygame.image.load(f"Marcel({i}).png").convert_alpha()
-        image_marcel=pygame.transform.scale(image_marcel,(width/20,int(image_marcel.get_height()/image_marcel.get_width()*width/20)))
+        image_marcel=pygame.transform.scale(image_marcel,(width/25,int(image_marcel.get_height()/image_marcel.get_width()*width/25)))
         image_marcel_liste.append(image_marcel)
     #Importation des sprites de Philippe
     for i in range(1,7):
         image_philippe=pygame.image.load(f"Philippe({i}).png").convert_alpha()
-        image_philippe=pygame.transform.scale(image_philippe,(width/20,int(image_philippe.get_height()/image_philippe.get_width()*width/20)))
+        image_philippe=pygame.transform.scale(image_philippe,(width/13,int(image_philippe.get_height()/image_philippe.get_width()*width/13)))
         image_philippe_liste.append(image_philippe)
     while en_jeu:
         clock.tick(60)
