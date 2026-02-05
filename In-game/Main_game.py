@@ -21,7 +21,7 @@ def retour_menu():
     en_jeu=False
 class ennemi_main:
     """Classe principale des ennemis"""
-    def __init__(self,x,y,vitesse=1,hp=1,arme=None,xp=0,sprite=None,vitesse_animation=0.15,taille_hitbox=[50,50]): ##AJOUTER PLUS TARD PARAMETRES COMME VIE, SPRITE AVEC CHEMIN D'ACCES, ETC
+    def __init__(self,x,y,vitesse=1,hp=1,arme=None,xp=0,sprite=None,vitesse_animation=0.15,taille_hitbox=[50,50], degat=10): ##AJOUTER PLUS TARD PARAMETRES COMME VIE, SPRITE AVEC CHEMIN D'ACCES, ETC
         self.x=x    ##Coordonnees reelles de l'ennemi
         self.y=y    ##Coordonnees reelles de l'ennemi
         self.vitesse=vitesse+echelle_difficulte    ##Vitesse de deplacement de l'ennemi
@@ -29,6 +29,7 @@ class ennemi_main:
         self.arme=arme  ##Arme de l'ennemi
         self.xp=xp	##xp de l'ennemi
         self.hitbox=taille_hitbox
+        self.degat=degat
 
         self.sprite_list=sprite if isinstance(sprite,list) else ([sprite] if sprite else [])
         self.animation_index=0
@@ -83,27 +84,27 @@ class ennemi_simple(ennemi_main):
     """Classe des ennemis simples"""
     spawn_delay=ennemy_spawn_delay
     def __init__(self,x,y):
-        super().__init__(x,y,vitesse=width/600,hp=3,xp=2)  ##Appelle le constructeur de la classe parente avec une vitesse de 2
+        super().__init__(x,y,vitesse=width/600,hp=3,xp=2,degat=10)  ##Appelle le constructeur de la classe parente avec une vitesse de 2
 
 
 class Marcel(ennemi_main):
     """Classe des ennemis rapides"""
     spawn_delay=ennemy_spawn_delay*1.5
     def __init__(self,x,y):
-        super().__init__(x,y,vitesse=width/300,hp=2,xp=2,sprite=image_marcel_liste,taille_hitbox=[image_marcel_liste[0].get_width(),image_marcel_liste[0].get_height()])  ##Appelle le constructeur de la classe parente avec une vitesse de 4
+        super().__init__(x,y,vitesse=width/300,hp=2,xp=2,sprite=image_marcel_liste,taille_hitbox=[image_marcel_liste[0].get_width(),image_marcel_liste[0].get_height()],degat=5)  ##Appelle le constructeur de la classe parente avec une vitesse de 4
 
 class ennemi_tireur(ennemi_main):
     """Classe des ennemis tireurs"""
     spawn_delay=ennemy_spawn_delay*3
     def __init__(self,x,y):
         arme_ennemi=weapon_main(1000-echelle_difficulte, projectile_ennemi,homing=False,portee_detection=1/3*height,vitesse=width/400+echelle_difficulte)  ##Crée une arme pour l'ennemi avec un délai de 1000ms entre chaque tir et des projectiles non homing
-        super().__init__(x,y,vitesse=width/600,hp=1,arme=arme_ennemi,xp=1)  ##Appelle le constructeur de la classe parente avec une vitesse de 1 et une arme
+        super().__init__(x,y,vitesse=width/600,hp=1,arme=arme_ennemi,xp=1,degat=7)  ##Appelle le constructeur de la classe parente avec une vitesse de 1 et une arme
 
 class Philippe(ennemi_main):
     """Classe des ennemis lourds"""
     spawn_delay=ennemy_spawn_delay*2
     def __init__(self,x,y):
-        super().__init__(x,y,vitesse=width/1200,hp=5,xp=3,sprite=image_philippe_liste,taille_hitbox=[image_philippe_liste[0].get_width(),image_philippe_liste[0].get_height()])
+        super().__init__(x,y,vitesse=width/1200,hp=5,xp=3,sprite=image_philippe_liste,taille_hitbox=[image_philippe_liste[0].get_width(),image_philippe_liste[0].get_height()],degat=20)
 
 class projectiles_general:
     """Classe principale des projectiles"""
@@ -178,7 +179,7 @@ class projectile_roquette(projectiles_general):
 
 class projectile_ennemi(projectiles_general):
     """Classe des projectiles ennemis"""
-    def __init__(self,x,y,vitesse,cible_initiale,homing=True,sprite_path=None,degat=1,range=10):
+    def __init__(self,x,y,vitesse,cible_initiale,homing=True,sprite_path=None,degat=7,range=10):
         super().__init__(x,y,vitesse+echelle_difficulte,cible_initiale,homing=homing, sprite_path=sprite_path, couleur=(0,0,0),degat=degat+echelle_difficulte,range=range)  ##Appelle le constructeur de la classe parente avec une couleur noire
 
 class weapon_main:
@@ -222,8 +223,8 @@ def lancer_jeu(settings):
     roquette=weapon_main(10000, projectile_roquette,homing=True,portee_detection=width/5,vitesse=width/300,aoe=True,aoe_rayon=width/10)  ##Crée une arme roquette avec un délai de 1500ms entre chaque tir et des projectiles homing
     type_armes=[laser,roquette]   ##Liste des types d'armes
     liste_projectiles_ennemis=[]  ##Liste pour stocker les projectiles des ennemis
-    pv_joueur=10  ##Points de vie du joueur
-    pv_max_joueur=10
+    pv_joueur=100  ##Points de vie du joueur
+    pv_max_joueur=100
     pygame.mixer.music.stop()
     xp=0
     xp_for_level=10
@@ -283,7 +284,6 @@ def lancer_jeu(settings):
                     echelle_difficulte+=1
                     niveau-=1
                 pv_max_joueur=10+(upgrades_joueur["pv"])
-                pv_joueur=pv_max_joueur
                 duree_pause=pygame.time.get_ticks()-temps_debut_pause
                 for classe in derniers_spawn:
                     derniers_spawn[classe]+=duree_pause
@@ -348,7 +348,7 @@ def lancer_jeu(settings):
             for ennemi in liste_ennemis[:]:
                 if ennemi.rect.colliderect(player_real_rect):
                     liste_ennemis.remove(ennemi)
-                    pv_joueur -= 1+echelle_difficulte
+                    pv_joueur -= ennemi.degat+echelle_difficulte
                     Soundhit.play()
             if pv_joueur <= 0:
                 en_jeu = False  ##Le joueur a perdu
