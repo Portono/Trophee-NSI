@@ -392,31 +392,17 @@ def lancer_jeu(settings):
             rect=pygame.Rect(width/2,height/2,width/8 if rect=="max_health_bar_rect" else pv_joueur/pv_max_joueur*width/8,height/100)
             rect.topleft=(width/150,height/150)
             pygame.draw.rect(screen,color,rect)
-            texte_xp=font.render(f"niveaux:{niveau}",True,blue)
-            texte_xp_rect=texte_xp.get_rect(center=(width/2,height/6))
-            screen.blit(texte_xp,texte_xp_rect)
-        #dDessiner la barre d'exp
+        #Dessiner la barre d'exp
         for rect,color in [("xp_for_level_rect",black),("current_xp",blue)]:
             rect=pygame.Rect(width/2,height/2,width/8 if rect=="xp_for_level" else xp/xp_for_level*width/8,height/100)
             rect.topleft=(width/150,height/60)
             pygame.draw.rect(screen,color,rect)
-            texte_hp=font.render(f"hp:{pv_joueur}/{pv_max_joueur}",True,green)
-            texte_hp_rect=texte_hp.get_rect(center=(width/2,height/4))
-            screen.blit(texte_hp,texte_hp_rect)
              
         if xp>=xp_for_level:
             xp-=xp_for_level
             xp_for_level=int(xp_for_level*1.5)
             niveau+=1
-        
-        
-        
-        centre=pygame.Rect(0,0,width/4,height/4)
-        centre.center=(0-offset_x,0-offset_y)
-        texte_base=font.render("Base", True,orange)
-        texte_base_rect=texte_base.get_rect(center=centre.center)
-        pygame.draw.rect(screen,black,centre)
-        screen.blit(texte_base,texte_base_rect)
+
         if upgrades_joueur["regen_pv"]>=1:
             if pv_heal_cooldown>=1000:
                 if pv_joueur+upgrades_joueur["regen_pv"]>=pv_max_joueur and pv_joueur!=pv_max_joueur:
