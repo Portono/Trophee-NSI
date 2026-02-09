@@ -15,6 +15,8 @@ image_marcel_liste=[]
 image_philippe=None
 image_philippe_liste=[]
 upgrades_joueur=dico_upgrades
+laser_sprite=None
+roquette_sprite=None
 
 #Classes
 def retour_menu():
@@ -22,11 +24,11 @@ def retour_menu():
 class ennemi_main:
     """Classe principale des ennemis"""
     def __init__(self,x,y,vitesse=1,hp=1,arme=None,xp=0,sprite=None,vitesse_animation=0.15,taille_hitbox=[50,50], degat=10): ##AJOUTER PLUS TARD PARAMETRES COMME VIE, SPRITE AVEC CHEMIN D'ACCES, ETC
-        self.x=x    ##Coordonnees reelles de l'ennemi
-        self.y=y    ##Coordonnees reelles de l'ennemi
+        self.x=x	##Coordonnees reelles de l'ennemi
+        self.y=y	##Coordonnees reelles de l'ennemi
         self.vitesse=vitesse+echelle_difficulte    ##Vitesse de deplacement de l'ennemi
         self.hp=hp+echelle_difficulte  ##Points de vie de l'ennemi
-        self.arme=arme  ##Arme de l'ennemi
+        self.arme=arme 	##Arme de l'ennemi
         self.xp=xp	##xp de l'ennemi
         self.hitbox=taille_hitbox
         self.degat=degat
@@ -122,11 +124,9 @@ class projectiles_general:
         self.image = sprite_path
         self.aoe=aoe
         self.aoe_rayon=aoe_rayon
-        if sprite_path:
-            image_originale = pygame.image.load(sprite_path).convert_alpha()
-            self.image = pygame.transform.scale(image_originale, (90, 35))
+        if sprite_path!=None:
             self.rect = self.image.get_rect(center=(self.x, self.y))
-        else:
+        if sprite_path==None:
             self.rect = pygame.Rect(self.x, self.y, 10, 10)
             self.rect.center = (self.x, self.y)
         #Si cible meurt entre temps, le projectile continue tout droit
@@ -169,13 +169,13 @@ class projectiles_general:
 
 class projectile_laser(projectiles_general):
     """Classe des projectiles laser"""
-    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path='projectile1.png',degat=1,range=10):
-        super().__init__(x,y,vitesse,cible_initiale,homing=homing, sprite_path=sprite_path, couleur=(255,0,0),degat=degat+upgrades_joueur["degats"],range=range)  ##Appelle le constructeur de la classe parente avec une couleur rouge
+    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite=None,degat=1,range=10):
+        super().__init__(x,y,vitesse,cible_initiale,homing=homing, sprite_path=sprite, couleur=(255,0,0),degat=degat+upgrades_joueur["degats"],range=range)  ##Appelle le constructeur de la classe parente avec une couleur rouge
 
 class projectile_roquette(projectiles_general):
     """Classe des projectiles roquettes"""
-    def __init__(self,x,y,vitesse,cible_initiale,homing=True,sprite_path='projectile2.png',degat=3,range=10,aoe=True,aoe_rayon=width/10):
-        super().__init__(x,y,vitesse,cible_initiale,homing=homing, sprite_path=sprite_path, couleur=(255,165,0),degat=degat+upgrades_joueur["degats"],range=range,aoe=aoe,aoe_rayon=aoe_rayon)  ##Appelle le constructeur de la classe parente avec une couleur orange
+    def __init__(self,x,y,vitesse,cible_initiale,homing=True,sprite=None,degat=3,range=10,aoe=True,aoe_rayon=width/10):
+        super().__init__(x,y,vitesse,cible_initiale,homing=homing, sprite_path=sprite, couleur=(255,165,0),degat=degat+upgrades_joueur["degats"],range=range,aoe=aoe,aoe_rayon=aoe_rayon)  ##Appelle le constructeur de la classe parente avec une couleur orange
 
 class projectile_ennemi(projectiles_general):
     """Classe des projectiles ennemis"""
@@ -202,7 +202,11 @@ class weapon_main:
         self.dernier_tir += duree_pause  ##Décale le temps du dernier tir pour compenser la pause
     
 def lancer_jeu(settings):
-    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte
+    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite
+    laser_sprite=pygame.image.load("projectile_laser.png").convert_alpha()
+    laser_sprite=pygame.transform.scale(laser_sprite,(width/20,int(laser_sprite.get_height()/laser_sprite.get_width()*width/20)))
+    roquette_sprite=pygame.image.load("projectile_roquette.png").convert_alpha()
+    roquette_sprite=pygame.transform.scale(roquette_sprite,(width/20,int(roquette_sprite.get_height()/roquette_sprite.get_width()*width/20)))
     image_marcel_liste.clear()
     image_philippe_liste.clear()
     echelle_difficulte=0
@@ -310,7 +314,7 @@ def lancer_jeu(settings):
                 cible_proche= min(liste_ennemis, key=lambda ennemi: math.hypot(ennemi.x - player_x, ennemi.y - player_y))
                 for armes in type_armes:
                     if armes.tirer() and math.hypot(cible_proche.x - player_x, cible_proche.y - player_y)<=armes.range_balle:
-                        nouveau_projectile = armes.classe(player_x, player_y, armes.vitesse, cible_proche, homing=armes.homing,range=armes.range_balle)
+                        nouveau_projectile = armes.classe(player_x, player_y, armes.vitesse, cible_proche, homing=armes.homing,range=armes.range_balle,sprite=laser_sprite if armes==laser else roquette_sprite)
                         liste_projectiles.append(nouveau_projectile)
             # Mettre à jour les projectiles du joueur
             for proj in liste_projectiles[:]:
@@ -413,21 +417,20 @@ def lancer_jeu(settings):
         texte_base_rect=texte_base.get_rect(center=centre.center)
         pygame.draw.rect(screen,black,centre)
         screen.blit(texte_base,texte_base_rect)
-
-        if pv_heal_cooldown>=1000:
-            if pv_joueur==pv_max_joueur:
-                break
-            if pv_joueur+upgrades_joueur["regen_pv"]>=pv_max_joueur:
-                pv_joueur=pv_max_joueur
-                pv_heal_cooldown=0
-            else:
-                pv_joueur+=upgrades_joueur["regen_pv"]
-                pv_heal_cooldown=0
-        pv_heal_cooldown+=1
+        if upgrades_joueur["regen_pv"]>=1:
+            if pv_heal_cooldown>=1000:
+                if pv_joueur+upgrades_joueur["regen_pv"]>=pv_max_joueur and pv_joueur!=pv_max_joueur:
+                    pv_joueur=pv_max_joueur
+                    pv_heal_cooldown=0
+                else:
+                    pv_joueur+=upgrades_joueur["regen_pv"]
+                    pv_heal_cooldown=0
+            pv_heal_cooldown+=1
 
 
         pygame.display.flip()
 
 pygame.quit()
+
 
 
