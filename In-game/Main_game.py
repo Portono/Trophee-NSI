@@ -336,7 +336,7 @@ def lancer_jeu(settings):
                     if proj in liste_projectiles:
                         liste_projectiles.remove(proj)
             for e in liste_ennemis[:]:
-                if e.hp<0:
+                if e.hp<=0:
                     xp+=e.xp
                     liste_ennemis.remove(e)
 
