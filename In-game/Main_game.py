@@ -290,6 +290,7 @@ def lancer_jeu(settings):
                     echelle_difficulte+=1
                     niveau-=1
                 pv_max_joueur=100+(upgrades_joueur["pv"])
+                vitesse_joueur=width/300+(upgrades_joueur["vitesse"])
                 duree_pause=pygame.time.get_ticks()-temps_debut_pause
                 for classe in derniers_spawn:
                     derniers_spawn[classe]+=duree_pause
