@@ -150,7 +150,7 @@ class projectiles_general:
                 self.calculer_direction(self.cible.x, self.cible.y)
             else:
                 if liste_ennemis:
-                    self.cible = min(liste_ennemis, key=lambda ennemi: math.hypot(ennemi.x - self.x, ennemi.y - self.y))
+                    self.cible = min(liste_ennemis, key=lambda ennemi:((ennemi.x-player_x)**2+(ennemi.y-player_y))**2)
         #Mouvement du projectile
         self.x += self.dir_x * self.vitesse
         self.y += self.dir_y * self.vitesse
@@ -289,7 +289,7 @@ def lancer_jeu(settings):
                     upgrades_joueur=level_up(screen,width,height)
                     echelle_difficulte+=1
                     niveau-=1
-                pv_max_joueur=100+(upgrades_joueur["pv"])*10
+                pv_max_joueur=100+(upgrades_joueur["pv"])
                 vitesse_joueur=width/300+(upgrades_joueur["vitesse"])
                 duree_pause=pygame.time.get_ticks()-temps_debut_pause
                 for classe in derniers_spawn:
@@ -312,7 +312,7 @@ def lancer_jeu(settings):
                 ennemi.update(player_x, player_y)
             # Gérer les tirs du joueur
             if liste_ennemis:
-                cible_proche= min(liste_ennemis, key=lambda ennemi: math.hypot(ennemi.x - player_x, ennemi.y - player_y))
+                cible_proche= min(liste_ennemis, key=lambda ennemi: (ennemi.x - player_x)**2+ (ennemi.y - player_y)**2)
                 for armes in type_armes:
                     if armes.tirer() and math.hypot(cible_proche.x - player_x, cible_proche.y - player_y)<=armes.range_balle:
                         nouveau_projectile = armes.classe(player_x, player_y, armes.vitesse, cible_proche, homing=armes.homing,range=armes.range_balle,sprite=laser_sprite if armes==laser else roquette_sprite)
