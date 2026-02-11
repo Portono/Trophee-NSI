@@ -6,19 +6,19 @@ pygame.init()
 
 
 dico_upgrades={
-                "chance":1,
-                "gain_xp":0,
-                "pv":0,
-                "vitesse":0,
-                "vitesse_balles":0,
-                "cadence_de_tir":0,
-                "degats":0,
-                "portee":0,
-                "regen_pv":0,
+                "chance":1,         ##fait
+                "gain_xp":0,        ##fait
+                "pv":0,             ##fait
+                "vitesse":0,        ##fait
+                "vitesse_balles":0, ##fait
+                "cadence_de_tir":0, ##fait
+                "degats":0,         ##fait
+                "portee":0,         ##fait
+                "regen_pv":0,       ##fait
                 "vol_de_vie":0,
                 "taille_projectiles":0,
                 "multishot":0,
-                "deflagrations":0,
+                "deflagrations":0,  ##fait
                 "esquive":0,
                 "renvoi":0,
                 "perforation":0,
