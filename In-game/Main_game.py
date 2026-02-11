@@ -150,7 +150,7 @@ class projectiles_general:
                 self.calculer_direction(self.cible.x, self.cible.y)
             else:
                 if liste_ennemis:
-                    self.cible = min(liste_ennemis, key=lambda ennemi:((ennemi.x-player_x)**2+(ennemi.y-player_y))**2)
+                    self.cible = min(liste_ennemis, key=lambda ennemi: (ennemi.x - self.x)**2 + (ennemi.y - self.y)**2)
         #Mouvement du projectile
         self.x += self.dir_x * self.vitesse
         self.y += self.dir_y * self.vitesse
@@ -184,7 +184,7 @@ class projectile_ennemi(projectiles_general):
 
 class weapon_main:
     """Classe principale des armes"""
-    def __init__(self,delai,classe_projectile,homing=False,portee_detection=1/2*height,vitesse=10,aoe=False,aoe_rayon=width/10):
+    def __init__(self,delai,classe_projectile,homing=False,portee_detection=1/2*height,vitesse=10,aoe=False,aoe_rayon=width/10,degat=1):
         self.delai=delai  ##Temps entre chaque tir en millisecondes
         self.dernier_tir=0  ##Temps du dernier tir
         self.classe=classe_projectile  ##Classe du projectile tiré
@@ -193,6 +193,7 @@ class weapon_main:
         self.vitesse=vitesse  ##Vitesse des projectiles tirés
         self.range_balle=portee_detection*2  ##Portée maximale des projectiles tirés
         self.aoe=aoe
+        self.degat=degat
     def tirer(self):
         if pygame.time.get_ticks() - self.dernier_tir >= self.delai:
             self.dernier_tir = pygame.time.get_ticks()
@@ -203,10 +204,13 @@ class weapon_main:
     
 def lancer_jeu(settings):
     global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite
-    laser_sprite=pygame.image.load("projectile_laser.png").convert_alpha()
-    laser_sprite=pygame.transform.scale(laser_sprite,(width/20,int(laser_sprite.get_height()/laser_sprite.get_width()*width/20)))
-    roquette_sprite=pygame.image.load("projectile_roquette.png").convert_alpha()
-    roquette_sprite=pygame.transform.scale(roquette_sprite,(width/20,int(roquette_sprite.get_height()/roquette_sprite.get_width()*width/20)))
+    for sprite,classe in [('projectile_laser.png',laser_sprite),('projectile_roquette.png',roquette_sprite)]:
+        img=pygame.image.load(sprite).convert_alpha()
+        img=pygame.transform.scale(img,(width/20,int(img.get_height()/img.get_width()*width/30)))
+        if classe==laser_sprite:
+            laser_sprite=img
+        else:
+            roquette_sprite=img
     image_marcel_liste.clear()
     image_philippe_liste.clear()
     echelle_difficulte=0
@@ -291,6 +295,9 @@ def lancer_jeu(settings):
                     niveau-=1
                 pv_max_joueur=100+(upgrades_joueur["pv"])*10
                 vitesse_joueur=width/300+(upgrades_joueur["vitesse"])*width/100
+                laser=weapon_main(500/(1+upgrades_joueur["cadence_de_tir"]/10), projectile_laser,homing=False,portee_detection=width/10+upgrades_joueur["portee"]*10,vitesse=width/200+upgrades_joueur["vitesse_balles"]/10,degat=1+upgrades_joueur["degats"])  ##Crée une arme laser avec un délai de 500ms entre chaque tir et des projectiles homing
+                roquette=weapon_main(10000/(1+upgrades_joueur["cadence_de_tir"]/10), projectile_roquette,homing=True,portee_detection=width/5+upgrades_joueur["portee"]*10,vitesse=width/300+upgrades_joueur["vitesse_balles"]/10,aoe=True,aoe_rayon=width/10+5*upgrades_joueur["deflagrations"],degat=3+upgrades_joueur["degats"])  ##Crée une arme roquette avec un délai de 1500ms entre chaque tir et des projectiles homing
+                type_armes=[laser,roquette]   ##Liste des types d'armes
                 duree_pause=pygame.time.get_ticks()-temps_debut_pause
                 for classe in derniers_spawn:
                     derniers_spawn[classe]+=duree_pause
@@ -338,7 +345,7 @@ def lancer_jeu(settings):
                         liste_projectiles.remove(proj)
             for e in liste_ennemis[:]:
                 if e.hp<=0:
-                    xp+=e.xp
+                    xp+=e.xp*(1+upgrades_joueur["gain_xp"]/5)
                     liste_ennemis.remove(e)
 
             # Mettre à jour les projectiles des ennemis
