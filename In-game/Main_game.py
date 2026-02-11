@@ -243,6 +243,10 @@ def lancer_jeu(settings):
     astro=pygame.transform.scale(astro,(width/20,int(astro.get_height()/astro.get_width()*width/20)))
     font=pygame.font.Font(None,150)
     pv_heal_cooldown=0
+    duree_journee=0
+    nombre_journees=0
+    dernier_soin=pygame.time.get_ticks()
+    maintenant=0
     #Importation des sprites de Marcel
     for i in range(1,7):
         image_marcel=pygame.image.load(f"Marcel({i}).png").convert_alpha()
@@ -254,6 +258,7 @@ def lancer_jeu(settings):
         image_philippe=pygame.transform.scale(image_philippe,(width/13,int(image_philippe.get_height()/image_philippe.get_width()*width/13)))
         image_philippe_liste.append(image_philippe)
     while en_jeu:
+        enemi_spawn_delay=2000-echelle_difficulte
         clock.tick(60)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -291,8 +296,13 @@ def lancer_jeu(settings):
                 temps_debut_pause=pygame.time.get_ticks()
                 for _ in range(niveau):
                     upgrades_joueur=level_up(screen,width,height)
-                    echelle_difficulte+=1
                     niveau-=1
+                liste_ennemis.clear()
+                liste_projectiles_ennemis.clear()
+                liste_projectiles.clear()
+                nombre_journees+=1
+                duree_journee=0
+                echelle_difficulte+=1
                 pv_max_joueur=100+(upgrades_joueur["pv"])*10
                 vitesse_joueur=width/300+(upgrades_joueur["vitesse"])*width/100
                 laser=weapon_main(500/(1+upgrades_joueur["cadence_de_tir"]/10), projectile_laser,homing=False,portee_detection=width/10+upgrades_joueur["portee"]*10,vitesse=width/200+upgrades_joueur["vitesse_balles"]/10,degat=1+upgrades_joueur["degats"])  ##Crée une arme laser avec un délai de 500ms entre chaque tir et des projectiles homing
@@ -411,15 +421,16 @@ def lancer_jeu(settings):
             xp_for_level=int(xp_for_level*1.5)
             niveau+=1
 
+        maintenant=pygame.time.get_ticks()
         if upgrades_joueur["regen_pv"]>=1:
-            if pv_heal_cooldown>=1000:
+            if maintenant-dernier_soin>=1000:
                 if pv_joueur+upgrades_joueur["regen_pv"]>=pv_max_joueur and pv_joueur!=pv_max_joueur:
                     pv_joueur=pv_max_joueur
-                    pv_heal_cooldown=0
                 else:
                     pv_joueur+=upgrades_joueur["regen_pv"]
-                    pv_heal_cooldown=0
-            pv_heal_cooldown+=1
+                dernier_soin=maintenant
+        duree_journee+=1
+        echelle_difficulte=nombre_journees*5+duree_journee//600
 
 
         pygame.display.flip()
