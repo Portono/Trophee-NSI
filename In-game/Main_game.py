@@ -8,7 +8,7 @@ from random_module import*
 
 pygame.init()
 echelle_difficulte=0
-ennemy_spawn_delay=2000-echelle_difficulte  ##Délai entre chaque spawn d'ennemi en millisecondes TEMPORAIRE
+ennemy_spawn_delay=4000-echelle_difficulte  ##Délai entre chaque spawn d'ennemi en millisecondes TEMPORAIRE
 vitesse_joueur = width/300  ##Vitesse de deplacement du joueur
 image_marcel=None
 image_marcel_liste=[]
@@ -26,7 +26,7 @@ class ennemi_main:
     def __init__(self,x,y,vitesse=1,hp=1,arme=None,xp=0,sprite=None,vitesse_animation=0.15,taille_hitbox=[50,50], degat=10): ##AJOUTER PLUS TARD PARAMETRES COMME VIE, SPRITE AVEC CHEMIN D'ACCES, ETC
         self.x=x	##Coordonnees reelles de l'ennemi
         self.y=y	##Coordonnees reelles de l'ennemi
-        self.vitesse=vitesse+echelle_difficulte    ##Vitesse de deplacement de l'ennemi
+        self.vitesse=vitesse+echelle_difficulte/10    ##Vitesse de deplacement de l'ennemi
         self.hp=hp+echelle_difficulte  ##Points de vie de l'ennemi
         self.arme=arme 	##Arme de l'ennemi
         self.xp=xp	##xp de l'ennemi
@@ -42,7 +42,7 @@ class ennemi_main:
 
     def dessiner(self,screen,offset_x,offset_y):    ##Dessine l'ennemi a l'ecran en fonction du decalage de la camera
         pos_ecran=(self.rect.x-offset_x,self.rect.y-offset_y)
-        pygame.draw.rect(screen,(0,0,255),pygame.Rect(self.rect.x-offset_x,self.rect.y-offset_y,self.hitbox[0],self.hitbox[1]))
+        ##pygame.draw.rect(screen,(0,0,255),pygame.Rect(self.rect.x-offset_x,self.rect.y-offset_y,self.hitbox[0],self.hitbox[1]))
 
         if self.sprite_list:
             if len(self.sprite_list)>1:
@@ -180,7 +180,7 @@ class projectile_roquette(projectiles_general):
 class projectile_ennemi(projectiles_general):
     """Classe des projectiles ennemis"""
     def __init__(self,x,y,vitesse,cible_initiale,homing=True,sprite_path=None,degat=7,range=10):
-        super().__init__(x,y,vitesse+echelle_difficulte,cible_initiale,homing=homing, sprite_path=sprite_path, couleur=(0,0,0),degat=degat+echelle_difficulte,range=range)  ##Appelle le constructeur de la classe parente avec une couleur noire
+        super().__init__(x,y,vitesse+echelle_difficulte/10,cible_initiale,homing=homing, sprite_path=sprite_path, couleur=(0,0,0),degat=degat+echelle_difficulte,range=range)  ##Appelle le constructeur de la classe parente avec une couleur noire
 
 class weapon_main:
     """Classe principale des armes"""
@@ -302,9 +302,8 @@ def lancer_jeu(settings):
                 liste_projectiles.clear()
                 nombre_journees+=1
                 duree_journee=0
-                echelle_difficulte+=1
                 pv_max_joueur=100+(upgrades_joueur["pv"])*10
-                vitesse_joueur=width/300+(upgrades_joueur["vitesse"])*width/100
+                vitesse_joueur=width/300+(upgrades_joueur["vitesse"])*width/900
                 laser=weapon_main(500/(1+upgrades_joueur["cadence_de_tir"]/10), projectile_laser,homing=False,portee_detection=width/10+upgrades_joueur["portee"]*10,vitesse=width/200+upgrades_joueur["vitesse_balles"]/10,degat=1+upgrades_joueur["degats"])  ##Crée une arme laser avec un délai de 500ms entre chaque tir et des projectiles homing
                 roquette=weapon_main(10000/(1+upgrades_joueur["cadence_de_tir"]/10), projectile_roquette,homing=True,portee_detection=width/5+upgrades_joueur["portee"]*10,vitesse=width/300+upgrades_joueur["vitesse_balles"]/10,aoe=True,aoe_rayon=width/10+5*upgrades_joueur["deflagrations"],degat=3+upgrades_joueur["degats"])  ##Crée une arme roquette avec un délai de 1500ms entre chaque tir et des projectiles homing
                 type_armes=[laser,roquette]   ##Liste des types d'armes
@@ -430,9 +429,11 @@ def lancer_jeu(settings):
                     pv_joueur+=upgrades_joueur["regen_pv"]
                 dernier_soin=maintenant
         duree_journee+=1
-        echelle_difficulte=nombre_journees*5+duree_journee//600
+        echelle_difficulte=nombre_journees*5+duree_journee//1200
 
-
+        rect_centre=pygame.Rect(0,0,150,150)
+        rect_centre.center=(-offset_x,-offset_y)
+        pygame.draw.rect(screen,(0,26,158),rect_centre)
         pygame.display.flip()
 
 pygame.quit()
