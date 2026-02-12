@@ -236,7 +236,7 @@ def lancer_jeu(settings):
     sprite_explosion=[]
     for sprite in ["Explosion1.png","Explosion2.png"]:
         img=pygame.image.load(sprite).convert_alpha()
-        img=pygame.transform.scale(img,(width/20,int(img.get_height()/img.get_width()*width/20)))
+        img=pygame.transform.scale(img,(width/5,int(img.get_height()/img.get_width()*width/5)))
         sprite_explosion.append(img)
     image_marcel_liste.clear()
     image_philippe_liste.clear()
@@ -339,7 +339,7 @@ def lancer_jeu(settings):
                 sprite_roquette=[]
                 for sprite in ["Explosion1.png","Explosion2.png"]:
                     img=pygame.image.load(sprite).convert_alpha()
-                    img=pygame.transform.scale(img,(width/10+5*upgrades_joueur["deflagrations"],int(img.get_height()/img.get_width()*(width/10+5*upgrades_joueur["deflagrations"]))))
+                    img=pygame.transform.scale(img,(width/5+5*upgrades_joueur["deflagrations"],int(img.get_height()/img.get_width()*(width/5+5*upgrades_joueur["deflagrations"]))))
                     sprite_roquette.append(img)
                 duree_pause=pygame.time.get_ticks()-temps_debut_pause
                 for classe in derniers_spawn:
