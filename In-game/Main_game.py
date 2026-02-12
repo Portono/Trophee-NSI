@@ -269,7 +269,7 @@ def lancer_jeu(settings):
     niveau=0
     astro=pygame.image.load("Astro.png").convert_alpha()
     astro=pygame.transform.scale(astro,(width/20,int(astro.get_height()/astro.get_width()*width/20)))
-    font=pygame.font.Font(None,150)
+    font=pygame.font.Font(None,int(width/25))
     pv_heal_cooldown=0
     duree_journee=0
     nombre_journees=0
@@ -473,12 +473,18 @@ def lancer_jeu(settings):
                 else:
                     pv_joueur+=upgrades_joueur["regen_pv"]
                 dernier_soin=maintenant
+
         duree_journee+=1
         echelle_difficulte=nombre_journees*5+duree_journee//1200
 
         rect_centre=pygame.Rect(0,0,150,150)
         rect_centre.center=(-offset_x,-offset_y)
         pygame.draw.rect(screen,(0,26,158),rect_centre)
+        
+        texte_niveau=font.render(f"Niveaux:{niveau}",True,(0,0,0))
+        texte_niveau_rect=texte_niveau.get_rect(topleft=(width/150,height/20))
+        screen.blit(texte_niveau,texte_niveau_rect)
+        
         pygame.display.flip()
 
 pygame.quit()
