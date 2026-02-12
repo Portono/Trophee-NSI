@@ -462,7 +462,7 @@ def lancer_jeu(settings):
              
         if xp>=xp_for_level:
             xp-=xp_for_level
-            xp_for_level=int(xp_for_level*1.5)
+            xp_for_level=int(xp_for_level*1.2)
             niveau+=1
 
         maintenant=pygame.time.get_ticks()
