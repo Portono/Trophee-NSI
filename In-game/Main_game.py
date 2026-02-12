@@ -206,7 +206,7 @@ def lancer_jeu(settings):
     global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite
     for sprite,classe in [('projectile_laser.png',laser_sprite),('projectile_roquette.png',roquette_sprite)]:
         img=pygame.image.load(sprite).convert_alpha()
-        img=pygame.transform.scale(img,(width/20,int(img.get_height()/img.get_width()*width/30)))
+        img=pygame.transform.scale(img,(width/20,int(img.get_height()/img.get_width()*width/20)))
         if classe==laser_sprite:
             laser_sprite=img
         else:
