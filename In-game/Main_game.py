@@ -292,7 +292,7 @@ def lancer_jeu(settings):
                 player_y += vitesse_joueur
             if touches[pygame.K_z] or touches[pygame.K_w]:
                 player_y -= vitesse_joueur
-            if touches[pygame.K_e] and math.hypot(abs(player_x),abs(player_y))<width/4:
+            if touches[pygame.K_e] and math.hypot(abs(player_x),abs(player_y))<width/4 and niveau>=1:
                 temps_debut_pause=pygame.time.get_ticks()
                 for _ in range(niveau):
                     upgrades_joueur=level_up(screen,width,height)
