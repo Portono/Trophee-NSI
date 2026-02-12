@@ -421,7 +421,8 @@ def lancer_jeu(settings):
             
 
         # Dessiner le fond
-        screen.fill((255, 255, 255)) # Fond blanc
+        screen.fill((255, 255, 255))
+        
         #Maintient le joueur au centre de l'ecran en calculant le decalage
         offset_x = player_x - (width // 2)
         offset_y = player_y - (height // 2)
@@ -434,6 +435,7 @@ def lancer_jeu(settings):
         #Dessiner les ennemis
         for ennemi in liste_ennemis:
             ennemi.dessiner(screen, offset_x, offset_y)
+            
         #Dessine le joueur
         astro_rect=astro.get_rect()
         astro_rect.center=(width/2,height/2)
@@ -446,20 +448,24 @@ def lancer_jeu(settings):
         #Dessiner les tirs des ennemis
         for proj in liste_projectiles_ennemis[:]:
             proj.dessiner(screen, offset_x, offset_y)
+            
         #Dessiner les explosions
         for explosion in liste_explosions[:]:
             explosion.dessiner(screen,offset_x,offset_y)
+            
         #Dessiner la barre de vie
         for rect,color in [("max_health_bar_rect",red),("health_bar_rect",green)]:
             rect=pygame.Rect(width/2,height/2,width/8 if rect=="max_health_bar_rect" else pv_joueur/pv_max_joueur*width/8,height/100)
             rect.topleft=(width/150,height/150)
             pygame.draw.rect(screen,color,rect)
+            
         #Dessiner la barre d'exp
         for rect,color in [("xp_for_level_rect",black),("current_xp",blue)]:
             rect=pygame.Rect(width/2,height/2,width/8 if rect=="xp_for_level" else xp/xp_for_level*width/8,height/100)
             rect.topleft=(width/150,height/60)
             pygame.draw.rect(screen,color,rect)
-             
+            
+        #Gestion de l'exp   
         if xp>=xp_for_level:
             xp-=xp_for_level
             xp_for_level=int(xp_for_level*1.2)
