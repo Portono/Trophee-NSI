@@ -38,7 +38,7 @@ dico_rarete_upgrades={
                 "degats":"commun",
                 "portee":"commun",
                 "cadence_de_tir":"commun",
-                "gain_xp":"rare",
+                "gain_xp":"commun",
                 "regen_pv":"rare",
                 "taille_projectiles":"rare",
                 "aoe_joueur":"rare",
