@@ -17,6 +17,7 @@ image_philippe_liste=[]
 upgrades_joueur=dico_upgrades
 laser_sprite=None
 roquette_sprite=None
+sprite_explosion=None
 
 #Classes
 def retour_menu():
@@ -201,7 +202,27 @@ class weapon_main:
         return False
     def compenser_pause(self,duree_pause):
         self.dernier_tir += duree_pause  ##Décale le temps du dernier tir pour compenser la pause
-    
+        
+class Explosion:
+    def __init__(self,x,y,sprite_list,vitesse_animation=0.05):
+        self.x=x
+        self.y=y
+        self.sprite_list=sprite_list
+        self.animation_index=0
+        self.vitesse_animation=vitesse_animation
+        self.terminee=False
+        
+    def update(self):
+        self.animation_index+=self.vitesse_animation
+        if self.animation_index>=len(self.sprite_list):
+            self.terminee=True
+            
+    def dessiner(self,screen,offset_x,offset_y):
+        if not self.terminee:
+             image=self.sprite_list[int(self.animation_index)]
+             rect=image.get_rect(center=(self.x-offset_x,self.y-offset_y))
+             screen.blit(image,rect)
+
 def lancer_jeu(settings):
     global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite
     for sprite,classe in [('projectile_laser.png',laser_sprite),('projectile_roquette.png',roquette_sprite)]:
@@ -211,6 +232,12 @@ def lancer_jeu(settings):
             laser_sprite=img
         else:
             roquette_sprite=img
+    #Sprite explosion Roquette
+    sprite_explosion=[]
+    for sprite in ["Explosion1.png","Explosion2.png"]:
+        img=pygame.image.load(sprite).convert_alpha()
+        img=pygame.transform.scale(img,(width/20,int(img.get_height()/img.get_width()*width/20)))
+        sprite_explosion.append(img)
     image_marcel_liste.clear()
     image_philippe_liste.clear()
     echelle_difficulte=0
@@ -233,6 +260,7 @@ def lancer_jeu(settings):
     roquette=weapon_main(10000, projectile_roquette,homing=True,portee_detection=width/5,vitesse=width/300,aoe=True,aoe_rayon=width/10)  ##Crée une arme roquette avec un délai de 1500ms entre chaque tir et des projectiles homing
     type_armes=[laser,roquette]   ##Liste des types d'armes
     liste_projectiles_ennemis=[]  ##Liste pour stocker les projectiles des ennemis
+    liste_explosions=[]
     pv_joueur=100  ##Points de vie du joueur
     pv_max_joueur=100
     pygame.mixer.music.stop()
@@ -307,6 +335,12 @@ def lancer_jeu(settings):
                 laser=weapon_main(500/(1+upgrades_joueur["cadence_de_tir"]/10), projectile_laser,homing=False,portee_detection=width/10+upgrades_joueur["portee"]*10,vitesse=width/200+upgrades_joueur["vitesse_balles"]/10,degat=1+upgrades_joueur["degats"])  ##Crée une arme laser avec un délai de 500ms entre chaque tir et des projectiles homing
                 roquette=weapon_main(10000/(1+upgrades_joueur["cadence_de_tir"]/10), projectile_roquette,homing=True,portee_detection=width/5+upgrades_joueur["portee"]*10,vitesse=width/300+upgrades_joueur["vitesse_balles"]/10,aoe=True,aoe_rayon=width/10+5*upgrades_joueur["deflagrations"],degat=3+upgrades_joueur["degats"])  ##Crée une arme roquette avec un délai de 1500ms entre chaque tir et des projectiles homing
                 type_armes=[laser,roquette]   ##Liste des types d'armes
+                #Explosion
+                sprite_roquette=[]
+                for sprite in ["Explosion1.png","Explosion2.png"]:
+                    img=pygame.image.load(sprite).convert_alpha()
+                    img=pygame.transform.scale(img,(width/10+5*upgrades_joueur["deflagrations"],int(img.get_height()/img.get_width()*(width/10+5*upgrades_joueur["deflagrations"]))))
+                    sprite_roquette.append(img)
                 duree_pause=pygame.time.get_ticks()-temps_debut_pause
                 for classe in derniers_spawn:
                     derniers_spawn[classe]+=duree_pause
@@ -326,6 +360,13 @@ def lancer_jeu(settings):
             # Mettre à jour les ennemis
             for ennemi in liste_ennemis:
                 ennemi.update(player_x, player_y)
+                
+            #Mettre à jour les explosions
+            for explosion in liste_explosions[:]:
+                explosion.update()
+                if explosion.terminee:
+                    liste_explosions.remove(explosion)
+                    
             # Gérer les tirs du joueur
             if liste_ennemis:
                 cible_proche= min(liste_ennemis, key=lambda ennemi: (ennemi.x - player_x)**2+ (ennemi.y - player_y)**2)
@@ -337,7 +378,6 @@ def lancer_jeu(settings):
             for proj in liste_projectiles[:]:
                 proj.update(liste_ennemis)
                 hit_ennemi=None
-
                 for ennemi in liste_ennemis:
                     if proj.rect.colliderect(ennemi.rect):
                         hit_ennemi=ennemi
@@ -345,6 +385,9 @@ def lancer_jeu(settings):
 
                 if hit_ennemi or proj.est_trop_loin():
                     if proj.aoe:
+                        explosion=Explosion(proj.x,proj.y,sprite_explosion)
+                        liste_explosions.append(explosion)
+                        
                         for e in liste_ennemis:
                             if math.hypot(proj.x-e.x,proj.y-e.y)<=proj.aoe_rayon:
                                     e.hp-=proj.degat
@@ -400,10 +443,12 @@ def lancer_jeu(settings):
         for proj in liste_projectiles[:]:
             proj.dessiner(screen, offset_x, offset_y)
 
-        #Gerer les tirs des ennemis
+        #Dessiner les tirs des ennemis
         for proj in liste_projectiles_ennemis[:]:
             proj.dessiner(screen, offset_x, offset_y)
-
+        #Dessiner les explosions
+        for explosion in liste_explosions[:]:
+            explosion.dessiner(screen,offset_x,offset_y)
         #Dessiner la barre de vie
         for rect,color in [("max_health_bar_rect",red),("health_bar_rect",green)]:
             rect=pygame.Rect(width/2,height/2,width/8 if rect=="max_health_bar_rect" else pv_joueur/pv_max_joueur*width/8,height/100)
