@@ -17,11 +17,11 @@ image_philippe_liste=[]
 upgrades_joueur=dico_upgrades
 laser_sprite=None
 roquette_sprite=None
-sprite_explosion=None
+sprite_explosion_roquette=None
 
+# position de la base (centre du monde) utilisée pour la flèche
+base_x, base_y = 0, 0
 #Classes
-def retour_menu():
-    en_jeu=False
 class ennemi_main:
     """Classe principale des ennemis"""
     def __init__(self,x,y,vitesse=1,hp=1,arme=None,xp=0,sprite=None,vitesse_animation=0.15,taille_hitbox=[50,50], degat=10): ##AJOUTER PLUS TARD PARAMETRES COMME VIE, SPRITE AVEC CHEMIN D'ACCES, ETC
@@ -32,7 +32,7 @@ class ennemi_main:
         self.arme=arme 	##Arme de l'ennemi
         self.xp=xp	##xp de l'ennemi
         self.hitbox=taille_hitbox
-        self.degat=degat
+        self.degat=degat+echelle_difficulte
 
         self.sprite_list=sprite if isinstance(sprite,list) else ([sprite] if sprite else [])
         self.animation_index=0
@@ -224,23 +224,29 @@ class Explosion:
              screen.blit(image,rect)
 
 def lancer_jeu(settings):
-    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite
+    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite,upgrades_joueur, sprite_explosion_roquette,image_philippe,image_philippe_liste
     for sprite,classe in [('projectile_laser.png',laser_sprite),('projectile_roquette.png',roquette_sprite)]:
         img=pygame.image.load(sprite).convert_alpha()
-        img=pygame.transform.scale(img,(width/20,int(img.get_height()/img.get_width()*width/20)))
+        img=pygame.transform.scale(img,(width/25,int(img.get_height()/img.get_width()*width/25)))
         if classe==laser_sprite:
             laser_sprite=img
         else:
             roquette_sprite=img
     #Sprite explosion Roquette
-    sprite_explosion=[]
+    sprite_explosion_roquette=[]
     for sprite in ["Explosion1.png","Explosion2.png"]:
         img=pygame.image.load(sprite).convert_alpha()
         img=pygame.transform.scale(img,(width/5,int(img.get_height()/img.get_width()*width/5)))
-        sprite_explosion.append(img)
+        sprite_explosion_roquette.append(img)
     image_marcel_liste.clear()
     image_philippe_liste.clear()
     echelle_difficulte=0
+    enemi_spawn_delay=2000-echelle_difficulte
+    # Mettre à jour les spawn delays des classes en fonction de la difficulté
+    ennemi_simple.spawn_delay=enemi_spawn_delay
+    Marcel.spawn_delay=enemi_spawn_delay*1.5
+    ennemi_tireur.spawn_delay=enemi_spawn_delay*3
+    Philippe.spawn_delay=enemi_spawn_delay*2
     upgrades_joueur=dico_upgrades
     en_pause=False
     width = settings["width"]
@@ -336,11 +342,11 @@ def lancer_jeu(settings):
                 roquette=weapon_main(10000/(1+upgrades_joueur["cadence_de_tir"]/10), projectile_roquette,homing=True,portee_detection=width/5+upgrades_joueur["portee"]*10,vitesse=width/300+upgrades_joueur["vitesse_balles"]/10,aoe=True,aoe_rayon=width/10+5*upgrades_joueur["deflagrations"],degat=3+upgrades_joueur["degats"])  ##Crée une arme roquette avec un délai de 1500ms entre chaque tir et des projectiles homing
                 type_armes=[laser,roquette]   ##Liste des types d'armes
                 #Explosion
-                sprite_roquette=[]
+                sprite_explosion_roquette=[]
                 for sprite in ["Explosion1.png","Explosion2.png"]:
                     img=pygame.image.load(sprite).convert_alpha()
                     img=pygame.transform.scale(img,(width/5+5*upgrades_joueur["deflagrations"],int(img.get_height()/img.get_width()*(width/5+5*upgrades_joueur["deflagrations"]))))
-                    sprite_roquette.append(img)
+                    sprite_explosion_roquette.append(img)
                 duree_pause=pygame.time.get_ticks()-temps_debut_pause
                 for classe in derniers_spawn:
                     derniers_spawn[classe]+=duree_pause
@@ -385,7 +391,7 @@ def lancer_jeu(settings):
 
                 if hit_ennemi or proj.est_trop_loin():
                     if proj.aoe:
-                        explosion=Explosion(proj.x,proj.y,sprite_explosion)
+                        explosion=Explosion(proj.x,proj.y,sprite_explosion_roquette)
                         liste_explosions.append(explosion)
                         
                         for e in liste_ennemis:
@@ -405,7 +411,7 @@ def lancer_jeu(settings):
                 proj.update([],player_pos=(player_x,player_y))
                 if proj.rect.colliderect(player_real_rect):
                     liste_projectiles_ennemis.remove(proj)
-                    pv_joueur -= proj.degat+echelle_difficulte
+                    pv_joueur -= proj.degat
                     Soundhit.play()
                 elif proj.est_trop_loin():
                     if proj in liste_projectiles_ennemis:
@@ -414,7 +420,7 @@ def lancer_jeu(settings):
             for ennemi in liste_ennemis[:]:
                 if ennemi.rect.colliderect(player_real_rect):
                     liste_ennemis.remove(ennemi)
-                    pv_joueur -= ennemi.degat+echelle_difficulte
+                    pv_joueur -= ennemi.degat
                     Soundhit.play()
             if pv_joueur <= 0:
                 en_jeu = False  ##Le joueur a perdu
@@ -461,7 +467,7 @@ def lancer_jeu(settings):
             
         #Dessiner la barre d'exp
         for rect,color in [("xp_for_level_rect",black),("current_xp",blue)]:
-            rect=pygame.Rect(width/2,height/2,width/8 if rect=="xp_for_level" else xp/xp_for_level*width/8,height/100)
+            rect=pygame.Rect(width/2,height/2,width/8 if rect=="xp_for_level_rect" else xp/xp_for_level*width/8,height/100)
             rect.topleft=(width/150,height/60)
             pygame.draw.rect(screen,color,rect)
             
@@ -482,6 +488,12 @@ def lancer_jeu(settings):
 
         duree_journee+=1
         echelle_difficulte=nombre_journees*5+duree_journee//1200
+        # Mettre à jour les spawn delays quand la difficulté change
+        enemi_spawn_delay=2000-echelle_difficulte
+        ennemi_simple.spawn_delay=enemi_spawn_delay
+        Marcel.spawn_delay=enemi_spawn_delay*1.5
+        ennemi_tireur.spawn_delay=enemi_spawn_delay*3
+        Philippe.spawn_delay=enemi_spawn_delay*2
 
         rect_centre=pygame.Rect(0,0,150,150)
         rect_centre.center=(-offset_x,-offset_y)
@@ -490,10 +502,10 @@ def lancer_jeu(settings):
         texte_niveau=font.render(f"Niveaux:{niveau}",True,(0,0,0))
         texte_niveau_rect=texte_niveau.get_rect(topleft=(width/150,height/20))
         screen.blit(texte_niveau,texte_niveau_rect)
+
         
         pygame.display.flip()
 
-pygame.quit()
 
 
 
