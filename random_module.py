@@ -18,7 +18,7 @@ dico_upgrades={
                 "degats_aoe":0,     ##fait
                 "vol_de_vie":0,     ##fait
                 "taille_projectiles":0,##fait
-                "duree_aoe":0,
+                "duree_aoe":0,      ##fait
                 "multishot":0,
                 "deflagrations":0,  ##fait
                 "esquive":0,
