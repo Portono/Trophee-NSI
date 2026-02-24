@@ -30,26 +30,19 @@ base_x, base_y = 0, 0
 
 def fleche_vers_destination(player_x, player_y, destination_x, destination_y):
     if destination_x>offset_x+width or destination_x<offset_x or destination_y>offset_y+height or destination_y<offset_y:
-        # Calculer la direction vers la destination
-        direction_x = destination_x - player_x
-        direction_y = destination_y - player_y
-        distance = math.hypot(direction_x, direction_y)
-        # Normaliser la direction
-        dir_x = direction_x / distance if distance > 0 else 0
-        dir_y = direction_y / distance if distance > 0 else 0
-        # Calculer l'angle en radians et convertir en degrés
-        angle_rad = math.atan2(-dir_y, dir_x)  # Inverser dir_y pour corriger l'orientation
-        angle_deg = math.degrees(angle_rad)
+        angle = math.atan2(destination_y - player_y, destination_x - player_x)
+        arrow_length = width // 30
+        arrow_size=width//100
+        arrow_x = width // 2 + math.cos(angle) * arrow_length
+        arrow_y = height // 2 + math.sin(angle) * arrow_length
+        pygame.draw.polygon(screen, red, [
+                                        (arrow_x, arrow_y),
+                                        (arrow_x - arrow_size * math.cos(angle - math.pi / 6),
+                                        arrow_y - arrow_size * math.sin(angle - math.pi / 6)),
+                                        (arrow_x - arrow_size * math.cos(angle + math.pi / 6),
+                                        arrow_y - arrow_size * math.sin(angle + math.pi / 6))])
+    return
 
-        #Dessiner la flèche à l'écran
-        flèche = pygame.Surface((20, 20), pygame.SRCALPHA)
-        pygame.draw.polygon(flèche, (255, 0, 0), [(10, 0), (20, 20), (10, 15), (0, 20)])
-        rotated_flèche = pygame.transform.rotate(flèche, angle_deg-90)
-        flèche_rect = rotated_flèche.get_rect(center=(player_x - offset_x, player_y - offset_y))
-        screen.blit(rotated_flèche, flèche_rect)
-        return angle_deg
-    else:
-        return None  ##Si la destination est à l'écran, on n'affiche pas de flèche
 #Classes
 class ennemi_main:
     """Classe principale des ennemis"""
@@ -137,10 +130,10 @@ class Philippe(ennemi_main):
     spawn_delay=enemi_spawn_delay*2
     def __init__(self,x,y):
         super().__init__(x,y,vitesse=width/1200,hp=5,xp=3,sprite=image_philippe_liste,taille_hitbox=[image_philippe_liste[0].get_width(),image_philippe_liste[0].get_height()],degat=20)
-
+            
 class projectiles_general:
     """Classe principale des projectiles"""
-    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path=None,couleur=(0,255,0),degat=1,range=10,aoe=False,aoe_rayon=None,degat_AOE=0,duree_AOE=0):  ##AJOUTER PLUS TARD SPRITE AVEC CHEMIN D'ACCES ET COULEUR SERT SEULEMENT SI PAS DE SPRITE
+    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path=None,couleur=(0,255,0),degat=1,range=10,aoe=False,aoe_rayon=None,degat_AOE=0,duree_AOE=0):
         self.x=x
         self.y=y
         self.start_x=x
@@ -210,6 +203,13 @@ class projectile_roquette(projectiles_general):
         if aoe_rayon is None:
             aoe_rayon=width/10
         super().__init__(x,y,vitesse,cible_initiale,homing=homing, sprite_path=sprite, couleur=(255,165,0),degat=degat+upgrades_joueur["degats"],range=range,aoe=aoe,aoe_rayon=aoe_rayon,degat_AOE=degat_AOE,duree_AOE=duree_AOE)  ##Appelle le constructeur de la classe parente avec une couleur orange
+
+class projectile_mine(projectiles_general):
+    """Classe des projectiles roquettes"""
+    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite=None,degat=3,range=10,aoe=True,aoe_rayon=None,degat_AOE=1,duree_AOE=333):
+        if aoe_rayon is None:
+            aoe_rayon=width/10
+        super().__init__(x,y,0,cible_initiale,homing=homing, sprite_path=sprite, couleur=(255,165,0),degat=degat+upgrades_joueur["degats"],range=range,aoe=aoe,aoe_rayon=aoe_rayon,degat_AOE=degat_AOE,duree_AOE=duree_AOE)  ##Appelle le constructeur de la classe parente avec une couleur orange
 
 class projectile_ennemi(projectiles_general):
     """Classe des projectiles ennemis"""
@@ -349,7 +349,8 @@ def lancer_jeu(settings):
     liste_projectiles = []  ##Liste pour stocker les projectiles
     laser=weapon_main(500, projectile_laser,homing=False,portee_detection=height/5,vitesse=width/200)  ##Crée une arme laser avec un délai de 500ms entre chaque tir et des projectiles homing
     roquette=weapon_main(10000, projectile_roquette,homing=True,portee_detection=width/5,vitesse=width/300,aoe=True,aoe_rayon=width/10,duree_AOE=333)  ##Crée une arme roquette avec un délai de 1500ms entre chaque tir et des projectiles homing
-    type_armes=[laser,roquette]   ##Liste des types d'armes
+    mine=weapon_main(1000, projectile_mine,homing=False,portee_detection=math.inf,vitesse=0,aoe=True,aoe_rayon=width/10,duree_AOE=5000)  ##Crée une arme mine avec un délai de 15000ms entre chaque tir et des projectiles non homing
+    type_armes=[laser,roquette,mine]   ##Liste des types d'armes
     liste_projectiles_ennemis=[]  ##Liste pour stocker les projectiles des ennemis
     liste_explosions=[]
     pv_joueur=100  ##Points de vie du joueur
