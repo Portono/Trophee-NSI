@@ -19,6 +19,7 @@ roquette_sprite=None
 sprite_explosion_roquette=None
 enemi_spawn_delay=2000
 offset_x,offset_y=0,0  ##Décalage de la caméra par rapport au centre du monde, utilisé pour dessiner les éléments à l'écran
+liste_ennemis=[]    ##Liste pour stocker les ennemis, définie dans lancer_jeu
 # Couleurs (importées de Menu)
 red = (255, 0, 0)
 green = (0, 255, 0)
@@ -97,7 +98,13 @@ class ennemi_main:
                 cible=type('Cible',(),{'x':player_x,'y':player_y})()  ##Crée un objet temporaire pour représenter la cible du projectile (pris d'internet car si je recodais une fonction joueur, il aurait fallu que je change tout le code)
                 nouveau_projectile = self.arme.classe(self.x, self.y, self.arme.vitesse, cible, homing=self.arme.homing,range=self.arme.range_balle,degat=self.arme.degat,aoe=self.arme.aoe,aoe_rayon=self.arme.aoe_rayon,degat_AOE=self.arme.degat_AOE)  ##Crée un nouveau projectile en utilisant la classe de l'arme de l'ennemi
                 liste_projectiles_ennemis.append(nouveau_projectile)
-
+    def prendre_degats(self, degats_infliges):
+        self.hp -= degats_infliges
+        if self.hp <= 0:
+            if self in liste_ennemis:
+                liste_ennemis.remove(self)
+        return False
+    
     @staticmethod   ##Sert a attribuer une fonction a une classe sans avoir besoin d'instancier un objet
     def calculer_pos_spawn(player_x, player_y,width,height):    ##Calcule une position de spawn aleatoire autour du joueur
         distance=math.hypot(width,height)/2 ##Pythagore mais plus simple
@@ -133,7 +140,7 @@ class Philippe(ennemi_main):
             
 class projectiles_general:
     """Classe principale des projectiles"""
-    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path=None,couleur=(0,255,0),degat=1,range=10,aoe=False,aoe_rayon=None,degat_AOE=0,duree_AOE=0):
+    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path=None,couleur=(0,255,0),degat=1,range=10,aoe=False,aoe_rayon=None,degat_AOE=0,duree_AOE=0,duree=None):
         self.x=x
         self.y=y
         self.start_x=x
@@ -147,7 +154,9 @@ class projectiles_general:
         self.range=range
         self.image = sprite_path
         self.aoe=aoe
+        self.duree=duree
         self.duree_AOE=duree_AOE
+        self.temps_creation=pygame.time.get_ticks()
         self.aoe_rayon=aoe_rayon if aoe_rayon is not None else width/10
         if sprite_path!=None:
             self.rect = self.image.get_rect(center=(self.x, self.y))
@@ -176,6 +185,10 @@ class projectiles_general:
             else:
                 if liste_ennemis:
                     self.cible = min(liste_ennemis, key=lambda ennemi: (ennemi.x - self.x)**2 + (ennemi.y - self.y)**2)
+        if self.duree is not None:
+            if pygame.time.get_ticks() - self.temps_creation >= self.duree:
+                return True  ##Indique que le projectile doit être supprimé
+
         #Mouvement du projectile
         self.x += self.dir_x * self.vitesse
         self.y += self.dir_y * self.vitesse
@@ -206,10 +219,19 @@ class projectile_roquette(projectiles_general):
 
 class projectile_mine(projectiles_general):
     """Classe des projectiles roquettes"""
-    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite=None,degat=3,range=10,aoe=True,aoe_rayon=None,degat_AOE=1,duree_AOE=333):
+    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite=None,degat=3,range=10,aoe=True,aoe_rayon=None,degat_AOE=1,duree_AOE=333,duree=5000):
         if aoe_rayon is None:
             aoe_rayon=width/10
-        super().__init__(x,y,0,cible_initiale,homing=homing, sprite_path=sprite, couleur=(255,165,0),degat=degat+upgrades_joueur["degats"],range=range,aoe=aoe,aoe_rayon=aoe_rayon,degat_AOE=degat_AOE,duree_AOE=duree_AOE)  ##Appelle le constructeur de la classe parente avec une couleur orange
+        super().__init__(x,y,0,cible_initiale,homing=homing, sprite_path=sprite, couleur=(255,165,0),degat=degat+upgrades_joueur["degats"],range=range,aoe=aoe,aoe_rayon=aoe_rayon,degat_AOE=degat_AOE,duree_AOE=duree_AOE,duree=duree)  ##Appelle le constructeur de la classe parente avec une couleur orange
+
+    def update(self, liste_ennemis, player_pos=None):
+        maintenant = pygame.time.get_ticks()
+        # La mine renvoie True UNIQUEMENT si le temps est écoulé
+        if maintenant - self.temps_creation >= self.duree:
+            return True 
+        return False
+
+
 
 class projectile_ennemi(projectiles_general):
     """Classe des projectiles ennemis"""
@@ -218,7 +240,7 @@ class projectile_ennemi(projectiles_general):
 
 class weapon_main:
     """Classe principale des armes"""
-    def __init__(self,delai,classe_projectile,homing=False,portee_detection=None,vitesse=10,aoe=False,aoe_rayon=None,degat=1,degat_AOE=1,duree_AOE=333):
+    def __init__(self,delai,classe_projectile,homing=False,portee_detection=None,vitesse=10,aoe=False,aoe_rayon=None,degat=1,degat_AOE=1,duree_AOE=333,duree=None):
         if portee_detection is None:
             portee_detection=height/2
         if aoe_rayon is None:
@@ -235,6 +257,7 @@ class weapon_main:
         self.degat_AOE=degat_AOE
         self.aoe_rayon=aoe_rayon
         self.duree_AOE=duree_AOE
+        self.duree=duree
     def tirer(self):
         if pygame.time.get_ticks() - self.dernier_tir >= self.delai:
             self.dernier_tir = pygame.time.get_ticks()
@@ -276,7 +299,7 @@ class AOE:
 
         self.temps_creation=pygame.time.get_ticks()
         self.dernier_tick=self.temps_creation
-
+        self.dernier_tick=pygame.time.get_ticks()-self.interval_tick  ##Permet de faire en sorte que les dégâts soient appliqués immédiatement à la création de l'AOE
         self.terminee=False
 
         if self.sprite:
@@ -310,7 +333,7 @@ class AOE:
             pygame.draw.circle(screen,(255,165,0),(int(self.x-offset_x),int(self.y-offset_y)),self.rayon,2)
 
 def lancer_jeu(settings):
-    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite,upgrades_joueur, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay
+    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite,upgrades_joueur, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay,liste_ennemis
     for sprite,classe in [('projectile_laser.png',laser_sprite),('projectile_roquette.png',roquette_sprite)]:
         img=pygame.image.load(sprite).convert_alpha()
         img=pygame.transform.scale(img,(width/25,int(img.get_height()/img.get_width()*width/25)))
@@ -349,7 +372,7 @@ def lancer_jeu(settings):
     liste_projectiles = []  ##Liste pour stocker les projectiles
     laser=weapon_main(500, projectile_laser,homing=False,portee_detection=height/5,vitesse=width/200)  ##Crée une arme laser avec un délai de 500ms entre chaque tir et des projectiles homing
     roquette=weapon_main(10000, projectile_roquette,homing=True,portee_detection=width/5,vitesse=width/300,aoe=True,aoe_rayon=width/10,duree_AOE=333)  ##Crée une arme roquette avec un délai de 1500ms entre chaque tir et des projectiles homing
-    mine=weapon_main(1000, projectile_mine,homing=False,portee_detection=math.inf,vitesse=0,aoe=True,aoe_rayon=width/10,duree_AOE=5000)  ##Crée une arme mine avec un délai de 15000ms entre chaque tir et des projectiles non homing
+    mine=weapon_main(5000, projectile_mine,homing=False,portee_detection=math.inf,vitesse=0,aoe=True,aoe_rayon=width/10,duree_AOE=5000,duree=10000,degat_AOE=1)  ##Crée une arme mine avec un délai de 15000ms entre chaque tir et des projectiles non homing
     type_armes=[laser,roquette,mine]   ##Liste des types d'armes
     liste_projectiles_ennemis=[]  ##Liste pour stocker les projectiles des ennemis
     liste_explosions=[]
@@ -477,40 +500,68 @@ def lancer_jeu(settings):
                     liste_explosions.remove(explosion)
                     
             # Gérer les tirs du joueur
-            if liste_ennemis:
-                cible_proche= min(liste_ennemis, key=lambda ennemi: (ennemi.x - player_x)**2+ (ennemi.y - player_y)**2)
+            if liste_ennemis or mine in type_armes: # On autorise le tir si ennemis OU si on a des mines
                 for armes in type_armes:
-                    if armes.tirer() and math.hypot(cible_proche.x - player_x, cible_proche.y - player_y)<=armes.range_balle:
-                        nouveau_projectile = armes.classe(player_x, player_y, armes.vitesse, cible_proche, homing=armes.homing,range=armes.range_balle,sprite=laser_sprite if armes==laser else roquette_sprite,degat=armes.degat,aoe=armes.aoe,aoe_rayon=armes.aoe_rayon,degat_AOE=armes.degat_AOE,duree_AOE=armes.duree_AOE)  ##Crée un nouveau projectile en utilisant la classe de l'arme du joueur
-                        liste_projectiles.append(nouveau_projectile)
+                    # Condition spéciale pour la mine : on la pose toujours sous nos pieds
+                    if armes.classe == projectile_mine:
+                        if armes.tirer():
+                            # On crée une cible factice sur le joueur pour la mine
+                            cible_ici = type('Cible', (), {'x': player_x, 'y': player_y})()
+                            nouveau_p = projectile_mine(
+                                player_x, player_y, 0, cible_ici,
+                                degat=armes.degat,
+                                range=armes.range_balle,
+                                aoe=armes.aoe,
+                                aoe_rayon=armes.aoe_rayon,
+                                degat_AOE=armes.degat_AOE,
+                                duree_AOE=armes.duree_AOE,
+                                sprite=None,
+                                duree=armes.duree
+                            )
+                            liste_projectiles.append(nouveau_p)
+                    
+                    # Tir normal pour les autres armes (Laser, Roquette)
+                    elif liste_ennemis:
+                        cible_proche = min(liste_ennemis, key=lambda ennemi: (ennemi.x - player_x)**2 + (ennemi.y - player_y)**2)
+                        if armes.tirer() and math.hypot(cible_proche.x - player_x, cible_proche.y - player_y) <= armes.range_balle:
+                            nouveau_p = armes.classe(
+                                player_x, player_y, armes.vitesse, cible_proche, 
+                                homing=armes.homing, range=armes.range_balle,
+                                sprite=laser_sprite if armes==laser else roquette_sprite,
+                                degat=armes.degat, aoe=armes.aoe, aoe_rayon=armes.aoe_rayon,
+                                degat_AOE=armes.degat_AOE, duree_AOE=armes.duree_AOE
+                            )
+                            liste_projectiles.append(nouveau_p)
                         
-            # Mettre à jour les projectiles du joueur
             for proj in liste_projectiles[:]:
-                proj.update(liste_ennemis)
-                hit_ennemi=None
+
+                temps_ecoule = proj.update(liste_ennemis)
+
+                # 1. Détection collision
+                hit_ennemi = None
                 for ennemi in liste_ennemis:
                     if proj.rect.colliderect(ennemi.rect):
-                        hit_ennemi=ennemi
+                        hit_ennemi = ennemi
                         break
 
-                if hit_ennemi or proj.est_trop_loin():
-                    if proj.aoe:
-                        explosion=Explosion(proj.x,proj.y,sprite_explosion_roquette)
-                        liste_explosions.append(explosion)
+                # 2. APPLIQUER DEGATS DIRECTS → METTRE ICI
+                if hit_ennemi:
+                    hit_ennemi.prendre_degats(proj.degat)
 
-                        aoe_zone=AOE(proj.x,proj.y,proj.aoe_rayon,proj.degat_AOE,proj.duree_AOE,interval_tick_ms=300,sprite=None)
+                # 3. SUPPRESSION ET AOE
+                if hit_ennemi or proj.est_trop_loin() or temps_ecoule:
+
+                    if proj.aoe:
+                        aoe_zone = AOE(
+                            proj.x,
+                            proj.y,
+                            proj.aoe_rayon,
+                            proj.degat_AOE,
+                            proj.duree_AOE
+                        )
                         liste_aoe.append(aoe_zone)
 
-                    if hit_ennemi:
-                        hit_ennemi.hp -= proj.degat
-                        if upgrades_joueur["vol_de_vie"]>0:
-                            pv_joueur=min(pv_joueur+upgrades_joueur["vol_de_vie"],pv_max_joueur)
-                    if proj in liste_projectiles:
-                        liste_projectiles.remove(proj)
-            for e in liste_ennemis[:]:
-                if e.hp<=0:
-                    xp+=e.xp*(1+upgrades_joueur["gain_xp"]/5)
-                    liste_ennemis.remove(e)
+                    liste_projectiles.remove(proj)
 
             # Mettre à jour les projectiles des ennemis
             for proj in liste_projectiles_ennemis[:]:
@@ -589,6 +640,9 @@ def lancer_jeu(settings):
             xp_for_level=int(xp_for_level*1.2)
             niveau+=1
 
+        if pv_joueur<=0:
+            en_jeu=False
+            
         maintenant=pygame.time.get_ticks()
         if upgrades_joueur["regen_pv"]>=1:
             if maintenant-dernier_soin>=1000:
