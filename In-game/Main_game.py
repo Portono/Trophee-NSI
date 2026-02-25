@@ -339,9 +339,38 @@ def lancer_jeu(settings):
     global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite,upgrades_joueur, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay,liste_ennemis
     with open("Map_Jeu.json","r") as f:
         map_data=json.load(f)
-    # --- CHARGEMENT CORRIGÉ ---
+    
+    zoom = 5
+    MAP_COLS = 149
+    MAP_ROWS = 100
+
+
     textures = {}
     TILE_SIZE = map_data.get("tileSize", 16)
+
+    # Largeur totale de la map en pixels avec le zoom
+    map_width_px = MAP_COLS * TILE_SIZE * zoom
+    map_height_px = MAP_ROWS * TILE_SIZE * zoom
+
+    # On calcule l'espace vide à diviser en deux pour centrer
+    marge_centrage_x = (width - map_width_px) // 2
+    marge_centrage_y = (height - map_height_px) // 2
+
+    # --- À mettre juste après le calcul de marge_centrage_x ---
+
+    # Position de la base au centre de la grille (coordonnées Monde)
+    # On divise par 2 pour tomber sur la tuile centrale
+    base_x = (MAP_COLS * TILE_SIZE) // 2
+    base_y = (MAP_ROWS * TILE_SIZE) // 2
+
+    # On initialise le joueur sur la base au début
+    player_x = base_x
+    player_y = base_y
+
+    # Initialisation de l'offset pour que la caméra soit centrée sur le joueur/base
+    # (Position Monde * Zoom) - (Moitié de l'écran)
+    offset_x = (player_x * zoom) - (width // 2)
+    offset_y = (player_y * zoom) - (height // 2)
 
     for sheet_id, sheet_info in map_data["spriteSheets"].items():
         img_data = base64.b64decode(sheet_info["base64"].split(",")[1])
@@ -361,7 +390,6 @@ def lancer_jeu(settings):
                 # ON STOCKE CHAQUE TUILE UNIQUE ICI
                 textures[f"{sheet_id}_{i}"] = full_surface.subsurface(rect)
 
-    print("Textures chargées et découpées avec succès !")
 
     for sprite,classe in [('projectile_laser.png',laser_sprite),('projectile_roquette.png',roquette_sprite)]:
         img=pygame.image.load(sprite).convert_alpha()
@@ -508,7 +536,6 @@ def lancer_jeu(settings):
             #Map??
             screen.fill(white)
 
-            zoom = 5
             taille_base = int(TILE_SIZE * zoom)
             # On ajoute 1 pixel pour l'overlapping
             taille_overlap = taille_base + 1 
@@ -519,22 +546,16 @@ def lancer_jeu(settings):
                 # On scale avec le pixel supplémentaire
                 textures_zoom[key] = pygame.transform.scale(surf, (taille_overlap, taille_overlap))
 
-            # --- DANS TA BOUCLE DE RENDU ---
             for layer in map_data["layers"]:
                 for tile in layer["tiles"]:
-                    sheet_id = tile["spriteSheetId"]
-                    tile_index = tile.get("id", 0)
-                    texture_key = f"{sheet_id}_{tile_index}"
+                    texture_key = f"{tile['spriteSheetId']}_{tile.get('id', 0)}"
                     
                     if texture_key in textures_zoom:
-                        # On calcule la position avec zoom, puis on tronque en INT
-                        # Ne pas arrondir les coordonnées de destination avec l'overlap !
-                        draw_x = int(tile["x"] * zoom - offset_x)
-                        draw_y = int(tile["y"] * zoom - offset_y)
+                        # On ajoute marge_centrage pour décaler tout le dessin vers le milieu
+                        draw_x = int(tile["x"] * zoom - offset_x + marge_centrage_x)
+                        draw_y = int(tile["y"] * zoom - offset_y + marge_centrage_y)
                         
-                        # Culling (on utilise la taille de base pour la vérification)
                         if -taille_overlap <= draw_x <= width and -taille_overlap <= draw_y <= height:
-                            # Le blit dessinera 17x17 (si base=16) sur des positions calées sur 16x16
                             screen.blit(textures_zoom[texture_key], (draw_x, draw_y))
 
             # Gérer le spawn des ennemis
@@ -719,7 +740,7 @@ def lancer_jeu(settings):
         texte_niveau_rect=texte_niveau.get_rect(topleft=(width/150,height/20))
         screen.blit(texte_niveau,texte_niveau_rect)
 
-        fleche_vers_destination(player_x,player_y,0,0)
+        fleche_vers_destination(player_x,player_y,base_x,base_y)
         pygame.display.flip()
 
 
