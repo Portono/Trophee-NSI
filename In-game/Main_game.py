@@ -1,6 +1,9 @@
 import pygame
 import random
 import math
+import json
+import base64
+import io
 from Menu import *
 from Sounddesign import*
 from menu_pause import*
@@ -44,7 +47,58 @@ def fleche_vers_destination(player_x, player_y, destination_x, destination_y):
                                         arrow_y - arrow_size * math.sin(angle + math.pi / 6))])
     return
 
-#Classes
+def dessiner_map(screen, map_data, sprite_sheets, offset_x, offset_y):
+    zoom = 2
+    tile_size = map_data.get("tileSize", 32)
+    display_size = int(tile_size * zoom)
+    sw, sh = screen.get_size()
+
+    # 1. RÉCUPÉRATION ET CALIBRAGE INITIAL
+    layers = map_data.get("layers", [])
+    all_tiles = []
+    for layer in layers:
+        tiles = layer.get("tiles", []) or layer.get("base", {}).get("tiles", [])
+        if tiles:
+            all_tiles.extend(tiles)
+
+    if not all_tiles:
+        return
+
+    # ON FORCE LE RECALIBRAGE SUR LA PREMIÈRE TUILE EXISTANTE
+    # Cela annule n'importe quel décalage venant du fichier JSON
+    origin_x = all_tiles[0]["x"]
+    origin_y = all_tiles[0]["y"]
+
+    # 2. DESSIN
+    for layer in layers:
+        tiles = layer.get("tiles", []) or layer.get("base", {}).get("tiles", [])
+        for tile in tiles:
+            # On soustrait l'origine pour que la map commence à (0,0)
+            # Ensuite on applique l'offset et le zoom
+            wx = (tile["x"] - origin_x) * zoom
+            wy = (tile["y"] - origin_y) * zoom
+            
+            # Position écran (Joueur au centre)
+            x = int(wx - offset_x + (sw // 2))
+            y = int(wy - offset_y + (sh // 2))
+
+            if -display_size < x < sw and -display_size < y < sh:
+                s_id = str(tile.get("spriteSheetId", ""))
+                if s_id in sprite_sheets:
+                    sheet = sprite_sheets[s_id]
+                    t_id = int(tile.get("id", 0))
+                    
+                    # Fix des colonnes pour éviter l'effet "portes"
+                    cols = sheet.get_width() // tile_size
+                    if cols > 0:
+                        sx = (t_id % cols) * tile_size
+                        sy = (t_id // cols) * tile_size
+                        
+                        source_rect = (sx, sy, tile_size, tile_size)
+                        img = sheet.subsurface(source_rect)
+                        img = pygame.transform.scale(img, (display_size, display_size))
+                        screen.blit(img, (x, y))
+
 class ennemi_main:
     """Classe principale des ennemis"""
     def __init__(self,x,y,vitesse=1,hp=1,arme=None,xp=0,sprite=None,vitesse_animation=0.15,taille_hitbox=[50,50], degat=10): ##AJOUTER PLUS TARD PARAMETRES COMME VIE, SPRITE AVEC CHEMIN D'ACCES, ETC
@@ -334,6 +388,22 @@ class AOE:
 
 def lancer_jeu(settings):
     global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite,upgrades_joueur, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay,liste_ennemis
+    # Chargement de la Map
+    with open("Map_Jeu.json", "r") as f:
+        map_data = json.load(f)
+    
+    sprite_sheets = {}
+    for sheet_id, sheet_data in map_data["spriteSheets"].items():
+        base64_string = sheet_data["base64"].split(",")[1]
+        image_bytes = base64.b64decode(base64_string)
+        image_file = io.BytesIO(image_bytes)
+        
+        # ICI : On stocke le résultat dans 'image_chargee'
+        image_chargee = pygame.image.load(image_file).convert_alpha()
+        
+        # On utilise str(sheet_id) pour être sûr que la clé correspond au JSON
+        sprite_sheets[str(sheet_id)] = image_chargee
+    
     for sprite,classe in [('projectile_laser.png',laser_sprite),('projectile_roquette.png',roquette_sprite)]:
         img=pygame.image.load(sprite).convert_alpha()
         img=pygame.transform.scale(img,(width/25,int(img.get_height()/img.get_width()*width/25)))
@@ -476,8 +546,9 @@ def lancer_jeu(settings):
                 for ennemi in liste_ennemis:
                     if ennemi.arme:
                         ennemi.arme.compenser_pause(duree_pause)  ##Décale les temps de tir des armes des ennemis pour compenser la pause
-            #Fond blanc
-            screen.fill((255, 255, 255))
+            #Map??
+            screen.fill(white)
+            dessiner_map(screen, map_data, sprite_sheets, offset_x, offset_y)
 
             # Gérer le spawn des ennemis
             for classe in types_ennemis:
@@ -596,11 +667,6 @@ def lancer_jeu(settings):
         offset_x = player_x - (width // 2)
         offset_y = player_y - (height // 2)
 
-        # Dessiner une grille pour voir le mouvement de la caméra
-        for i in range(-5000, 5000, 100):
-            pygame.draw.line(screen, (240, 240, 240), (i - offset_x, -5000 - offset_y), (i - offset_x, 5000 - offset_y))
-            pygame.draw.line(screen, (240, 240, 240), (-5000 - offset_x, i - offset_y), (5000 - offset_x, i - offset_y))
-
         #Dessiner les ennemis
         for ennemi in liste_ennemis:
             ennemi.dessiner(screen, offset_x, offset_y)
@@ -661,10 +727,6 @@ def lancer_jeu(settings):
         Marcel.spawn_delay=enemi_spawn_delay*1.5
         ennemi_tireur.spawn_delay=enemi_spawn_delay*3
         Philippe.spawn_delay=enemi_spawn_delay*2
-
-        rect_centre=pygame.Rect(0,0,150,150)
-        rect_centre.center=(-offset_x,-offset_y)
-        pygame.draw.rect(screen,(0,26,158),rect_centre)
         
         texte_niveau=font.render(f"Niveaux:{niveau}",True,(0,0,0))
         texte_niveau_rect=texte_niveau.get_rect(topleft=(width/150,height/20))
