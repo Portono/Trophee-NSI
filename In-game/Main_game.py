@@ -2,8 +2,8 @@ import pygame
 import random
 import math
 import json
-import base64
 import io
+import base64
 from Menu import *
 from Sounddesign import*
 from menu_pause import*
@@ -47,53 +47,6 @@ def fleche_vers_destination(player_x, player_y, destination_x, destination_y):
                                         arrow_y - arrow_size * math.sin(angle + math.pi / 6))])
     return
 
-def dessiner_map(screen, map_data, sprite_sheets, offset_x, offset_y, origin_x, origin_y):
-    zoom = 5
-    tile_size = 16
-    # ASTUCE 1 : On ajoute 1 pixel de "débordement" pour boucher les fissures
-    display_size = (tile_size * zoom) + 1 
-    sw, sh = screen.get_size()
-    mid_sw, mid_sh = sw // 2, sh // 2
-
-    for layer in map_data.get("layers", []):
-        tiles = layer.get("tiles")
-        if not tiles:
-            data_interne = layer.get("base") or layer.get("Base")
-            if data_interne:
-                tiles = data_interne.get("tiles")
-        
-        if not tiles: continue
-
-        for tile in tiles:
-            try:
-                t_id = int(tile.get("id", -1))
-            except:
-                t_id = -1
-            if t_id == -1: continue
-
-            # ASTUCE 2 : On arrondit le calcul AVANT de transformer en entier
-            # On utilise round() pour éviter les sauts de pixels
-            # Position de la tuile dans le monde
-            wx = (tile["x"] - origin_x) * zoom
-            wy = (tile["y"] - origin_y) * zoom
-
-            # Position sur l'écran : (Position Monde) - (Position Caméra) + (Milieu Écran)
-            x = int(wx - offset_x + mid_sw)
-            y = int(wy - offset_y + mid_sh)
-
-            if -display_size < x < sw and -display_size < y < sh:
-                s_id = str(tile.get("spriteSheetId", ""))
-                if s_id in sprite_sheets:
-                    sheet = sprite_sheets[s_id]
-                    cols = sheet.get_width() // tile_size
-                    if cols > 0:
-                        sx = (t_id % cols) * tile_size
-                        sy = (t_id // cols) * tile_size
-                        
-                        img = sheet.subsurface((sx, sy, tile_size, tile_size))
-                        # ASTUCE 3 : On scale avec le display_size augmenté de 1px
-                        img = pygame.transform.scale(img, (display_size, display_size))
-                        screen.blit(img, (x, y))
 
 class ennemi_main:
     """Classe principale des ennemis"""
@@ -384,32 +337,31 @@ class AOE:
 
 def lancer_jeu(settings):
     global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite,upgrades_joueur, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay,liste_ennemis
-    # Chargement de la Map
-    with open("Map_Jeu.json", "r") as f:
-        map_data = json.load(f)
-    
-    sprite_sheets = {}
-    for sheet_id, sheet_data in map_data["spriteSheets"].items():
-        base64_string = sheet_data["base64"].split(",")[1]
-        image_bytes = base64.b64decode(base64_string)
-        image_file = io.BytesIO(image_bytes)
+    with open("Map_Jeu.json","r") as f:
+        map_data=json.load(f)
+    # --- CHARGEMENT CORRIGÉ ---
+    textures = {}
+    TILE_SIZE = map_data.get("tileSize", 16)
+
+    for sheet_id, sheet_info in map_data["spriteSheets"].items():
+        img_data = base64.b64decode(sheet_info["base64"].split(",")[1])
+        img_file = io.BytesIO(img_data)
+        full_surface = pygame.image.load(img_file).convert_alpha()
         
-        # ICI : On stocke le résultat dans 'image_chargee'
-        image_chargee = pygame.image.load(image_file).convert_alpha()
+        sheet_w, sheet_h = full_surface.get_size()
+        cols = sheet_w // TILE_SIZE
+        rows = sheet_h // TILE_SIZE
         
-        # On utilise str(sheet_id) pour être sûr que la clé correspond au JSON
-        sprite_sheets[str(sheet_id)] = image_chargee
-    
-    # --- CALCUL DE L'ORIGINE POUR LE CENTRAGE ---
-    origin_x, origin_y = 0, 0
-    layers = map_data.get("layers", [])
-    for layer in layers:
-        # On cherche dans "tiles" ou dans le dictionnaire "Base"
-        tiles = layer.get("tiles") or (layer.get("Base") and layer.get("Base").get("tiles"))
-        if tiles:
-            origin_x = tiles[0]["x"]
-            origin_y = tiles[0]["y"]
-            break # On a trouvé notre point de repère
+        for i in range(cols * rows):
+            px = (i % cols) * TILE_SIZE
+            py = (i // cols) * TILE_SIZE
+            rect = pygame.Rect(px, py, TILE_SIZE, TILE_SIZE)
+            
+            if full_surface.get_rect().contains(rect):
+                # ON STOCKE CHAQUE TUILE UNIQUE ICI
+                textures[f"{sheet_id}_{i}"] = full_surface.subsurface(rect)
+
+    print("Textures chargées et découpées avec succès !")
 
     for sprite,classe in [('projectile_laser.png',laser_sprite),('projectile_roquette.png',roquette_sprite)]:
         img=pygame.image.load(sprite).convert_alpha()
@@ -555,7 +507,35 @@ def lancer_jeu(settings):
                         ennemi.arme.compenser_pause(duree_pause)  ##Décale les temps de tir des armes des ennemis pour compenser la pause
             #Map??
             screen.fill(white)
-            dessiner_map(screen, map_data, sprite_sheets, offset_x, offset_y,origin_x,origin_y)
+
+            zoom = 5
+            taille_base = int(TILE_SIZE * zoom)
+            # On ajoute 1 pixel pour l'overlapping
+            taille_overlap = taille_base + 1 
+
+            textures_zoom = {}
+
+            for key, surf in textures.items():
+                # On scale avec le pixel supplémentaire
+                textures_zoom[key] = pygame.transform.scale(surf, (taille_overlap, taille_overlap))
+
+            # --- DANS TA BOUCLE DE RENDU ---
+            for layer in map_data["layers"]:
+                for tile in layer["tiles"]:
+                    sheet_id = tile["spriteSheetId"]
+                    tile_index = tile.get("id", 0)
+                    texture_key = f"{sheet_id}_{tile_index}"
+                    
+                    if texture_key in textures_zoom:
+                        # On calcule la position avec zoom, puis on tronque en INT
+                        # Ne pas arrondir les coordonnées de destination avec l'overlap !
+                        draw_x = int(tile["x"] * zoom - offset_x)
+                        draw_y = int(tile["y"] * zoom - offset_y)
+                        
+                        # Culling (on utilise la taille de base pour la vérification)
+                        if -taille_overlap <= draw_x <= width and -taille_overlap <= draw_y <= height:
+                            # Le blit dessinera 17x17 (si base=16) sur des positions calées sur 16x16
+                            screen.blit(textures_zoom[texture_key], (draw_x, draw_y))
 
             # Gérer le spawn des ennemis
             for classe in types_ennemis:
