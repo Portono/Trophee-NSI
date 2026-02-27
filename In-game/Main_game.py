@@ -522,12 +522,12 @@ def lancer_jeu(settings):
                     img=pygame.image.load(sprite).convert_alpha()
                     img=pygame.transform.scale(img,(width/10+10*upgrades_joueur["deflagrations"],int(img.get_height()/img.get_width()*(width/10+10*upgrades_joueur["deflagrations"]))))
                     sprite_explosion_roquette.append(img)
-                for sprite,classe in [('projectile_laser.png',laser_sprite),('projectile_roquette.png',roquette_sprite)]:
+                for sprite,classe in [('projectile_laser.png',"laser_sprite"),('projectile_roquette.png',"roquette_sprite")]:
                     img=pygame.image.load(sprite).convert_alpha()
                     img=pygame.transform.scale(img,(width/25+5*upgrades_joueur["taille_projectiles"],int(img.get_height()/img.get_width()*(width/25+5*upgrades_joueur["taille_projectiles"]))))
-                    if classe==laser_sprite:
+                    if classe=="laser_sprite":
                         laser_sprite=img
-                    else:
+                    elif classe=="roquette_sprite":
                         roquette_sprite=img
                 duree_pause=pygame.time.get_ticks()-temps_debut_pause
                 for classe in derniers_spawn:
