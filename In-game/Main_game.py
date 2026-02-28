@@ -67,7 +67,8 @@ class ennemi_main:
 
     def dessiner(self,screen,offset_x,offset_y):    ##Dessine l'ennemi a l'ecran en fonction du decalage de la camera
         pos_ecran=(self.rect.x-offset_x,self.rect.y-offset_y)
-        ##pygame.draw.rect(screen,(0,0,255),pygame.Rect(self.rect.x-offset_x,self.rect.y-offset_y,self.hitbox[0],self.hitbox[1]))
+
+        #pygame.draw.rect(screen,(0,0,255),pygame.Rect(self.rect.x-offset_x,self.rect.y-offset_y,self.hitbox[0],self.hitbox[1]))        NE PAS SUPPRIMER, C'EST LA HITBOX DE L'ENNEMI, UTILE POUR LE DEBUG
 
         if self.sprite_list:
             if len(self.sprite_list)>1:
@@ -217,7 +218,7 @@ class projectile_roquette(projectiles_general):
     def __init__(self,x,y,vitesse,cible_initiale,homing=True,sprite=None,degat=3,range=10,aoe=True,aoe_rayon=None,degat_AOE=1,duree_AOE=333,interval_tick_ms=500):
         if aoe_rayon is None:
             aoe_rayon=width/10
-        super().__init__(x,y,vitesse,cible_initiale,homing=homing, sprite_path=sprite, couleur=(255,165,0),degat=degat+upgrades_joueur["degats"],range=range,aoe=aoe,aoe_rayon=aoe_rayon,degat_AOE=degat_AOE,duree_AOE=duree_AOE)  ##Appelle le constructeur de la classe parente avec une couleur orange
+        super().__init__(x,y,vitesse,cible_initiale,homing=homing, sprite_path=sprite, couleur=(255,165,0),degat=degat,range=range,aoe=aoe,aoe_rayon=aoe_rayon,degat_AOE=degat_AOE,duree_AOE=duree_AOE)  ##Appelle le constructeur de la classe parente avec une couleur orange
         self.interval_tick_ms=interval_tick_ms
 
 class projectile_mine(projectiles_general):
@@ -225,7 +226,7 @@ class projectile_mine(projectiles_general):
     def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite=None,degat=2,range=10,aoe=True,aoe_rayon=None,degat_AOE=1,duree_AOE=333,duree=5000,interval_tick_ms=500):
         if aoe_rayon is None:
             aoe_rayon=width/10
-        super().__init__(x,y,0,cible_initiale,homing=homing, sprite_path=sprite, couleur=(255,165,0),degat=degat+upgrades_joueur["degats"],range=range,aoe=aoe,aoe_rayon=aoe_rayon,degat_AOE=degat_AOE,duree_AOE=duree_AOE,duree=duree)  ##Appelle le constructeur de la classe parente avec une couleur orange
+        super().__init__(x,y,0,cible_initiale,homing=homing, sprite_path=sprite, couleur=(255,165,0),degat=degat,range=range,aoe=aoe,aoe_rayon=aoe_rayon,degat_AOE=degat_AOE,duree_AOE=duree_AOE,duree=duree)  ##Appelle le constructeur de la classe parente avec une couleur orange
         self.interval_tick_ms=interval_tick_ms
 
     def update(self, liste_ennemis, player_pos=None):
@@ -244,7 +245,7 @@ class projectile_ennemi(projectiles_general):
 
 class weapon_main:
     """Classe principale des armes"""
-    def __init__(self,delai,classe_projectile,homing=False,portee_detection=None,vitesse=10,aoe=False,aoe_rayon=None,degat=1,degat_AOE=1,duree_AOE=333,duree=None,interval_tick_ms=500):
+    def __init__(self,delai,classe_projectile,homing=False,portee_detection=None,vitesse=10,aoe=False,aoe_rayon=None,degat=1,degat_AOE=1,duree_AOE=333,duree=None,interval_tick_ms=500,sprite=None):
         if portee_detection is None:
             portee_detection=height/2
         if aoe_rayon is None:
@@ -263,6 +264,7 @@ class weapon_main:
         self.duree_AOE=duree_AOE
         self.duree=duree
         self.interval_tick_ms=interval_tick_ms
+        self.sprite=sprite
     def tirer(self):
         if pygame.time.get_ticks() - self.dernier_tir >= self.delai:
             self.dernier_tir = pygame.time.get_ticks()
@@ -296,9 +298,9 @@ class AOE:
         self.x=x
         self.y=y
         self.rayon=rayon
-        self.degat=degat_par_tick+upgrades_joueur["degats_aoe"]
+        self.degat=degat_par_tick
 
-        self.duree=duree_ms+upgrades_joueur["duree_aoe"]*100  ##Durée totale de l'AOE en millisecondes
+        self.duree=duree_ms  ##Durée totale de l'AOE en millisecondes
         self.interval_tick=interval_tick_ms
         self.sprite=sprite
 
@@ -324,6 +326,8 @@ class AOE:
                     # IMPORTANT : On appelle la fonction qui gère la mort !
                     mort = ennemi.prendre_degats(self.degat)
                     
+                    global pv_joueur
+                    pv_joueur=min(pv_joueur+upgrades_joueur["vol_de_vie"],pv_max_joueur)  ##S'assure que les PV du joueur ne deviennent pas négatifs
                     # Si l'ennemi meurt dans l'AOE, on doit ajouter l'XP
                     if mort and xp_callback:
                         xp_callback(ennemi.xp)
@@ -358,6 +362,8 @@ class aura:
                 if distance <= self.rayon:
                     # On inflige les dégâts
                     mort = ennemi.prendre_degats(self.degat)
+                    global pv_joueur
+                    pv_joueur=min(pv_joueur+upgrades_joueur["vol_de_vie"],pv_max_joueur)  ##S'assure que les PV du joueur ne deviennent pas négatifs
                     # Si l'ennemi meurt, on appelle le callback pour l'XP
                     if mort and xp_callback:
                         xp_callback(ennemi.xp)
@@ -381,7 +387,7 @@ class aura:
             screen.blit(surface_aura, (pos_ecran[0] - self.rayon, pos_ecran[1] - self.rayon))
 
 def lancer_jeu(settings):
-    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite,upgrades_joueur, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay,liste_ennemis,player_y,player_x
+    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite,upgrades_joueur, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay,liste_ennemis,player_y,player_x,pv_max_joueur,laser,roquette,mine,aura_active,type_armes,liste_armes,mines_actuelles
     player_x,player_y=0,0
     with open("Map_Jeu.json","r") as f:
         map_data=json.load(f)
@@ -390,7 +396,7 @@ def lancer_jeu(settings):
     MAP_COLS = 149
     MAP_ROWS = 100
 
-
+    mur_collision=[]
     textures = {}
     TILE_SIZE = map_data.get("tileSize", 16)
 
@@ -402,7 +408,6 @@ def lancer_jeu(settings):
     marge_centrage_x = (width - map_width_px) // 2-width/2-TILE_SIZE*zoom*2.5
     marge_centrage_y = (height - map_height_px) // 2-height/2-TILE_SIZE*zoom*3.5
 
-    # --- À mettre juste après le calcul de marge_centrage_x ---
 
     # Position de la base au centre de la grille (coordonnées Monde)
     # On divise par 2 pour tomber sur la tuile centrale
@@ -432,14 +437,20 @@ def lancer_jeu(settings):
             if full_surface.get_rect().contains(rect):
                 # ON STOCKE CHAQUE TUILE UNIQUE ICI
                 textures[f"{sheet_id}_{i}"] = full_surface.subsurface(rect)
+    for layers in map_data["layers"]:
+        if layers.get("collider")==True:
+            for tile in layers["tiles"]:
+                x=tile["x"]*zoom+marge_centrage_x
+                y=tile["y"]*zoom+marge_centrage_y
+                rect_mur=pygame.Rect(x,y,TILE_SIZE*zoom,TILE_SIZE*zoom)
+                mur_collision.append(rect_mur)
 
-
-    for sprite,classe in [('projectile_laser.png',laser_sprite),('projectile_roquette.png',roquette_sprite)]:
+    for sprite,classe in [('projectile_laser.png',"laser_sprite"),('projectile_roquette.png',"roquette_sprite")]:
         img=pygame.image.load(sprite).convert_alpha()
         img=pygame.transform.scale(img,(width/25,int(img.get_height()/img.get_width()*width/25)))
-        if classe==laser_sprite:
+        if classe=="laser_sprite":
             laser_sprite=img
-        else:
+        elif classe=="roquette_sprite":
             roquette_sprite=img
     #Sprite explosion Roquette
     sprite_explosion_roquette=[]
@@ -450,7 +461,7 @@ def lancer_jeu(settings):
     image_marcel_liste.clear()
     image_philippe_liste.clear()
     echelle_difficulte=0
-    enemi_spawn_delay=2000-echelle_difficulte
+    enemi_spawn_delay=4000-echelle_difficulte
     # Mettre à jour les spawn delays des classes en fonction de la difficulté
     ennemi_simple.spawn_delay=enemi_spawn_delay
     Marcel.spawn_delay=enemi_spawn_delay*1.5
@@ -470,15 +481,17 @@ def lancer_jeu(settings):
     derniers_spawn = {classe: 0 for classe in types_ennemis}  ##Dictionnaire pour stocker le dernier spawn de chaque type d'ennemi
     clock = pygame.time.Clock()
     liste_projectiles = []  ##Liste pour stocker les projectiles
-    laser=weapon_main(500, projectile_laser,homing=False,portee_detection=height/5,vitesse=width/200,interval_tick_ms=500)  ##Crée une arme laser avec un délai de 500ms entre chaque tir et des projectiles homing
-    roquette=weapon_main(10000, projectile_roquette,homing=True,portee_detection=width/5,vitesse=width/300,aoe=True,aoe_rayon=width/10,duree_AOE=333,interval_tick_ms=500)  ##Crée une arme roquette avec un délai de 1500ms entre chaque tir et des projectiles homing
-    mine=weapon_main(5000, projectile_mine,homing=False,portee_detection=math.inf,vitesse=0,aoe=True,aoe_rayon=width/20,duree_AOE=2500,duree=10000,degat_AOE=1,interval_tick_ms=500,degat=2)  ##Crée une arme mine avec un délai de 1500ms entre chaque tir et des projectiles non homing
-    type_armes=[laser,roquette,mine]   ##Liste des types d'armes
+    laser=weapon_main(500, projectile_laser,homing=False,portee_detection=height/5,vitesse=width/200,interval_tick_ms=500,sprite=laser_sprite)  ##Crée une arme laser avec un délai de 500ms entre chaque tir et des projectiles homing
+    roquette=weapon_main(10000, projectile_roquette,homing=True,portee_detection=width/5,vitesse=width/300,aoe=True,aoe_rayon=width/10,duree_AOE=333,interval_tick_ms=500,sprite=roquette_sprite)  ##Crée une arme roquette avec un délai de 1500ms entre chaque tir et des projectiles homing
+    mine=weapon_main(5000, projectile_mine,homing=False,portee_detection=math.inf,vitesse=0,aoe=True,aoe_rayon=width/20,duree_AOE=2500,duree=10000,degat_AOE=1,interval_tick_ms=500,degat=2,sprite=None)  ##Crée une arme mine avec un délai de 1500ms entre chaque tir et des projectiles non homing
+    aura_active=aura(width/10,1,sprite=None,interval_tick_ms=500)  ##Crée une aura qui inflige des dégâts aux ennemis à proximité toutes les 500ms
+    type_armes=[laser]   ##Liste des types d'armes
+    liste_armes=[laser,roquette,mine,aura_active]   ##Liste des armes du joueur, utilisée pour le level up
     liste_projectiles_ennemis=[]  ##Liste pour stocker les projectiles des ennemis
     liste_explosions=[]
-    aura_active=aura(width/10,1,sprite=None,interval_tick_ms=500)  ##Crée une aura qui inflige des dégâts aux ennemis à proximité toutes les 500ms
-    pv_joueur=100  ##Points de vie du joueur
-    pv_max_joueur=100
+    mines_actuelles=[]  ##Liste pour stocker les mines posées par le joueur
+    pv_joueur=math.inf  ##Points de vie du joueur
+    pv_max_joueur=math.inf
     pygame.mixer.music.stop()
     xp=0
     xp_for_level=10
@@ -539,13 +552,22 @@ def lancer_jeu(settings):
                 player_y -= vitesse_joueur
             if touches[pygame.K_e] and math.hypot(abs(player_x),abs(player_y))<width/4 and niveau>=1:
                 temps_debut_pause=pygame.time.get_ticks()
+                if nombre_journees%5==0 and nombre_journees!=0:
+                    armes_bloquees=[a for a in liste_armes if a not in type_armes]  ##Liste des armes que le joueur n'a pas encore débloquées
+                    if armes_bloquees:
+                        nb_choix=min(len(armes_bloquees),3)  ##Nombre d'armes à proposer, au maximum 3
+                        options_arme=random.sample(armes_bloquees, nb_choix)  ##Armes proposées aléatoirement parmi celles que le joueur n'a pas encore débloquées
+                        choix=level_up(screen,width,height,options_arme)  ##Affiche le menu de level up et récupère le choix du joueur
+                        if choix:
+                            type_armes.append(choix)  ##Ajoute l'arme choisie à la liste des armes du joueur
                 for _ in range(niveau):
-                    upgrades_joueur=level_up(screen,width,height)
+                    upgrades_joueur=level_up(screen,width,height,upgrades_joueur)
                     niveau-=1
                 liste_ennemis.clear()
                 liste_projectiles_ennemis.clear()
                 liste_projectiles.clear()
                 liste_aoe.clear()
+                mines_actuelles.clear()
                 nombre_journees+=1
                 duree_journee=0
                 # Mettre à jour HP max et scale le HP actuel proportionnellement
@@ -554,13 +576,12 @@ def lancer_jeu(settings):
                 if ancien_pv_max > 0:
                     pv_joueur = int(pv_joueur * (pv_max_joueur / ancien_pv_max))
                 vitesse_joueur=width/300+(upgrades_joueur["vitesse"])*width/1200
-                laser=weapon_main(500/(1+upgrades_joueur["cadence_de_tir"]/10), projectile_laser,homing=False,portee_detection=width/10+upgrades_joueur["portee"]*10,vitesse=width/200+upgrades_joueur["vitesse_balles"]/10,degat=1+upgrades_joueur["degats"],interval_tick_ms=500)  ##Crée une arme laser avec un délai de 500ms entre chaque tir et des projectiles homing
-                roquette=weapon_main(10000/(1+upgrades_joueur["cadence_de_tir"]/10), projectile_roquette,homing=True,portee_detection=width/5+upgrades_joueur["portee"]*10,vitesse=width/300+upgrades_joueur["vitesse_balles"]/10,aoe=True,aoe_rayon=width/20+5*upgrades_joueur["deflagrations"],degat=3+upgrades_joueur["degats"],degat_AOE=1+upgrades_joueur["degats_aoe"],duree_AOE=333,interval_tick_ms=500)  ##Crée une arme roquette avec un délai de 1500ms entre chaque tir et des projectiles homing
-                mine=weapon_main(10000/(1+upgrades_joueur["cadence_de_tir"]/10), projectile_mine,homing=False,portee_detection=math.inf,vitesse=0,aoe=True,aoe_rayon=width/20+5*upgrades_joueur["deflagrations"],degat=2+upgrades_joueur["degats"],degat_AOE=1+upgrades_joueur["degats_aoe"],duree_AOE=2500+upgrades_joueur["duree_aoe"]*100,interval_tick_ms=500,duree=10000)  ##Crée une arme mine avec un délai de 1500ms entre chaque tir et des projectiles homing
+                laser=weapon_main(500/(1+upgrades_joueur["cadence_de_tir"]/10), projectile_laser,homing=False,portee_detection=width/10+upgrades_joueur["portee"]*10,vitesse=width/200+upgrades_joueur["vitesse_balles"]/10,degat=1+upgrades_joueur["degats"],interval_tick_ms=500,sprite=laser_sprite)  ##Crée une arme laser avec un délai de 500ms entre chaque tir et des projectiles homing
+                roquette=weapon_main(10000/(1+upgrades_joueur["cadence_de_tir"]/10), projectile_roquette,homing=True,portee_detection=width/5+upgrades_joueur["portee"]*10,vitesse=width/300+upgrades_joueur["vitesse_balles"]/10,aoe=True,aoe_rayon=width/20+5*upgrades_joueur["deflagrations"],degat=3+upgrades_joueur["degats"],degat_AOE=1+upgrades_joueur["degats_aoe"],duree_AOE=333+upgrades_joueur["duree_aoe"]*100,interval_tick_ms=500,sprite=roquette_sprite)  ##Crée une arme roquette avec un délai de 1500ms entre chaque tir et des projectiles homing
+                mine=weapon_main(10000/(1+upgrades_joueur["cadence_de_tir"]/10), projectile_mine,homing=False,portee_detection=math.inf,vitesse=0,aoe=True,aoe_rayon=width/20+5*upgrades_joueur["deflagrations"],degat=2+upgrades_joueur["degats"],degat_AOE=1+upgrades_joueur["degats_aoe"],duree_AOE=2500+upgrades_joueur["duree_aoe"]*100,interval_tick_ms=500,duree=10000,sprite=None)  ##Crée une arme mine avec un délai de 1500ms entre chaque tir et des projectiles homing
                 aura_active.rayon=width/10+5*upgrades_joueur["portee"]
                 aura_active.degat=1+upgrades_joueur["degats_aoe"]
                 aura_active.interval_tick=500/(1+upgrades_joueur["cadence_de_tir"]/10)
-                armes=[laser,roquette,mine]
                 #Explosion
                 sprite_explosion_roquette=[]
                 for sprite in ["Explosion1.png","Explosion2.png"]:
@@ -662,7 +683,7 @@ def lancer_jeu(settings):
                             nouveau_p = armes.classe(
                                 player_x, player_y, armes.vitesse, cible_proche, 
                                 homing=armes.homing, range=armes.range_balle,
-                                sprite=laser_sprite if armes==laser else roquette_sprite,
+                                sprite=armes.sprite,
                                 degat=armes.degat, aoe=armes.aoe, aoe_rayon=armes.aoe_rayon,
                                 degat_AOE=armes.degat_AOE, duree_AOE=armes.duree_AOE
                             )
@@ -707,9 +728,10 @@ def lancer_jeu(settings):
                     # On vérifie si le projectile est toujours dans la liste avant de remove
                     if proj in liste_projectiles:
                         liste_projectiles.remove(proj)
-
-            aura_active.update(player_x, player_y, liste_ennemis, xp_callback=lambda xp_gagne: globals().update(xp=xp + xp_gagne))
-            aura_active.dessiner(screen, player_x, player_y, offset_x, offset_y)
+            #Mettre a jour l'aura
+            if aura_active in type_armes:
+                aura_active.update(player_x, player_y, liste_ennemis, xp_callback=lambda xp_gagne: globals().update(xp=xp + xp_gagne))
+                aura_active.dessiner(screen, player_x, player_y, offset_x, offset_y)
             # Mettre à jour les projectiles des ennemis
             for proj in liste_projectiles_ennemis[:]:
                 proj.update([], player_pos=(player_x, player_y))
@@ -729,6 +751,7 @@ def lancer_jeu(settings):
             for ennemi in liste_ennemis[:]:
                 if ennemi.rect.colliderect(player_real_rect):
                     pv_joueur -= ennemi.degat
+                    Soundhit.play()
                     liste_ennemis.remove(ennemi)
 
             #Gerer les AOE
@@ -798,7 +821,7 @@ def lancer_jeu(settings):
         echelle_difficulte=nombre_journees*5+duree_journee//1200
 
         # Mettre à jour les spawn delays quand la difficulté change
-        enemi_spawn_delay=2000-echelle_difficulte
+        enemi_spawn_delay=max(4000-echelle_difficulte,500)  # On limite le spawn delay minimum à 500ms pour éviter que ce soit injouable ou que ca aille dans le negatif
         ennemi_simple.spawn_delay=enemi_spawn_delay
         Marcel.spawn_delay=enemi_spawn_delay*1.5
         ennemi_tireur.spawn_delay=enemi_spawn_delay*3
