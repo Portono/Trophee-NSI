@@ -110,7 +110,7 @@ class ennemi_main:
         if self.arme and distance <= self.arme.range:   
             if self.arme.tirer():
                 cible=type('Cible',(),{'x':cible_x,'y':cible_y})()  ##Crée un objet temporaire pour représenter la cible du projectile (pris d'internet car si je recodais une fonction joueur, il aurait fallu que je change tout le code)
-                nouveau_projectile = self.arme.classe(self.x, self.y, self.arme.vitesse, cible, homing=self.arme.homing,range=self.arme.range_balle,degat=self.arme.degat,aoe=self.arme.aoe,aoe_rayon=self.arme.aoe_rayon,degat_AOE=self.arme.degat_AOE)  ##Crée un nouveau projectile en utilisant la classe de l'arme de l'ennemi
+                nouveau_projectile = self.arme.classe(self.x, self.y, self.arme.vitesse, cible, homing=self.arme.homing,range=self.arme.range_balle,degat=self.arme.degat,aoe=self.arme.aoe,aoe_rayon=self.arme.aoe_rayon,degat_AOE=self.arme.degat_AOE,sprite_path=self.arme.sprite)  ##Crée un nouveau projectile en utilisant la classe de l'arme de l'ennemi
                 liste_projectiles_ennemis.append(nouveau_projectile)
     def prendre_degats(self, degats_infliges):
         self.hp -= degats_infliges
@@ -151,7 +151,7 @@ class Leure(ennemi_main):
     """Classe des ennemis lanceur de bombes"""
     spawn_delay=enemi_spawn_delay*3
     def __init__(self,x,y):
-        arme_leure=weapon_main(2000-echelle_difficulte,projectile_leure,homing=False,portee_detection=1/3*height,vitesse=width/400+echelle_difficulte)
+        arme_leure=weapon_main(2000-echelle_difficulte,projectile_leure,homing=False,portee_detection=1/3*height,vitesse=width/400+echelle_difficulte,sprite=projectile_leure_sprite)
         super().__init__(x,y,vitesse=width/600,hp=2,arme=arme_leure,xp=3,degat=5,sprite=image_leure_liste,taille_hitbox=[image_leure_liste[0].get_width(),image_leure_liste[0].get_height()],vitesse_animation=0.05)
 
 class Philippe(ennemi_main):
@@ -234,7 +234,7 @@ class projectile_laser(projectiles_general):
 
 class projectile_roquette(projectiles_general):
     """Classe des projectiles roquettes"""
-    def __init__(self,x,y,vitesse,cible_initiale,homing=True,sprite=None,degat=3,range=10,aoe=True,aoe_rayon=None,degat_AOE=1,duree_AOE=333,interval_tick_ms=500):
+    def __init__(self,x,y,vitesse,cible_initiale,homing=True,sprite=None,degat=3,range=10,aoe=True,aoe_rayon=None	,degat_AOE=1,duree_AOE=333,interval_tick_ms=500):
         if aoe_rayon is None:
             aoe_rayon=width/10
         super().__init__(x,y,vitesse,cible_initiale,homing=homing, sprite_path=sprite, couleur=(255,165,0),degat=degat,range=range,aoe=aoe,aoe_rayon=aoe_rayon,degat_AOE=degat_AOE,duree_AOE=duree_AOE)  ##Appelle le constructeur de la classe parente avec une couleur orange
@@ -366,14 +366,19 @@ class AOE:
 
             self.dernier_tick = maintenant
 
-    def dessiner(self,screen,offset_x,offset_y):
+    def dessiner(self, screen, offset_x, offset_y):
         if self.terminee:
             return
+        
         if self.sprite:
-            pos_ecran=(self.x-offset_x-self.rayon,self.y-offset_y-self.rayon)
-            screen.blit(self.sprite,pos_ecran)
+            pos_ecran = (self.x - offset_x - self.rayon, self.y - offset_y - self.rayon)
+            screen.blit(self.sprite, pos_ecran)
         else:
-            pygame.draw.circle(screen,(255,165,0),(int(self.x-offset_x),int(self.y-offset_y)),self.rayon,2)
+            # Créer une surface temporaire pour de l'alpha (transparence) si tu veux
+            # Ou simplement dessiner un cercle plein (enlever le "2" à la fin)
+            centre = (int(self.x - offset_x), int(self.y - offset_y))
+            # Remplacer 2 par 0 pour un cercle plein
+            pygame.draw.circle(screen, (255, 165, 0), centre, int(self.rayon), 2)
 
 class aura:
     def __init__(self, rayon, degat, sprite=None, interval_tick_ms=500):
@@ -475,7 +480,7 @@ class tourelle:
     
         
 def lancer_jeu(settings):
-    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay,liste_ennemis,player_y,player_x,pv_max_joueur,laser,roquette,mine,aura_active,type_armes,liste_armes,mines_actuelles
+    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay,liste_ennemis,player_y,player_x,pv_max_joueur,laser,roquette,mine,aura_active,type_armes,liste_armes,mines_actuelles,projectile_leure_sprite,sprite_leure,liste_projectiles_ennemis
     player_x,player_y=0,0
     with open("Map_Jeu.json","r") as f:
         map_data=json.load(f)
@@ -523,7 +528,6 @@ def lancer_jeu(settings):
             rect = pygame.Rect(px, py, TILE_SIZE, TILE_SIZE)
             
             if full_surface.get_rect().contains(rect):
-                # ON STOCKE CHAQUE TUILE UNIQUE ICI
                 textures[f"{sheet_id}_{i}"] = full_surface.subsurface(rect)
     for layers in map_data["layers"]:
         if layers.get("collider")==True:
@@ -533,7 +537,7 @@ def lancer_jeu(settings):
                 rect_mur=pygame.Rect(x,y,TILE_SIZE*zoom,TILE_SIZE*zoom)
                 mur_collision.append(rect_mur)
 
-    for sprite,classe in [('projectile_laser.png',"laser_sprite"),('projectile_roquette.png',"roquette_sprite"),("projectile_tourelle.png","projectile_tourelle_sprite"),("enemy_bomb(1).png","projectile_leure_sprite")]:
+    for sprite,classe in [('projectile_laser.png',"laser_sprite"),('projectile_roquette.png',"roquette_sprite"),("projectile_tourelle.png","projectile_tourelle_sprite")]:
         img=pygame.image.load(sprite).convert_alpha()
         img=pygame.transform.scale(img,(width/25,int(img.get_height()/img.get_width()*width/25)))
         if classe=="laser_sprite":
@@ -542,7 +546,10 @@ def lancer_jeu(settings):
             roquette_sprite=img
         elif classe=="projectile_tourelle_sprite":
             projectile_tourelle_sprite=img
-        elif classe=="projectile_leure_sprite":
+    for sprite,classe in [("enemy_bomb(1).png","projectile_leure_sprite")]:
+        img=pygame.image.load(sprite).convert_alpha()
+        img=pygame.transform.scale(img,(width/50,int(img.get_height()/img.get_width()*width/50)))
+        if classe=="projectile_leure_sprite":
             projectile_leure_sprite=img
     #Sprite explosion Roquette
     sprite_explosion_roquette=[]
@@ -682,7 +689,6 @@ def lancer_jeu(settings):
                 liste_ennemis.clear()
                 liste_projectiles.clear()
                 liste_projectiles_ennemis.clear()
-                liste_projectiles_ennemis.clear()
                 nombre_journees+=1
                 duree_journee=0
 
@@ -817,6 +823,7 @@ def lancer_jeu(settings):
                             proj.degat_AOE,
                             proj.duree_AOE,
                             interval_tick_ms=proj.interval_tick_ms,
+                            cible="ennemi"
                         )
                         liste_aoe.append(aoe_zone)
                         
@@ -855,6 +862,7 @@ def lancer_jeu(settings):
                             liste_explosions.append(explosion)
                             aoe_zone = AOE(proj.x, proj.y, proj.aoe_rayon, proj.degat_AOE, proj.duree_AOE, interval_tick_ms=300,cible="joueur")
                             liste_aoe.append(aoe_zone)
+                            print("aoe cree")
                     if proj in liste_projectiles_ennemis:
                         liste_projectiles_ennemis.remove(proj)
                     pv_joueur -= proj.degat
@@ -889,12 +897,8 @@ def lancer_jeu(settings):
             for aoe in liste_aoe[:]:
                 if aoe.cible == "ennemi":
                     aoe.update(liste_ennemis)
-                elif aoe.cible == "joueur":
-                    # On crée une liste temporaire avec un objet factice possédant le rect du joueur
-                    # pour que la méthode update de l'AOE puisse faire sa collision habituelle
-                    target_joueur = [type('Target', (), {'rect': player_real_rect, 'prendre_degats': lambda d: globals().update(pv_joueur=pv_joueur-d)})()]
-                    # Note : Si ta classe AOE blesse directement, passe juste player_real_rect dans une liste
-                    aoe.update([player_real_rect]) 
+                else:
+                    aoe.update([],player_rect=player_real_rect) 
 
                 aoe.dessiner(screen, offset_x, offset_y)
     
@@ -984,6 +988,7 @@ def lancer_jeu(settings):
 
         fleche_vers_destination(player_x,player_y,0,0)
         pygame.display.flip()
+
 
 
 
