@@ -141,7 +141,8 @@ def boucle_menu(pause=False):
                         play=True
                     if settings_button_rect.collidepoint(mouse_pos):   ##Si le bouton Settings est appuye
                         current_menu=menu_settings
-                    if quit_button_rect.collidepoint(mouse_pos):
+                    if quit_button_rect.collidepoint(mouse_pos) and pause:
+                        sauvegarder_jeu()
                         pygame.quit()       ##Quitte pygame
                         exit()      ##Quitte le programme
                     if astropedia_button_rect.collidepoint(mouse_pos):
@@ -243,6 +244,7 @@ def boucle_menu(pause=False):
             refresh_ui()
         pygame.display.flip()
     return {"width": width, "height": height, "fullscreen": fullscreen, "play": play}
+
 
 
 
