@@ -38,10 +38,6 @@ dico_upgrades_uniques={
                             "tourelle_aoe_defensive":False,
                             "tourelle_leurre":False
                             },
-                "airstrike":{"airstrike_stun":False,
-                             "airstrike_":False,
-                             "airstrike_":False
-                            }
                 }
 #------------------Upgrades stats laser------------------------------------------
 dico_upgrades_laser={
@@ -80,11 +76,7 @@ dico_upgrades_tourelle={
                 "vitesse_balles":0,
                 "portee":0
                 }
-#------------------Upgrades stats tourelle------------------------------------------
-dico_upgrades_airstrike={
-                "cadence_de_tir":0,
-                "degat":0,
-                }
+
 
 
 liste_dicos=[dico_upgrades_stats,dico_upgrades_laser,dico_upgrades_roquette,dico_upgrades_mine,dico_upgrades_aura,dico_upgrades_tourelle]
@@ -96,6 +88,7 @@ master_dico = {
     "aura": dico_upgrades_aura,
     "tourelle": dico_upgrades_tourelle
 }
+
 
 def random_upgrade(nb_upgrades=3, armes_possedees=["stats", "laser","roquette"]):
     liste_upgrades = []
@@ -127,13 +120,33 @@ def random_upgrade(nb_upgrades=3, armes_possedees=["stats", "laser","roquette"])
 
     return liste_upgrades
 
-def afficher_upgrades(screen, width, height, nb_upgrades, armes_possedees, font):
-    liste_upgrades = random_upgrade(nb_upgrades=nb_upgrades, armes_possedees=armes_possedees)
-    
+def afficher_upgrades(screen, width, height, nb_upgrades, armes_possedees, font, nouvelle_arme=False):
+    if nouvelle_arme:
+        # toutes les armes possibles
+        toutes_armes = ["laser","roquette","mine","aura","tourelle"]
+
+        # armes non possédées
+        armes_disponibles = [arme for arme in toutes_armes if arme not in armes_possedees]
+
+        # on en propose 3
+        nb_a_piger = min(3, len(armes_disponibles))
+        armes_choix = random.sample(armes_disponibles, nb_a_piger)
+
+        # format compatible avec ton UI
+        liste_upgrades = [(arme, "nouvelle arme") for arme in armes_choix]
+
+    else:
+        liste_upgrades = random_upgrade(nb_upgrades=nb_upgrades, armes_possedees=armes_possedees)
+
     nb_u = len(liste_upgrades)
-    # On divise la largeur totale par le nombre d'upgrades
-    r_width = width / nb_u 
-    r_height = height / 1.1 # Presque toute la hauteur
+
+    # Marges relatives à la taille de l'écran
+    marge_ecran = width * 0.05  # 5% de la largeur de l'écran
+    marge_entre = width * 0.02   # 2% de la largeur de l'écran
+
+    # Taille des boutons
+    r_width = (width - 2*marge_ecran - (nb_u-1)*marge_entre) / nb_u
+    r_height = height * 0.6  # 60% de la hauteur de l'écran
 
     while True:
         screen.fill((30, 30, 30))
@@ -144,36 +157,43 @@ def afficher_upgrades(screen, width, height, nb_upgrades, armes_possedees, font)
                 exit()
             
             if event.type == pygame.MOUSEBUTTONDOWN:
-                # Pour détecter le clic, on regarde juste quel index i est touché
-                index_clique = int(event.pos[0] // r_width)
+                index_clique = int((event.pos[0] - marge_ecran) // (r_width + marge_entre))
                 if 0 <= index_clique < nb_u:
                     return liste_upgrades[index_clique]
 
-        # Dessin des colonnes/cartes
+        souris_x, souris_y = pygame.mouse.get_pos()
+
+        # Dessin des boutons
         for i in range(nb_u):
+            x = marge_ecran + i * (r_width + marge_entre)
+            y = (height - r_height) / 2
+            rect = pygame.Rect(x, y, r_width, r_height)
 
-            # On laisse juste 5 pixels de marge entre eux pour le style ;) c "style"
-            rect = pygame.Rect(i * r_width + 5, (height - r_height) / 2, r_width - 10, r_height)
-            
-            pygame.draw.rect(screen, (0, 200, 0), rect) # Vert un peu plus sombre
-            pygame.draw.rect(screen, (255, 255, 255), rect, 2) # Bordure
+            # Effet au survol
+            scale = 1.05 if rect.collidepoint(souris_x, souris_y) else 1.0  # grossissement 5% pour quand tu le survole comme ca ca fait "style"
+            largeur_scaled = rect.width * scale
+            hauteur_scaled = rect.height * scale
+            x_scaled = rect.centerx - largeur_scaled / 2
+            y_scaled = rect.centery - hauteur_scaled / 2
+            rect_scaled = pygame.Rect(x_scaled, y_scaled, largeur_scaled, hauteur_scaled)
 
-            # Affichage du texte centré dans chaque colonne
+            # Couleur au hover
+            couleur = (0, 255, 0) if scale > 1 else (0, 200, 0)
+
+            # Rectangle avec coins arrondis
+            pygame.draw.rect(screen, couleur, rect_scaled, border_radius=int(width*0.015))
+            pygame.draw.rect(screen, (255, 255, 255), rect_scaled, 3, border_radius=int(width*0.015))
+
+            # Texte centré
             nom_arme, nom_stat = liste_upgrades[i]
-            
-            # Texte 1 : L'arme
             txt_arme = font.render(str(nom_arme).upper(), True, (255, 255, 255))
-            # Texte 2 : La stat
             txt_stat = font.render(str(nom_stat), True, (200, 255, 200))
-            
-            # Centrage automatique dans le rectangle i
-            centro_x = i * r_width + (r_width / 2)
-            screen.blit(txt_arme, txt_arme.get_rect(center=(centro_x, height // 2 - 30)))
-            screen.blit(txt_stat, txt_stat.get_rect(center=(centro_x, height // 2 + 30)))
+            centro_x = rect_scaled.centerx
+            screen.blit(txt_arme, txt_arme.get_rect(center=(centro_x, rect_scaled.y + rect_scaled.height/3)))
+            screen.blit(txt_stat, txt_stat.get_rect(center=(centro_x, rect_scaled.y + 2*rect_scaled.height/3)))
 
         pygame.display.flip()
 
 
 
-#for _ in range(100):
-    #print(random_upgrade()) ##debug
+
