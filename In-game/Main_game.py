@@ -520,7 +520,7 @@ class tourelle:
     
         
 def lancer_jeu(settings):
-    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay,liste_ennemis,player_y,player_x,pv_max_joueur,laser,roquette,mine,aura_active,type_armes,liste_armes,mines_actuelles,projectile_leure_sprite,liste_projectiles_ennemis,tourelle,sprite_feu_roquette,sprite_feu_leure,projectile_mine_sprite,image_leure_liste
+    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay,liste_ennemis,player_y,player_x,pv_max_joueur,laser,roquette,mine,aura_active,type_armes,liste_armes,mines_actuelles,projectile_leure_sprite,liste_projectiles_ennemis,tourelle,sprite_feu_roquette,sprite_feu_leure,projectile_mine_sprite,image_leure_liste,xp,xp_for_level
     player_x,player_y=0,0
 
     #Chargement de la map
@@ -965,42 +965,42 @@ def lancer_jeu(settings):
             # Mettre à jour les projectiles des ennemis
             for proj in liste_projectiles_ennemis[:]:
                 proj.update([], player_pos=(player_x, player_y))
+
+                impact = False  # indique si le projectile touche quelque chose
+
+                # Collision avec les tourelles
                 for t in liste_tourelles:
                     if proj.rect.colliderect(t.colliderect):
-                        if proj.aoe:
-                            explosion = Explosion(proj.x, proj.y, proj.sprite_explosion)
-                            liste_explosions.append(explosion)
-                            aoe_zone = AOE(proj.x, proj.y, proj.aoe_rayon, proj.degat_AOE, proj.duree_AOE, interval_tick_ms=proj.interval_tick_ms,cible="joueur",sprite_feu=proj.sprite_feu)
-                            liste_aoe.append(aoe_zone)
-                        t.hp-=proj.degat
-                        if proj in liste_projectiles_ennemis:
-                            liste_projectiles_ennemis.remove(proj)
+                        t.hp -= proj.degat
+                        impact = True
                         break
 
-                if proj.rect.colliderect(player_real_rect):
-                    if proj.aoe:
-                            explosion = Explosion(proj.x, proj.y, proj.sprite_explosion)
-                            liste_explosions.append(explosion)
-                            aoe_zone = AOE(proj.x, proj.y, proj.aoe_rayon, proj.degat_AOE, proj.duree_AOE, interval_tick_ms=proj.interval_tick_ms,cible="joueur",sprite_feu=proj.sprite_feu)
-                            liste_aoe.append(aoe_zone)
+                # Collision avec le joueur
+                if not impact and proj.rect.colliderect(player_real_rect):
                     pv_joueur -= proj.degat
-                    if proj in liste_projectiles_ennemis:
-                        liste_projectiles_ennemis.remove(proj)
                     Soundhit.play()
-                    continue
+                    impact = True
 
-                elif proj.est_trop_loin():
+                # Projectile trop loin
+                if not impact and proj.est_trop_loin():
+                    impact = True
+
+                # Si le projectile a eu un impact, créer explosion / AOE et le retirer
+                if impact:
                     if proj.aoe:
                         explosion = Explosion(proj.x, proj.y, proj.sprite_explosion)
                         liste_explosions.append(explosion)
-                        aoe_zone = AOE(proj.x, proj.y, proj.aoe_rayon, proj.degat_AOE, proj.duree_AOE, interval_tick_ms=proj.interval_tick_ms,cible="joueur",sprite_feu=proj.sprite_feu)
+                        aoe_zone = AOE(
+                            proj.x, proj.y, proj.aoe_rayon, proj.degat_AOE, proj.duree_AOE,
+                            interval_tick_ms=proj.interval_tick_ms, cible="joueur", sprite_feu=proj.sprite_feu
+                        )
                         liste_aoe.append(aoe_zone)
+
                     if proj in liste_projectiles_ennemis:
                         liste_projectiles_ennemis.remove(proj)
 
-            #Mettre a jour les collision ennemis
+            # Mettre à jour les collisions ennemis avec le joueur
             for ennemi in liste_ennemis[:]:
-                #pour le joueur
                 if ennemi.rect.colliderect(player_real_rect):
                     pv_joueur -= ennemi.degat
                     Soundhit.play()
