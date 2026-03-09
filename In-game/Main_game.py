@@ -28,6 +28,7 @@ projectile_tourelle_sprite=None
 attack_delay_ennemi=1000
 image_leure_liste=[]
 image_majo_liste=[]
+image_terminateur_liste=[]
 sprite_feu_roquette=None
 sprite_feu_leure=None
 projectile_mine_sprite=None
@@ -168,7 +169,7 @@ class ennemi_tireur(ennemi_main):
     spawn_delay=enemi_spawn_delay*3
     def __init__(self,x,y):
         arme_ennemi=weapon_main(max(100,1000-echelle_difficulte/10), projectile_ennemi,homing=False,portee_detection=1/3*height+echelle_difficulte/10,vitesse=width/400+echelle_difficulte/10)  ##Crée une arme pour l'ennemi avec un délai de 1000ms entre chaque tir et des projectiles non homing
-        super().__init__(x,y,vitesse=width/600,hp=1,arme=arme_ennemi,xp=1,degat=7)  ##Appelle le constructeur de la classe parente avec une vitesse de 1 et une arme
+        super().__init__(x,y,vitesse=width/600,hp=1,arme=arme_ennemi,xp=1,degat=7,sprite=image_terminateur_liste,taille_hitbox=[image_terminateur_liste[0].get_width(),image_terminateur_liste[0].get_height()],vitesse_animation=0.04)  ##Appelle le constructeur de la classe parente avec une vitesse de 1 et une arme
 
 class Leure(ennemi_main):
     """Classe des ennemis lanceur de bombes"""
@@ -550,7 +551,7 @@ class tourelle:
     
         
 def lancer_jeu(settings):
-    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay,liste_ennemis,player_y,player_x,pv_max_joueur,laser,roquette,mine,aura_active,type_armes,liste_armes,mines_actuelles,projectile_leure_sprite,liste_projectiles_ennemis,tourelle,sprite_feu_roquette,sprite_feu_leure,projectile_mine_sprite,image_leure_liste,xp,xp_for_level,sprite_explosion_leure,sprite_explosion_mine,sprite_explosion_roquette,image_majo_liste
+    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay,liste_ennemis,player_y,player_x,pv_max_joueur,laser,roquette,mine,aura_active,type_armes,liste_armes,mines_actuelles,projectile_leure_sprite,liste_projectiles_ennemis,tourelle,sprite_feu_roquette,sprite_feu_leure,projectile_mine_sprite,image_leure_liste,xp,xp_for_level,sprite_explosion_leure,sprite_explosion_mine,sprite_explosion_roquette,image_majo_liste,image_terminateur_liste
     player_x,player_y=0,0
 
     #Chargement de la map
@@ -713,6 +714,13 @@ def lancer_jeu(settings):
         image_majo=pygame.image.load(f"Majo({i}).png").convert_alpha()
         image_majo=pygame.transform.scale(image_majo,(width/20,int(image_majo.get_height()/image_majo.get_width()*width/20)))
         image_majo_liste.append(image_majo)
+
+    ###Sprite de Terminateur(ennemie tireur)
+    image_terminateur_liste=[]
+    for i in range(1,3):
+        image_terminateur=pygame.image.load(f"Terminateur({i}).png").convert_alpha()
+        image_terminateur=pygame.transform.scale(image_majo,(width/20,int(image_terminateur.get_height()/image_terminateur.get_width()*width/20)))
+        image_terminateur_liste.append(image_terminateur)
 
     ##Chargement des autres trucs
 
