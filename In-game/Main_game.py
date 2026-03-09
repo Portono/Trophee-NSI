@@ -750,7 +750,7 @@ def lancer_jeu(settings):
     "aura": aura_active,
     "tourelle": tourelle_active
     }
-    pv_joueur=300  ##Points de vie du joueur
+    pv_joueur=100  ##Points de vie du joueur
     pv_max_joueur=100
     pygame.mixer.music.stop()
     xp=0
@@ -758,7 +758,7 @@ def lancer_jeu(settings):
     niveau=0
     pv_heal_cooldown=0
     duree_journee=0
-    nombre_journees=5
+    nombre_journees=0
     dernier_soin=pygame.time.get_ticks()
     maintenant=0
     liste_aoe=[]
