@@ -27,6 +27,7 @@ liste_projectiles=[]    ##Liste pour stocker les projectiles, définie dans lanc
 projectile_tourelle_sprite=None
 attack_delay_ennemi=1000
 image_leure_liste=[]
+image_majo_liste=[]
 sprite_feu_roquette=None
 sprite_feu_leure=None
 projectile_mine_sprite=None
@@ -139,7 +140,7 @@ class ennemi_simple(ennemi_main):
     """Classe des ennemis simples"""
     spawn_delay=enemi_spawn_delay
     def __init__(self,x,y):
-        super().__init__(x,y,vitesse=width/600,hp=3,xp=2,degat=10)  ##Appelle le constructeur de la classe parente avec une vitesse de 2
+        super().__init__(x,y,vitesse=width/600,hp=3,xp=2,degat=10,sprite=image_majo_liste,taille_hitbox=[image_majo_liste[0].get_width(),image_majo_liste[0].get_height()],vitesse_animation=0.04)  ##Appelle le constructeur de la classe parente avec une vitesse de 2
 
 
 class Marcel(ennemi_main):
@@ -532,7 +533,7 @@ class tourelle:
     
         
 def lancer_jeu(settings):
-    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay,liste_ennemis,player_y,player_x,pv_max_joueur,laser,roquette,mine,aura_active,type_armes,liste_armes,mines_actuelles,projectile_leure_sprite,liste_projectiles_ennemis,tourelle,sprite_feu_roquette,sprite_feu_leure,projectile_mine_sprite,image_leure_liste,xp,xp_for_level,sprite_explosion_leure,sprite_explosion_mine,sprite_explosion_roquette
+    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay,liste_ennemis,player_y,player_x,pv_max_joueur,laser,roquette,mine,aura_active,type_armes,liste_armes,mines_actuelles,projectile_leure_sprite,liste_projectiles_ennemis,tourelle,sprite_feu_roquette,sprite_feu_leure,projectile_mine_sprite,image_leure_liste,xp,xp_for_level,sprite_explosion_leure,sprite_explosion_mine,sprite_explosion_roquette,image_majo_liste
     player_x,player_y=0,0
 
     #Chargement de la map
@@ -688,6 +689,13 @@ def lancer_jeu(settings):
         image_leure=pygame.image.load(f"Leure({i}).png").convert_alpha()
         image_leure=pygame.transform.scale(image_leure,(width/20,int(image_leure.get_height()/image_leure.get_width()*width/20)))
         image_leure_liste.append(image_leure)
+
+    ###Sprite de Majo(ennemie normal)
+    image_majo_liste=[]
+    for i in range(1,3):
+        image_majo=pygame.image.load(f"Majo({i}).png").convert_alpha()
+        image_majo=pygame.transform.scale(image_majo,(width/20,int(image_majo.get_height()/image_majo.get_width()*width/20)))
+        image_majo_liste.append(image_majo)
 
     ##Chargement des autres trucs
 
