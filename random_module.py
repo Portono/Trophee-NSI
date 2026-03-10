@@ -18,8 +18,8 @@ dico_upgrades_stats={
 
 #------------------Upgrades armes uniques----------------------------------------
 dico_upgrades_uniques={
-                "laser":{"laser_electrique":False,
-                         "laser_ralentissant":False,
+                "laser":{"laser_electrique":True,                  ##Fait
+                         "laser_ralentissant":True,                ##Fait
                          "laser_perforant":False
                          },
                 "roquette":{"roquette_shrapnel":False,
@@ -55,7 +55,6 @@ dico_upgrades_roquette={
                 "vitesse_balles":0,
                 "portee":0,
                 "rayon_aoe":0,
-                "duree_aoe":0
                 }
 #------------------Upgrades stats mine------------------------------------------
 dico_upgrades_mine={
@@ -216,4 +215,21 @@ def afficher_upgrades(screen, width, height, nb_upgrades, armes_possedees, font,
 
 
 
+def reset_upgrades():
 
+    for k in dico_upgrades_stats:
+        dico_upgrades_stats[k] = 0
+
+    for d in [
+        dico_upgrades_laser,
+        dico_upgrades_roquette,
+        dico_upgrades_mine,
+        dico_upgrades_aura,
+        dico_upgrades_tourelle
+    ]:
+        for k in d:
+            d[k] = 0
+
+    for arme in dico_upgrades_uniques:
+        for k in dico_upgrades_uniques[arme]:
+            dico_upgrades_uniques[arme][k] = False
