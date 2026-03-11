@@ -18,8 +18,8 @@ dico_upgrades_stats={
 
 #------------------Upgrades armes uniques----------------------------------------
 dico_upgrades_uniques={
-                "laser":{"laser_electrique":True,                  ##Fait
-                         "laser_ralentissant":True,                ##Fait
+                "laser":{"laser_electrique":False,                  ##Fait
+                         "laser_ralentissant":False,                ##Fait
                          "laser_perforant":False
                          },
                 "roquette":{"roquette_shrapnel":False,
