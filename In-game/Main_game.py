@@ -477,7 +477,7 @@ class AOE:
             # SI LA CIBLE EST LE JOUEUR
             if self.cible == "joueur" and player_rect is not None:
                 # On calcule la distance entre le centre de l'AOE et le centre du joueur
-                if math.hypot(self.x - player_rect.centerx, self.y - player_rect.centery) <= self.rayon:
+                if math.hypot(self.x - player_rect.centerx, self.y - player_rect.centery) <= self.rayon and not random.randint(1,11)<=dico_upgrades_stats["esquive"]:
                     global pv_joueur
                     pv_joueur -= self.degat  # L'AOE inflige des dégâts au joueur
             
@@ -1196,9 +1196,10 @@ def lancer_jeu(settings):
 
                 # Collision avec le joueur
                 if not impact and proj.rect.colliderect(player_real_rect):
-                    pv_joueur -= proj.degat
-                    Soundhit.play()
-                    impact = True
+                    if not random.randint(1,11)<=dico_upgrades_stats["esquive"]:    ##Pour l'esquive
+                        pv_joueur -= proj.degat
+                        Soundhit.play()
+                        impact = True
 
                 # Projectile trop loin
                 if not impact and proj.est_trop_loin():
@@ -1221,8 +1222,9 @@ def lancer_jeu(settings):
             # Mettre à jour les collisions ennemis avec le joueur
             for ennemi in liste_ennemis[:]:
                 if ennemi.rect.colliderect(player_real_rect):
-                    pv_joueur -= ennemi.degat
-                    Soundhit.play()
+                    if not random.randint(1,11)<=dico_upgrades_stats["esquive"]:
+                        pv_joueur -= ennemi.degat
+                        Soundhit.play()
                     liste_ennemis.remove(ennemi)
 
                 #pour les tourelles
