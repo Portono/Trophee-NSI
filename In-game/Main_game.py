@@ -36,6 +36,7 @@ aura_sprites=[]
 sprite_feu_mine=None
 sprite_explosion_mine=None
 sprite_explosion_leure=[]
+projectile_terminateur=[]
 
 # Couleurs (importées de Menu)
 red = (255, 0, 0)
@@ -134,6 +135,7 @@ class ennemi_main:
         if self.arme and distance <= self.arme.range:   
             if self.arme.tirer():
                 cible=type('Cible',(),{'x':cible_x,'y':cible_y})()  ##Crée un objet temporaire pour représenter la cible du projectile (pris d'internet car si je recodais une fonction joueur, il aurait fallu que je change tout le code)
+                sprite_choisi = random.choice(self.arme.sprite if isinstance(self.arme.sprite, list) else [self.arme.sprite])
                 nouveau_projectile = self.arme.classe(self.x,
                                                       self.y,
                                                       self.arme.vitesse+echelle_difficulte/10,
@@ -144,7 +146,7 @@ class ennemi_main:
                                                       aoe=self.arme.aoe,
                                                       aoe_rayon=self.arme.aoe_rayon+echelle_difficulte/10,
                                                       degat_AOE=self.arme.degat_AOE+echelle_difficulte,
-                                                      sprite_path=self.arme.sprite,
+                                                      sprite_path=sprite_choisi,
                                                       duree_AOE=self.arme.duree_AOE+echelle_difficulte*100,
                                                       sprite_feu=self.arme.sprite_feu,
                                                       sprite_explosion=self.arme.sprite_explosion)  ##Crée un nouveau projectile en utilisant la classe de l'arme de l'ennemi
@@ -185,14 +187,14 @@ class Terminateur(ennemi_main):
     """Classe des ennemis tireurs"""
     spawn_delay=enemi_spawn_delay*3
     def __init__(self,x,y):
-        arme_ennemi=weapon_main(max(100,1000-echelle_difficulte/10), projectile_ennemi,homing=False,portee_detection=1/3*height+echelle_difficulte/10,vitesse=width/400+echelle_difficulte/100)  ##Crée une arme pour l'ennemi avec un délai de 1000ms entre chaque tir et des projectiles non homing
+        arme_ennemi=weapon_main(max(100,1000-echelle_difficulte/10), projectile_ennemi,homing=False,portee_detection=1/3*height+echelle_difficulte/10,vitesse=width/400+echelle_difficulte/10,sprite=projectile_terminateur)  ##Crée une arme pour l'ennemi avec un délai de 1000ms entre chaque tir et des projectiles non homing
         super().__init__(x,y,vitesse=width/600,hp=1,arme=arme_ennemi,xp=1,degat=7,sprite=image_terminateur_liste,taille_hitbox=[image_terminateur_liste[0].get_width(),image_terminateur_liste[0].get_height()],vitesse_animation=0.04)  ##Appelle le constructeur de la classe parente avec une vitesse de 1 et une arme
 
 class Leure(ennemi_main):
     """Classe des ennemis lanceur de bombes"""
     spawn_delay=enemi_spawn_delay*3
     def __init__(self,x,y):
-        arme_leure=weapon_main(max(200,2000-echelle_difficulte/10),projectile_leure,homing=False,portee_detection=1/3*height+echelle_difficulte/10,vitesse=width/400+echelle_difficulte/100,sprite=projectile_leure_sprite,aoe=True,sprite_feu=sprite_feu_leure,duree_AOE=2000+echelle_difficulte*100,degat=20+echelle_difficulte,degat_AOE=5+echelle_difficulte,interval_tick_ms=500,sprite_explosion=sprite_explosion_leure)
+        arme_leure=weapon_main(max(200,2000-echelle_difficulte/10),projectile_leure,homing=False,portee_detection=1/3*height+echelle_difficulte/10,vitesse=width/400+echelle_difficulte/10,sprite=projectile_leure_sprite,aoe=True,sprite_feu=sprite_feu_leure,duree_AOE=2000+echelle_difficulte*100,degat=20+echelle_difficulte,degat_AOE=5+echelle_difficulte,interval_tick_ms=500,sprite_explosion=sprite_explosion_leure)
         super().__init__(x,y,vitesse=width/600,hp=2,arme=arme_leure,xp=3,degat=5,sprite=image_leure_liste,taille_hitbox=[image_leure_liste[0].get_width(),image_leure_liste[0].get_height()],vitesse_animation=0.05)
 
 class Philippe(ennemi_main):
@@ -350,7 +352,7 @@ class projectile_tourelle(projectiles_general):
 
 class projectile_ennemi(projectiles_general):
     """Classe des projectiles ennemis"""
-    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path=None,degat=7,range=10,aoe=False,aoe_rayon=None,degat_AOE=0,duree_AOE=0,sprite_feu=None,sprite_explosion=None):
+    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path=projectile_terminateur,degat=7,range=10,aoe=False,aoe_rayon=None,degat_AOE=0,duree_AOE=0,sprite_feu=None,sprite_explosion=None):
         super().__init__(x,y,vitesse+echelle_difficulte*10,cible_initiale,homing=homing, sprite_path=sprite_path, couleur=(0,0,0),degat=degat+echelle_difficulte,range=range+echelle_difficulte*10,aoe=aoe,aoe_rayon=aoe_rayon,degat_AOE=degat_AOE,duree_AOE=duree_AOE,sprite_feu=sprite_feu,sprite_explosion=sprite_explosion)  ##Appelle le constructeur de la classe parente avec une couleur noire
 
 class projectile_leure(projectiles_general):
@@ -527,13 +529,11 @@ class aura:
     def update(self, player_x, player_y, liste_ennemis, xp_callback=None):
 
         # upgrades
-        self.rayon = width/4 + dico_upgrades_aura["portee"] * (width/20)
+        self.rayon = width/4 + dico_upgrades_aura["portee"] * (width/40)
         self.degat = 1 + dico_upgrades_aura["degat"]
 
-        self.interval_tick_ms = max(
-            100,
-            500 - dico_upgrades_aura["cadence_de_tir"] * 50
-        )
+        self.interval_tick_ms = max(100,500 - dico_upgrades_aura["cadence_de_tir"] * 50)
+
         maintenant = pygame.time.get_ticks()
 
         if maintenant - self.temps_dernier_tick >= self.interval_tick_ms:
@@ -550,7 +550,7 @@ class aura:
                 if dist <= self.rayon:
 
                     mort = ennemi.prendre_degats(self.degat)
-
+                    pv_joueur=max(pv_max_joueur,pv_joueur+dico_upgrades_stats["vol_de_vie"]*self.degat)
                     if mort and xp_callback:
                         xp_callback(ennemi.xp)
 
@@ -694,7 +694,7 @@ class arc_electrique:
         screen.blit(sprite,rect)
 
 def lancer_jeu(settings):
-    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay,liste_ennemis,player_y,player_x,pv_max_joueur,laser,roquette,mine,aura_active,type_armes,liste_armes,mines_actuelles,projectile_leure_sprite,liste_projectiles_ennemis,tourelle,sprite_feu_roquette,sprite_feu_leure,projectile_mine_sprite,image_leure_liste,xp,xp_for_level,sprite_explosion_leure,sprite_explosion_mine,sprite_explosion_roquette,image_majo_liste,image_terminateur_liste,aura_sprites,arc_electrique_sprite,liste_arcs
+    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay,liste_ennemis,player_y,player_x,pv_max_joueur,laser,roquette,mine,aura_active,type_armes,liste_armes,mines_actuelles,projectile_leure_sprite,liste_projectiles_ennemis,tourelle,sprite_feu_roquette,sprite_feu_leure,projectile_mine_sprite,image_leure_liste,xp,xp_for_level,sprite_explosion_leure,sprite_explosion_mine,sprite_explosion_roquette,image_majo_liste,image_terminateur_liste,aura_sprites,arc_electrique_sprite,liste_arcs,projectile_terminateur
     player_x,player_y=0,0
     #reset_upgrades()
 
@@ -781,6 +781,13 @@ def lancer_jeu(settings):
     img=pygame.image.load('enemy_bomb(1).png').convert_alpha()
     img=pygame.transform.scale(img,(width/35,int(img.get_height()/img.get_width()*width/35)))
     projectile_leure_sprite=img
+
+    ##Terminateur
+    projectile_terminateur=[]
+    for i in range(1,5):
+        img=pygame.image.load(f"E_Shoot({i}).png").convert_alpha()
+        img=pygame.transform.scale(img,(width/30,int(img.get_height()/img.get_width()*width/30)))
+        projectile_terminateur.append(img)
 
     ##Chargement des sprites des AOE
 
@@ -1131,7 +1138,7 @@ def lancer_jeu(settings):
                 # 2. APPLIQUER DEGATS ET RECUPERER XP
                 if hit_ennemi:
                     # On capture si l'ennemi est mort (nécessite le 'return True' dans prendre_degats)
-                    pv_joueur=max(0,pv_joueur)
+                    pv_joueur=max(0,pv_joueur+dico_upgrades_stats["vol_de_vie"]*proj.degat)
                     if isinstance(proj,projectile_laser):
                         proj.chain_lightning(hit_ennemi,liste_ennemis,liste_arcs) 
                     mort = hit_ennemi.prendre_degats(proj.degat)
