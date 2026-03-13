@@ -138,16 +138,16 @@ class ennemi_main:
                 sprite_choisi = random.choice(self.arme.sprite if isinstance(self.arme.sprite, list) else [self.arme.sprite])
                 nouveau_projectile = self.arme.classe(self.x,
                                                       self.y,
-                                                      self.arme.vitesse+echelle_difficulte/10,
+                                                      self.arme.vitesse,
                                                       cible,
                                                       homing=self.arme.homing,
-                                                      range=self.arme.range_balle+echelle_difficulte/10,
-                                                      degat=self.arme.degat+echelle_difficulte,
+                                                      range=self.arme.range_balle,
+                                                      degat=self.arme.degat,
                                                       aoe=self.arme.aoe,
-                                                      aoe_rayon=self.arme.aoe_rayon+echelle_difficulte/10,
-                                                      degat_AOE=self.arme.degat_AOE+echelle_difficulte,
+                                                      aoe_rayon=self.arme.aoe_rayon,
+                                                      degat_AOE=self.arme.degat_AOE,
                                                       sprite_path=sprite_choisi,
-                                                      duree_AOE=self.arme.duree_AOE+echelle_difficulte*100,
+                                                      duree_AOE=self.arme.duree_AOE,
                                                       sprite_feu=self.arme.sprite_feu,
                                                       sprite_explosion=self.arme.sprite_explosion)  ##Crée un nouveau projectile en utilisant la classe de l'arme de l'ennemi
                 liste_projectiles_ennemis.append(nouveau_projectile)
@@ -353,7 +353,7 @@ class projectile_tourelle(projectiles_general):
 class projectile_ennemi(projectiles_general):
     """Classe des projectiles ennemis"""
     def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path=projectile_terminateur,degat=7,range=10,aoe=False,aoe_rayon=None,degat_AOE=0,duree_AOE=0,sprite_feu=None,sprite_explosion=None):
-        super().__init__(x,y,vitesse+echelle_difficulte*10,cible_initiale,homing=homing, sprite_path=sprite_path, couleur=(0,0,0),degat=degat+echelle_difficulte,range=range+echelle_difficulte*10,aoe=aoe,aoe_rayon=aoe_rayon,degat_AOE=degat_AOE,duree_AOE=duree_AOE,sprite_feu=sprite_feu,sprite_explosion=sprite_explosion)  ##Appelle le constructeur de la classe parente avec une couleur noire
+        super().__init__(x,y,vitesse,cible_initiale,homing=homing, sprite_path=sprite_path, couleur=(0,0,0),degat=degat+echelle_difficulte,range=range+echelle_difficulte*10,aoe=aoe,aoe_rayon=aoe_rayon,degat_AOE=degat_AOE,duree_AOE=duree_AOE,sprite_feu=sprite_feu,sprite_explosion=sprite_explosion)  ##Appelle le constructeur de la classe parente avec une couleur noire
 
 class projectile_leure(projectiles_general):
     """Classe des projectiles de Leure"""
@@ -361,7 +361,7 @@ class projectile_leure(projectiles_general):
         super().__init__(
                 x,
                 y,
-                vitesse+echelle_difficulte*10,
+                vitesse,
                 cible_initiale,
                 homing=homing,
                 sprite_path=sprite_path,
@@ -1008,7 +1008,7 @@ def lancer_jeu(settings):
                     niveau -= 1
                 pv_max_joueur=100+dico_upgrades_stats["pv"]*10
                 pv_joueur=100+dico_upgrades_stats["pv"]*10
-                vitesse_joueur=width/300+dico_upgrades_stats["vitesse"]*20
+                vitesse_joueur=width/300+dico_upgrades_stats["vitesse"]*5
                 armes_possedees=["stats"]+(["laser"] if laser in type_armes else [])+(["roquette"] if roquette in type_armes else []+(["mine"] if mine in type_armes else [])+(["aura"] if aura_active in type_armes else [])+(["tourelle"] if tourelle_active in type_armes else []))
                 duree_pause=pygame.time.get_ticks()-temps_debut_pause
                 for armes in type_armes:
