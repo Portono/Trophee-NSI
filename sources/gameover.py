@@ -3,7 +3,7 @@ from Menu import*
 from Sounddesign import*
 pygame.init()
 screen=pygame.display.set_mode((width,height))
-front=pygame.font.Font("fontgameover.ttf",int(width/7))
+front=pygame.font.Font("data/fontgameover.ttf",int(width/7))
 
 def afficher_gameover():
     tps_debut=pygame.time.get_ticks()
