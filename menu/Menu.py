@@ -216,7 +216,7 @@ def boucle_menu(pause=False):
                 screen.blit(texte_surface, texte_rect)  ##Affichage du texte
         if current_menu==menu_settings: #les boutons dans le menu des parametres
             #Texte de la resolution actuelle
-            resolution_texte=menu_font.render(f"Resolution: {width}x{height}",True,black)  ##Creation du texte de la resolution
+            resolution_texte=menu_font.render(f"Resolution: {width}x{height}",True,black) if pause==False else menu_font.render("Il est recommande de changer la resolution dans le menu principal",True,red)  ##Creation du texte de la resolution
             resolution_texte_rect=resolution_texte.get_rect(center=(width//2, height//5))   ##Centrage du texte de la resolution
             screen.blit(resolution_texte, resolution_texte_rect)  ##Affichage du texte
             for rect,texte in [(fullscreen_button_rect,"Plein ecran"),(goback_button_rect,"Retour"),(input_width_rect,user_width_input),(input_height_rect,user_height_input)]:
