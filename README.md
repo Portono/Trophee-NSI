@@ -64,6 +64,7 @@ python sources/main.py
 * **Sprites 2D**
 
 Sprites réalisés avec **Pixilart**.
+Musiques et sons réalisés avec **UltraaBox**
 
 # Versions
 
@@ -81,6 +82,10 @@ Version actuelle : **1.0**
 
 * Evan Berthelin
 * Mael Barbaros
+
+**Sound Designer :**
+
+* Evan Berthelin
 
 # Dépôt GitHub officiel
 
