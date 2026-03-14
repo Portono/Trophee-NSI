@@ -718,7 +718,7 @@ def lancer_jeu(settings):
     #reset_upgrades()
 
     #Chargement de la map
-    with open("Map_Jeu.json","r") as f:
+    with open("data/Map_Jeu.json","r") as f:
         map_data=json.load(f)
     
     zoom = width/512
@@ -777,38 +777,38 @@ def lancer_jeu(settings):
     ##Chargement des sprites des projectiles
 
     ###Laser
-    img=pygame.image.load('projectile_laser.png').convert_alpha()
+    img=pygame.image.load('data/projectile_laser.png').convert_alpha()
     img=pygame.transform.scale(img,(width/25,int(img.get_height()/img.get_width()*width/25)))
     laser_sprite=img
 
     ###Roquette
-    img=pygame.image.load('projectile_roquette.png').convert_alpha()
+    img=pygame.image.load('data/projectile_roquette.png').convert_alpha()
     img=pygame.transform.scale(img,(width/25,int(img.get_height()/img.get_width()*width/25)))
     roquette_sprite=img
 
     ###Tourelle
-    img=pygame.image.load('projectile_tourelle.png').convert_alpha()
+    img=pygame.image.load('data/projectile_tourelle.png').convert_alpha()
     img=pygame.transform.scale(img,(width/25,int(img.get_height()/img.get_width()*width/25)))
     projectile_tourelle_sprite=img
 
     ###Mine
     projectile_mine_sprite=[]
     for i in range(1,3):
-        img=pygame.image.load(f'Landmine({i}).png').convert_alpha()
+        img=pygame.image.load(f'data/Landmine({i}).png').convert_alpha()
         img=pygame.transform.scale(img,(width/25,int(img.get_height()/img.get_width()*width/25)))
         projectile_mine_sprite.append(img)
 
     ###Leure
     projectile_leure_sprite=[]
     for i in range(1,3):
-        img=pygame.image.load(f'enemy_bomb({i}).png').convert_alpha()
+        img=pygame.image.load(f'data/enemy_bomb({i}).png').convert_alpha()
         img=pygame.transform.scale(img,(width/35,int(img.get_height()/img.get_width()*width/35)))
         projectile_leure_sprite.append(img)
 
     ##Terminateur
     projectile_terminateur=[]
     for i in range(1,10):
-        img=pygame.image.load(f"E_Shoot({i}).png").convert_alpha()
+        img=pygame.image.load(f"data/E_Shoot({i}).png").convert_alpha()
         img=pygame.transform.scale(img,(width/10,int(img.get_height()/img.get_width()*width/10)))
         projectile_terminateur.append(img)
 
@@ -817,21 +817,21 @@ def lancer_jeu(settings):
     ###Aura
     aura_sprites=[]
     for i in range(1,8):
-        img=pygame.image.load(f"Aura({i}).png").convert_alpha()##on scale pas car la classe le fait
+        img=pygame.image.load(f"data/Aura({i}).png").convert_alpha()##on scale pas car la classe le fait
         aura_sprites.append(img)
 
     ###Sprite feu roquette
-    img=pygame.image.load("fire.png").convert_alpha()
+    img=pygame.image.load("data/fire.png").convert_alpha()
     img=pygame.transform.scale(img,(width/10,int(img.get_height()/img.get_width()*width/10)))
     sprite_feu_roquette=img
 
     ###Sprite feu mine
-    img=pygame.image.load("fire.png").convert_alpha()
+    img=pygame.image.load("data/fire.png").convert_alpha()
     img=pygame.transform.scale(img,(width/10,int(img.get_height()/img.get_width()*width/10)))
     sprite_feu_mine=img
 
     ###Sprite feu Leure
-    img=pygame.image.load("fire.png").convert_alpha()
+    img=pygame.image.load("data/fire.png").convert_alpha()
     img=pygame.transform.scale(img,(width/20,int(img.get_height()/img.get_width()*width/20)))
     sprite_feu_leure=img
 
@@ -839,59 +839,59 @@ def lancer_jeu(settings):
 
     ###Sprite de l'explosion de la roquette
     sprite_explosion_roquette=[]
-    for image in ["Explosion1.png","Explosion2.png"]:
-        img=pygame.image.load(image).convert_alpha()
+    for i in range(1,3):
+        img=pygame.image.load(f"data/Explosion{i}.png").convert_alpha()
         img=pygame.transform.scale(img,(width/10,int(img.get_height()/img.get_width()*width/10)))
-        sprite_explosion_roquette.append(img)
+        sprite_explosion_roquette.append(img)    
 
     ###Sprite de l'explosion de la mine
     sprite_explosion_mine=[]
-    for image in ["Explosion1.png","Explosion2.png"]:
-        img=pygame.image.load(image).convert_alpha()
+    for i in range(1,3):
+        img=pygame.image.load(f"data/Explosion{i}.png").convert_alpha()
         img=pygame.transform.scale(img,(width/10,int(img.get_height()/img.get_width()*width/10)))
-        sprite_explosion_mine.append(img)
+        sprite_explosion_mine.append(img) 
     
     ###Sprite de l'explosion des projectiles de Leure
     sprite_explosion_leure=[]
-    for image in ['E_Bomb(1).png',"E_Bomb(2).png","E_Bomb(3).png"]:
-        img=pygame.image.load(image).convert_alpha()
+    for i in range(1,3):
+        img=pygame.image.load(f"data/Explosion{i}.png").convert_alpha()
         img=pygame.transform.scale(img,(width/10,int(img.get_height()/img.get_width()*width/10)))
-        sprite_explosion_leure.append(img)
+        sprite_explosion_leure.append(img) 
 
     ##Chargement des sprites des ennemis
 
     ###Sprite de Marcel(rapide)
     image_marcel_liste=[]
     for i in range(1,7):
-        image_marcel=pygame.image.load(f"Marcel({i}).png").convert_alpha()
+        image_marcel=pygame.image.load(f"data/Marcel({i}).png").convert_alpha()
         image_marcel=pygame.transform.scale(image_marcel,(width/25,int(image_marcel.get_height()/image_marcel.get_width()*width/25)))
         image_marcel_liste.append(image_marcel)
     
     ###Sprite de Philippe(tank)
     image_philippe_liste=[]
     for i in range(1,7):
-        image_philippe=pygame.image.load(f"Philippe({i}).png").convert_alpha()
+        image_philippe=pygame.image.load(f"data/Philippe({i}).png").convert_alpha()
         image_philippe=pygame.transform.scale(image_philippe,(width/13,int(image_philippe.get_height()/image_philippe.get_width()*width/13)))
         image_philippe_liste.append(image_philippe)
 
     ###Sprite de Leure(bombardier)
     image_leure_liste=[]
     for i in range(1,7):
-        image_leure=pygame.image.load(f"Leure({i}).png").convert_alpha()
+        image_leure=pygame.image.load(f"data/Leure({i}).png").convert_alpha()
         image_leure=pygame.transform.scale(image_leure,(width/20,int(image_leure.get_height()/image_leure.get_width()*width/20)))
         image_leure_liste.append(image_leure)
 
     ###Sprite de Majo(ennemie normal)
     image_majo_liste=[]
     for i in range(1,3):
-        image_majo=pygame.image.load(f"Majo({i}).png").convert_alpha()
+        image_majo=pygame.image.load(f"data/Majo({i}).png").convert_alpha()
         image_majo=pygame.transform.scale(image_majo,(width/20,int(image_majo.get_height()/image_majo.get_width()*width/20)))
         image_majo_liste.append(image_majo)
 
     ###Sprite de Terminateur(ennemie tireur)
     image_terminateur_liste=[]
     for i in range(1,8):
-        image_terminateur=pygame.image.load(f"Terminateur({i}).png").convert_alpha()
+        image_terminateur=pygame.image.load(f"data/Terminateur({i}).png").convert_alpha()
         image_terminateur=pygame.transform.scale(image_terminateur,(width/20,int(image_terminateur.get_height()/image_terminateur.get_width()*width/20)))
         image_terminateur_liste.append(image_terminateur)
 
@@ -900,7 +900,7 @@ def lancer_jeu(settings):
     ###Chargement de la tourelle
     tourelle_sprites=[]
     for i in range(1,5):
-        img=pygame.image.load(f'Turret({i}).png').convert_alpha()
+        img=pygame.image.load(f'data/Turret({i}).png').convert_alpha()
         img=pygame.transform.scale(img,(width/20,width/20))
         tourelle_sprites.append(img)
     
@@ -908,13 +908,13 @@ def lancer_jeu(settings):
     font=pygame.font.Font(None,int(width/25))
 
     ###Chargement de Astro(joueur)
-    astro=pygame.image.load("Astro.png").convert_alpha()
+    astro=pygame.image.load("data/Astro.png").convert_alpha()
     astro=pygame.transform.scale(astro,(width/20,int(astro.get_height()/astro.get_width()*width/20)))
 
     ##Chargement de l'arc electrique
     arc_electrique_sprite=[]
     for i in range(1,4):
-        img=pygame.image.load(f"ArcE({i}).png").convert_alpha() ## on resize pas car la fonction le fait
+        img=pygame.image.load(f"data/ArcE({i}).png").convert_alpha() ## on resize pas car la fonction le fait
         arc_electrique_sprite.append(img)
 
     echelle_difficulte=0
@@ -1193,7 +1193,12 @@ def lancer_jeu(settings):
 
                     # On vérifie si le projectile est toujours dans la liste avant de remove
                     if proj in liste_projectiles:
-                        liste_projectiles.remove(proj)
+                        if proj.est_trop_loin():
+                            liste_projectiles.remove(proj)
+                        else:
+                            if not isinstance(proj,projectile_laser) and not dico_upgrades_uniques["laser"]["laser_perforant"]:
+                                liste_projectiles.remove(proj)
+                            
 
             #Mettre a jour l'aura
             if aura_active in type_armes:
