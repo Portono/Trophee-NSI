@@ -27,6 +27,10 @@ Installation de pygame :
 ```
 pip install pygame
 ```
+ou alors
+```
+pip install -r requirements.txt
+```
 
 # Installation
 
