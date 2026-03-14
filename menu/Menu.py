@@ -61,6 +61,33 @@ logo=pygame.transform.scale(logo_import,(width,int(logo_import_height/logo_impor
 #astrowantsyou
 AstroWantsYou=pygame.image.load("AstroWantsYou.png")
 AstroWantsYou=pygame.transform.scale(AstroWantsYou,(int(AstroWantsYou.get_width()/AstroWantsYou.get_height()*height),height))
+#fond
+background_import=[]
+for i in range(1,7):
+    img = pygame.image.load(f"Wallpaper({i}).png")
+    background_import.append(img)
+
+backgrounds_flou_import=[]
+for i in range(1,7):
+    img = pygame.image.load(f"Wallpaper_flou({i}).png")
+    backgrounds_flou_import.append(img)
+
+backgrounds=[]
+backgrounds_flou=[]
+
+for img in background_import:
+    normal = pygame.transform.scale(img,(width,height))
+    backgrounds.append(normal)
+
+for img in backgrounds_flou_import:
+    blur = pygame.transform.scale(img,(width,height))
+    backgrounds_flou.append(blur)
+
+
+image_index=0
+image_delay=200
+dernier_frame=pygame.time.get_ticks()
+
 #on définit les variables pour les changement de scène du menu
 menu_main="main"
 menu_settings="settings"
@@ -120,16 +147,20 @@ def afficher_menu():
     return boucle_menu()
 
 def boucle_menu(pause=False):
-    global current_menu, play, fullscreen, fullscreen_change, resolution_change, width, height, user_width_input, width_input_toggle, user_height_input, height_input_toggle,screen,width_button_text,height_button_text
+    global current_menu, play, fullscreen, fullscreen_change, resolution_change, width, height, user_width_input, width_input_toggle, user_height_input, height_input_toggle,screen,width_button_text,height_button_text,dernier_frame,image_delay,image_index
     play=False
     pygame.mixer.music.load("Mainmenu.mp3")
     pygame.mixer.music.play(-1)
     #Recuperation de la position de la souris
     #Raffraichissement du logo sur l'ecran
     while not play:
-        screen.fill(white)  ##Fond blanc
-        if current_menu!=menu_astropedia:
-            screen.blit(logo,(0,0))     ##Affichage du logo en haut de l'ecran
+        maintenant=pygame.time.get_ticks()
+
+
+        if maintenant-dernier_frame>image_delay:
+            image_index=(image_index+1)%len(backgrounds)
+            dernier_frame=maintenant
+
         mouse_pos=pygame.mouse.get_pos()
         #Quitter le jeu
         for event in pygame.event.get():    ##Recuperation des evenements
@@ -203,6 +234,8 @@ def boucle_menu(pause=False):
 
         #dessine les boutons et le texte
         if current_menu==menu_main: ##les boutons dans le menu principal
+            screen.blit(backgrounds[image_index],(0,0))
+            screen.blit(logo,(0,0))     ##Affichage du logo en haut de l'ecran
             user_width_input=width_button_text
             user_height_input=height_button_text
             for rect,texte in [(play_button_rect,"Reprendre" if pause else "Jouer"),(settings_button_rect,"Parametres"),(quit_button_rect,"Quitter"),(astropedia_button_rect,"Astropedia")]:
@@ -216,7 +249,8 @@ def boucle_menu(pause=False):
                 screen.blit(texte_surface, texte_rect)  ##Affichage du texte
         if current_menu==menu_settings: #les boutons dans le menu des parametres
             #Texte de la resolution actuelle
-            resolution_texte=menu_font.render(f"Resolution: {width}x{height}",True,black) if pause==False else menu_font.render("Il est recommande de changer la resolution dans le menu principal",True,red)  ##Creation du texte de la resolution
+            screen.blit(backgrounds_flou[image_index],(0,0))
+            resolution_texte=menu_font.render(f"Resolution: {width}x{height}",True,orange) if pause==False else menu_font.render("Il est recommande de changer la resolution dans le menu principal",True,red)  ##Creation du texte de la resolution
             resolution_texte_rect=resolution_texte.get_rect(center=(width//2, height//5))   ##Centrage du texte de la resolution
             screen.blit(resolution_texte, resolution_texte_rect)  ##Affichage du texte
             for rect,texte in [(fullscreen_button_rect,"Plein ecran"),(goback_button_rect,"Retour"),(input_width_rect,user_width_input),(input_height_rect,user_height_input)]:
@@ -229,6 +263,7 @@ def boucle_menu(pause=False):
                 texte_rect=texte_surface.get_rect(center=rect.center)   ##Centrage du texte
                 screen.blit(texte_surface, texte_rect)  ##Affichage du texte
         if current_menu==menu_astropedia:
+            screen.blit(backgrounds_flou[image_index],(0,0))
             astropedia_text=menu_font.render("coucou",True,black)
             astropedia_text_rect=astropedia_text.get_rect(center=(width//2,height//2))
             screen.blit(astropedia_text,astropedia_text_rect)
