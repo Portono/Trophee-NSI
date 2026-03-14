@@ -1,4 +1,6 @@
 import pygame
+import pygame_widgets
+from pygame_widgets.slider import Slider
 
 pygame.init()
 
@@ -49,6 +51,7 @@ goback_button_rect=pygame.Rect(0, 0, button_width, button_height)
 input_width_rect=pygame.Rect(0, 0, button_width, button_height)
 input_height_rect=pygame.Rect(0, 0, button_width, button_height)
 astropedia_button_rect=pygame.Rect(0,0,button_width,button_height)
+astropedia_back_button_rect=pygame.Rect(0,0,button_width,button_height)
 #Definition de texte des boutons
 height_button_text="Hauteur"
 width_button_text="Largeur"
@@ -95,12 +98,14 @@ menu_settings="settings"
 menu_astropedia="astropedia"
 current_menu=menu_main
 play=False  ##Variable pour lancer le jeu
+sound_volume=50
+sound_slider=None
 
 def refresh_ui():
     """
     Cette fonction sert a rafraichir l'interface utilisateur en repositionnant les boutons et le logo en recalculant leurs positions et leurs tailles car leur position n'est calcule seulement lors de leur creation
     """
-    global play_button_rect, settings_button_rect, quit_button_rect, logo, menu_font, fullscreen_button_rect, goback_button_rect, input_width_rect,input_height_rect,screen
+    global play_button_rect, settings_button_rect, quit_button_rect, logo, menu_font, fullscreen_button_rect, goback_button_rect, input_width_rect,input_height_rect,screen,astropedia_back_button_rect,sound_slider,sound_volume
     monitor_info=pygame.display.Info()
     monitor_width=monitor_info.current_w
     monitor_height=monitor_info.current_h
@@ -137,8 +142,13 @@ def refresh_ui():
     ##Bouton Astropedia
     astropedia_button_rect=pygame.Rect(0,0,button_width,button_height)
     astropedia_button_rect.center=(width//2,height//4.5)
+    ##Bouton retour astropedia
+    astropedia_back_button_rect=pygame.Rect(0,0,button_width,button_height)
+    astropedia_back_button_rect.center=(width//2,height*3//3.8)
     ##Taille de la police
     menu_font=pygame.font.Font("data/font.ttf", int(height*0.05))
+    ##Slider de son
+    sound_slider=Slider(screen,int(width*0.85),int(height*0.25),int(width*0.02),int(height*0.45),min=0,max=100,step=1,initial=sound_volume,vertical=True,colour=hover_color,valueColour=orange)
     ##Taille de AstroWantsYou
     AstroWantsYou=pygame.image.load("data/AstroWantsYou.png")
     AstroWantsYou=pygame.transform.scale(AstroWantsYou,(int(AstroWantsYou.get_width()/AstroWantsYou.get_height()*height),height))
@@ -170,10 +180,11 @@ def afficher_menu():
     return boucle_menu()
 
 def boucle_menu(pause=False):
-    global current_menu, play, fullscreen, fullscreen_change, resolution_change, width, height, user_width_input, width_input_toggle, user_height_input, height_input_toggle,screen,width_button_text,height_button_text,dernier_frame,image_delay,image_index
+    global current_menu, play, fullscreen, fullscreen_change, resolution_change, width, height, user_width_input, width_input_toggle, user_height_input, height_input_toggle,screen,width_button_text,height_button_text,dernier_frame,image_delay,image_index,sound_slider,sound_volume
     play=False
     pygame.mixer.music.load("data/Mainmenu.mp3")
     pygame.mixer.music.play(-1)
+    pygame.mixer.music.set_volume(sound_volume/100)
     #Recuperation de la position de la souris
     #Raffraichissement du logo sur l'ecran
     while not play:
@@ -185,8 +196,9 @@ def boucle_menu(pause=False):
             dernier_frame=maintenant
 
         mouse_pos=pygame.mouse.get_pos()
+        events=pygame.event.get()
         #Quitter le jeu
-        for event in pygame.event.get():    ##Recuperation des evenements
+        for event in events:    ##Recuperation des evenements
             if event.type == pygame.QUIT:   ##Si on clique sur la croix
                 pygame.quit()       ##Quitte pygame
                 exit()      ##Quitte le programme
@@ -224,7 +236,8 @@ def boucle_menu(pause=False):
                         height_button_text="Hauteur"
                         user_height_input=""
                 elif current_menu==menu_astropedia:
-                    pass						##TEMPORAIRE
+                    if astropedia_back_button_rect.collidepoint(mouse_pos):
+                        current_menu=menu_main
 
             ##Changement de la resolution via l'input utilisateur
             if event.type==pygame.KEYDOWN and current_menu==menu_settings and width_input_toggle==True:   ##Si une touche est appuye dans le menu des parametres
@@ -285,11 +298,25 @@ def boucle_menu(pause=False):
                 texte_surface=menu_font.render(texte,True,orange)    ##Creation du texte
                 texte_rect=texte_surface.get_rect(center=rect.center)   ##Centrage du texte
                 screen.blit(texte_surface, texte_rect)  ##Affichage du texte
+
+            pygame_widgets.update(events)
+            sound_volume=int(sound_slider.getValue())
+            pygame.mixer.music.set_volume(sound_volume/100)
+            sound_text=menu_font.render(f"Volume : {sound_volume}",True,orange)
+            sound_text_rect=sound_text.get_rect(center=(int(width*0.86), int(height*0.18)))
+            screen.blit(sound_text,sound_text_rect)
+
         if current_menu==menu_astropedia:
             screen.blit(backgrounds_flou[image_index],(0,0))
             astropedia_text=menu_font.render("coucou",True,black)
             astropedia_text_rect=astropedia_text.get_rect(center=(width//2,height//2))
             screen.blit(astropedia_text,astropedia_text_rect)
+            button_color=hover_color if astropedia_back_button_rect.collidepoint(mouse_pos) else black
+            pygame.draw.rect(screen,button_color,astropedia_back_button_rect,border_radius=100)
+            retour_surface=menu_font.render("Retour",True,orange)
+            retour_rect=retour_surface.get_rect(center=astropedia_back_button_rect.center)
+            screen.blit(retour_surface,retour_rect)
+
         #Toggle du fullscreen
         if fullscreen_change==True or resolution_change==True:
             fullscreen_change=False
