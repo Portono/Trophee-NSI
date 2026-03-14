@@ -57,6 +57,7 @@ python main.py
 * **Pygame** – Bibliothèque utilisée pour le moteur du jeu
 * **JSON** – Sauvegarde de certaines données
 * **Sprites 2D** – Graphismes du jeu
+  * Pour les sprites Pixilart a ete utilise
 
 # Versions
 
