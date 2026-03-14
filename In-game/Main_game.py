@@ -607,7 +607,7 @@ class tourelle:
             delai=max(100,1000-dico_upgrades_tourelle["cadence_de_tir"]*10), 
             classe_projectile=projectile_tourelle, 
             vitesse=width/100+dico_upgrades_tourelle["vitesse_balles"]*10, 
-            degat=0.5+dico_upgrades_tourelle["vitesse_balles"]/2,
+            degat=0.5+dico_upgrades_tourelle["degat"]/2,
             sprite=sprite_balle
         )
 
@@ -784,7 +784,7 @@ def lancer_jeu(settings):
 
     ##Terminateur
     projectile_terminateur=[]
-    for i in range(1,12):
+    for i in range(1,10):
         img=pygame.image.load(f"E_Shoot({i}).png").convert_alpha()
         img=pygame.transform.scale(img,(width/10,int(img.get_height()/img.get_width()*width/10)))
         projectile_terminateur.append(img)
@@ -1346,7 +1346,6 @@ def lancer_jeu(settings):
 
         fleche_vers_destination(player_x,player_y,0,0)
         pygame.display.flip()
-
 
 
 
