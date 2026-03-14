@@ -69,7 +69,7 @@ Version actuelle : **1.0**
 -Evan Berthelin
 -Mael Barbaros
 
-*Design graphique:
+* Design graphique:
 -Evan Berthelin
 -Mael Barbaros
 
