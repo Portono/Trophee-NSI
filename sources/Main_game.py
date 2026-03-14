@@ -965,6 +965,7 @@ def lancer_jeu(settings):
     pv_joueur=100  ##Points de vie du joueur
     pv_max_joueur=100
     pygame.mixer.music.stop()
+    set_sfx_volume(settings.get("sound_volume",50)/100)
     xp=0
     xp_for_level=10
     niveau=0
@@ -1206,9 +1207,8 @@ def lancer_jeu(settings):
                     if proj in liste_projectiles:
                         if proj.est_trop_loin():
                             liste_projectiles.remove(proj)
-                        else:
-                            if not isinstance(proj,projectile_laser) and not dico_upgrades_uniques["laser"]["laser_perforant"]:
-                                liste_projectiles.remove(proj)
+                        elif not isinstance(proj,projectile_laser) and not dico_upgrades_uniques["laser"]["laser_perforant"]:
+                            liste_projectiles.remove(proj)
                             
 
             #Mettre a jour l'aura
