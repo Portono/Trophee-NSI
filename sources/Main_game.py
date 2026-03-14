@@ -44,9 +44,18 @@ green = (0, 255, 0)
 black = (0, 0, 0)
 blue = (0, 0, 255)
 
+GAME_MUSIC_EVENT=pygame.USEREVENT+1
+GAME_MUSIC_TRACKS=["data/1-3.mp3","data/2-3.mp3", "data/3-3.mp3"]
 def ajouter_xp(g):
     global xp
     xp+=g
+
+def jouer_musique_jeu_aleatoire(settings):
+        morceau=random.choice(GAME_MUSIC_TRACKS)
+        pygame.mixer.music.load(morceau)
+        pygame.mixer.music.set_volume(settings.get("sound_volume",50)/100)
+        pygame.mixer.music.play()
+
 def fleche_vers_destination(player_x, player_y, destination_x, destination_y):
     if destination_x>offset_x+width or destination_x<offset_x or destination_y>offset_y+height or destination_y<offset_y:
         angle = math.atan2(destination_y - player_y, destination_x - player_x)
@@ -716,6 +725,10 @@ class arc_electrique:
 
 def lancer_jeu(settings):
     global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay,liste_ennemis,player_y,player_x,pv_max_joueur,laser,roquette,mine,aura_active,type_armes,liste_armes,mines_actuelles,projectile_leure_sprite,liste_projectiles_ennemis,tourelle,sprite_feu_roquette,sprite_feu_leure,projectile_mine_sprite,image_leure_liste,xp,xp_for_level,sprite_explosion_leure,sprite_explosion_mine,sprite_explosion_roquette,image_majo_liste,image_terminateur_liste,aura_sprites,arc_electrique_sprite,liste_arcs,projectile_terminateur
+    if settings is None:
+        settings={"width":width,"height":height,"fullscreen":fullscreen,"sound_volume":50,"play":True}
+
+
     player_x,player_y=0,0
     #reset_upgrades()
 
@@ -967,6 +980,8 @@ def lancer_jeu(settings):
     pv_max_joueur=100
     pygame.mixer.music.stop()
     set_sfx_volume(settings.get("sound_volume",50)/100)
+    pygame.mixer.music.set_endevent(GAME_MUSIC_EVENT)
+    jouer_musique_jeu_aleatoire(settings)
     xp=0
     xp_for_level=10
     niveau=0
@@ -992,11 +1007,16 @@ def lancer_jeu(settings):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
+            if event.type==GAME_MUSIC_EVENT:
+                jouer_musique_jeu_aleatoire(settings)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     temps_debut_pause=pygame.time.get_ticks()
+                    pygame.mixer.music.stop()
                     settings=afficher_menu_pause()
                     set_sfx_volume(settings.get("sound_volume",50)/100)
+                    pygame.mixer.music.set_endevent(GAME_MUSIC_EVENT)
+                    jouer_musique_jeu_aleatoire(settings)
                     duree_pause=pygame.time.get_ticks()-temps_debut_pause
 
                     for classe in derniers_spawn:
