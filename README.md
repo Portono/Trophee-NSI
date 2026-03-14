@@ -41,16 +41,19 @@ afin d'installer toutes les bibliothèques nécessaires.
 
 Les étapes pour installer le projet :
 
-1. Télécharger ou cloner le projet.
-2. Installer les bibliothèques requises.
-3. Vérifier que **pygame** est correctement installé.
+1. Télécharger la **dernière Release** du projet depuis GitHub.
+2. Extraire le fichier **.zip** téléchargé.
+3. Ouvrir le dossier du projet extrait.
+4. Installer les bibliothèques requises si nécessaire.
 
 # Démarrage
+
+Le fichier principal du jeu se trouve dans le dossier **sources**.
 
 Pour lancer le jeu :
 
 ```
-python main.py
+python sources/main.py
 ```
 
 # Fabriqué avec
