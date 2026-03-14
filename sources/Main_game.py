@@ -135,7 +135,10 @@ class ennemi_main:
         if self.arme and distance <= self.arme.range:   
             if self.arme.tirer():
                 cible=type('Cible',(),{'x':cible_x,'y':cible_y})()  ##Crée un objet temporaire pour représenter la cible du projectile (pris d'internet car si je recodais une fonction joueur, il aurait fallu que je change tout le code)
-                sprite_choisi = random.choice(self.arme.sprite if isinstance(self.arme.sprite, list) else [self.arme.sprite])
+                if isinstance(self, Terminateur) and isinstance(self.arme.sprite, list):
+                    sprite_choisi = random.choice(self.arme.sprite)
+                else:
+                    sprite_choisi = self.arme.sprite
                 nouveau_projectile = self.arme.classe(self.x,
                                                       self.y,
                                                       self.arme.vitesse,
@@ -205,7 +208,7 @@ class Philippe(ennemi_main):
             
 class projectiles_general:
     """Classe principale des projectiles"""
-    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path=None,couleur=(0,255,0),degat=1,range=10,aoe=False,aoe_rayon=None,degat_AOE=0,duree_AOE=0,duree=None,interval_tick_ms=500,sprite_feu=None,sprite_explosion=None):
+    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path=None,couleur=(0,255,0),degat=1,range=10,aoe=False,aoe_rayon=None,degat_AOE=0,duree_AOE=0,duree=None,interval_tick_ms=500,sprite_feu=None,sprite_explosion=None,vitesse_animation=0):
         self.x=x
         self.y=y
         self.start_x=x
@@ -225,13 +228,18 @@ class projectiles_general:
         self.interval_tick_ms=interval_tick_ms
         self.angle=0
         self.sprite_explosion=sprite_explosion
+        self.vitesse_animation=vitesse_animation
+        self.animation_index=0
         if sprite_feu!=None:
             self.sprite_feu=sprite_feu
         else:
             self.sprite_feu=sprite_feu
         self.aoe_rayon=aoe_rayon if aoe_rayon is not None else width/10
         if sprite_path!=None:
-            self.rect = self.image.get_rect(center=(self.x, self.y))
+            if isinstance(self.image,list):
+                self.rect=self.image[0].get_rect(center=(self.x,self.y))
+            else:
+                self.rect = self.image.get_rect(center=(self.x, self.y))
         if sprite_path==None:
             self.rect = pygame.Rect(self.x, self.y, 10, 10)
             self.rect.center = (self.x, self.y)
@@ -272,7 +280,17 @@ class projectiles_general:
     def dessiner(self,screen,offset_x,offset_y):
         pos_ecran_x=self.rect.x-offset_x
         pos_ecran_y=self.rect.y - offset_y
-        if self.image and not isinstance(self.image,list):
+        if isinstance(self.image,list):
+            self.animation_index += self.vitesse_animation
+            if self.animation_index >= len(self.image):
+                self.animation_index = 0
+
+            image = self.image[int(self.animation_index)]
+
+            rotated_image = pygame.transform.rotate(image, self.angle)
+            new_rect = rotated_image.get_rect(center=(pos_ecran_x, pos_ecran_y))
+            screen.blit(rotated_image, new_rect)
+        elif self.image and not isinstance(self.image,list):
             rotated_image = pygame.transform.rotate(self.image, self.angle)
             new_rect= rotated_image.get_rect(center=(pos_ecran_x, pos_ecran_y))
             screen.blit(rotated_image, new_rect)
@@ -334,8 +352,8 @@ class projectile_roquette(projectiles_general):
 
 class projectile_mine(projectiles_general):
     """Classe des projectiles roquettes"""
-    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite=projectile_mine_sprite,degat=2,range=math.inf,aoe=True,aoe_rayon=width/10,degat_AOE=1,duree_AOE=333,duree=5000,interval_tick_ms=500,sprite_feu=sprite_feu_mine,sprite_explosion=sprite_explosion_mine):
-        super().__init__(x,y,0,cible_initiale,homing=homing, sprite_path=sprite, couleur=(255,165,0),degat=degat+dico_upgrades_mine["degat"],range=range,aoe=aoe,aoe_rayon=aoe_rayon+dico_upgrades_mine["rayon_aoe"]*10,degat_AOE=degat_AOE+dico_upgrades_mine["degat"],duree_AOE=duree_AOE+dico_upgrades_mine["duree_aoe"]*10,duree=duree+dico_upgrades_mine["duree_vie"]*100,sprite_feu=sprite_feu,sprite_explosion=sprite_explosion)  ##Appelle le constructeur de la classe parente avec une couleur orange
+    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite=projectile_mine_sprite,degat=2,range=math.inf,aoe=True,aoe_rayon=width/10,degat_AOE=1,duree_AOE=333,duree=5000,interval_tick_ms=500,sprite_feu=sprite_feu_mine,sprite_explosion=sprite_explosion_mine,vitesse_animation=0.1):
+        super().__init__(x,y,0,cible_initiale,homing=homing, sprite_path=sprite, couleur=(255,165,0),degat=degat+dico_upgrades_mine["degat"],range=range,aoe=aoe,aoe_rayon=aoe_rayon+dico_upgrades_mine["rayon_aoe"]*10,degat_AOE=degat_AOE+dico_upgrades_mine["degat"],duree_AOE=duree_AOE+dico_upgrades_mine["duree_aoe"]*10,duree=duree+dico_upgrades_mine["duree_vie"]*100,sprite_feu=sprite_feu,sprite_explosion=sprite_explosion,vitesse_animation=vitesse_animation)  ##Appelle le constructeur de la classe parente avec une couleur orange
         self.interval_tick_ms=interval_tick_ms
 
     def update(self, liste_ennemis, player_pos=None):
@@ -357,7 +375,7 @@ class projectile_ennemi(projectiles_general):
 
 class projectile_leure(projectiles_general):
     """Classe des projectiles de Leure"""
-    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path=projectile_leure_sprite,degat=20,range=10,aoe=True,aoe_rayon=width/20,degat_AOE=5,duree_AOE=2000,sprite_feu=sprite_feu_leure,interval_tick_ms=500,sprite_explosion=sprite_explosion_leure):
+    def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite_path=projectile_leure_sprite,degat=20,range=10,aoe=True,aoe_rayon=width/20,degat_AOE=5,duree_AOE=2000,sprite_feu=sprite_feu_leure,interval_tick_ms=500,sprite_explosion=sprite_explosion_leure,vitesse_animation=0.1):
         super().__init__(
                 x,
                 y,
@@ -374,7 +392,8 @@ class projectile_leure(projectiles_general):
                 duree_AOE=duree_AOE+echelle_difficulte*100,
                 interval_tick_ms=interval_tick_ms,
                 sprite_feu=sprite_feu,
-                sprite_explosion=sprite_explosion
+                sprite_explosion=sprite_explosion,
+                vitesse_animation=vitesse_animation
                         )
 class weapon_main:
     """Classe principale des armes"""
@@ -702,7 +721,7 @@ def lancer_jeu(settings):
     with open("Map_Jeu.json","r") as f:
         map_data=json.load(f)
     
-    zoom = 5
+    zoom = width/512
     MAP_COLS = 149
     MAP_ROWS = 100
 
@@ -773,14 +792,18 @@ def lancer_jeu(settings):
     projectile_tourelle_sprite=img
 
     ###Mine
-    img=pygame.image.load('Landmine(1).png').convert_alpha()
-    img=pygame.transform.scale(img,(width/25,int(img.get_height()/img.get_width()*width/25)))
-    projectile_mine_sprite=img
+    projectile_mine_sprite=[]
+    for i in range(1,3):
+        img=pygame.image.load(f'Landmine({i}).png').convert_alpha()
+        img=pygame.transform.scale(img,(width/25,int(img.get_height()/img.get_width()*width/25)))
+        projectile_mine_sprite.append(img)
 
     ###Leure
-    img=pygame.image.load('enemy_bomb(1).png').convert_alpha()
-    img=pygame.transform.scale(img,(width/35,int(img.get_height()/img.get_width()*width/35)))
-    projectile_leure_sprite=img
+    projectile_leure_sprite=[]
+    for i in range(1,3):
+        img=pygame.image.load(f'enemy_bomb({i}).png').convert_alpha()
+        img=pygame.transform.scale(img,(width/35,int(img.get_height()/img.get_width()*width/35)))
+        projectile_leure_sprite.append(img)
 
     ##Terminateur
     projectile_terminateur=[]
