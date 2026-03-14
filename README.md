@@ -74,8 +74,10 @@ Version actuelle : **1.0**
   - Evan Berthelin
   - Mael Barbaros
 
-# Lien vers notre Github si vu autre part:
-Si vous voyez cela autre part que notre Github, le lien est ci-dessous afin de pouvoir acceder aux version precedentes etc
+## Dépôt GitHub officiel
+
+Le code source complet du projet, ainsi que l'historique des versions et les mises à jour, sont disponibles sur GitHub :
+
 ```
 https://github.com/Portono/Champ-de-Mars
 ```
