@@ -1,4 +1,4 @@
-# Trophee-NSI
+#Champ de Mars
 Trophee NSI
 
 Il faut installer la font le logo, la musique dans le meme dossier que le script du menu  
