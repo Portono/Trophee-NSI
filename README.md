@@ -31,6 +31,7 @@ ou alors
 ```
 pip install -r requirements.txt
 ```
+afin d'installer toutes les bibliotheques necessaires
 
 # Installation
 
