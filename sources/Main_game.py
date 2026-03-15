@@ -1331,17 +1331,21 @@ def lancer_jeu(settings):
 
             #Targetting des ennemis pour savoir si c le joueur ou la tourelle
             for ennemi in liste_ennemis[:]:
-                dist_joueur = math.hypot(ennemi.x - player_x, ennemi.y - player_y)
-                
-                # On initialise la cible sur le joueur
                 target_x, target_y = player_x, player_y
-                min_dist = dist_joueur
 
-                for t in liste_tourelles:
-                    dist_t = math.hypot(ennemi.x - t.x, ennemi.y - t.y)
-                    if dist_t < min_dist:
-                        min_dist = dist_t
-                        target_x, target_y = t.x, t.y
+                if liste_tourelles and dico_upgrades_uniques["tourelle"]["tourelle_leurre"]:
+                    # Toujours cibler la tourelle la plus proche
+                    t_proche = min(liste_tourelles, key=lambda t: math.hypot(ennemi.x - t.x, ennemi.y - t.y))
+                    target_x, target_y = t_proche.x, t_proche.y
+                elif liste_tourelles:
+                    # si pas l'upgrade cibler le plus proche entre tourelle et joueur
+                    dist_joueur = math.hypot(ennemi.x - player_x, ennemi.y - player_y)
+                    min_dist = dist_joueur
+                    for t in liste_tourelles:
+                        dist_t = math.hypot(ennemi.x - t.x, ennemi.y - t.y)
+                        if dist_t < min_dist:
+                            min_dist = dist_t
+                            target_x, target_y = t.x, t.y
 
                 ennemi.update(target_x, target_y)
                 
