@@ -91,11 +91,11 @@ Version actuelle : **1.0**
 
 # Auteurs
 
-**Alias**
+**Alias :**
 
-*Evan Miniscloux = Portono
-*Evan Berthelin  = Enma-EB
-*Mael Barbaro    = Oltorc/Kolkien
+* Evan Miniscloux = Portono
+* Evan Berthelin  = Enma-EB
+* Mael Barbaro    = Oltorc/Kolkien
 
 **Développeurs :**
 
