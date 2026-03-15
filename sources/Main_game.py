@@ -75,7 +75,7 @@ def fleche_vers_destination(player_x, player_y, destination_x, destination_y):
 
 class ennemi_main:
     """Classe principale des ennemis"""
-    def __init__(self,x,y,vitesse=1,hp=1,arme=None,xp=0,sprite=None,vitesse_animation=0.15,taille_hitbox=[50,50], degat=10): ##AJOUTER PLUS TARD PARAMETRES COMME VIE, SPRITE AVEC CHEMIN D'ACCES, ETC
+    def __init__(self,x,y,vitesse=1,hp=1,arme=None,xp=0,sprite=None,vitesse_animation=0.15,taille_hitbox=[50,50], degat=10): 
         self.x=x	##Coordonnees reelles de l'ennemi
         self.y=y	##Coordonnees reelles de l'ennemi
         self.vitesse_base=vitesse+echelle_difficulte/10
@@ -1033,7 +1033,7 @@ def lancer_jeu(settings):
     aura_active=aura(width/4,1,sprite=aura_sprites,interval_tick_ms=500,vitesse_animation=0.1)  ##Crée une aura qui inflige des dégâts aux ennemis à proximité toutes les 500ms
     aura_active.nom="Aura Active"
     tourelle_active=tourelle(0,0,sprite_batiment=tourelle_sprites,sprite_balle=projectile_tourelle_sprite,vitesse_animation=0.1)  ##Crée une tourelle qui tire des projectiles de tourelle
-    type_armes=["stats",laser,roquette]   ##Liste des types d'armes
+    type_armes=["stats",laser,mine]   ##Liste des types d'armes
     liste_armes=[laser,roquette,mine,aura_active,tourelle_active]   ##Liste des armes du joueur, utilisée pour le level up
     armes_possedees=["stats"]+(["laser"] if laser in type_armes else [])+(["roquette"] if roquette in type_armes else [])+(["mine"] if mine in type_armes else [])+(["aura"] if aura_active in type_armes else [])+(["tourelle"] if tourelle_active in type_armes else [])
     liste_projectiles_ennemis=[]  ##Liste pour stocker les projectiles des ennemis
@@ -1062,6 +1062,7 @@ def lancer_jeu(settings):
     dernier_soin=pygame.time.get_ticks()
     maintenant=0
     liste_aoe=[]
+    liste_fragmentations_mine=[]
     liste_arcs=[]
     taille_base = int(TILE_SIZE * zoom)
     # On ajoute 1 pixel pour l'overlapping
@@ -1070,6 +1071,29 @@ def lancer_jeu(settings):
     for key, surf in textures.items():
         # On scale avec le pixel supplémentaire
         textures_zoom[key] = pygame.transform.scale(surf, (taille_overlap, taille_overlap))
+    
+    def programmer_fragmentations_mine(x,y,projectile_source):
+        if not dico_upgrades_uniques["mine"]["mine_fragmentation"]:
+            return
+        moment_declenchement=pygame.time.get_ticks()+500
+        rayon_fragment=max(1,projectile_source.aoe_rayon/2)
+        rayon_disposition=projectile_source.aoe_rayon
+        for i in range(8):
+            angle=(2*math.pi*i)/8
+            fx=x+math.cos(angle)*rayon_disposition
+            fy=y+math.sin(angle)*rayon_disposition
+            liste_fragmentations_mine.append({
+                "x":fx,
+                "y":fy,
+                "rayon":rayon_fragment,
+                "degat":projectile_source.degat_AOE,
+                "duree":projectile_source.duree_AOE,
+                "interval":projectile_source.interval_tick_ms,
+                "sprite_feu":projectile_source.sprite_feu,
+                "sprite_explosion":projectile_source.sprite_explosion,
+                "declenchement":moment_declenchement,
+            })
+
 
     while en_jeu:
         clock.tick(60)
@@ -1190,7 +1214,7 @@ def lancer_jeu(settings):
                     derniers_spawn[classe] = pygame.time.get_ticks()
 
             #Targetting des ennemis pour savoir si c le joueur ou la tourelle
-            for ennemi in liste_ennemis:
+            for ennemi in liste_ennemis[:]:
                 dist_joueur = math.hypot(ennemi.x - player_x, ennemi.y - player_y)
                 
                 # On initialise la cible sur le joueur
@@ -1344,6 +1368,8 @@ def lancer_jeu(settings):
                         liste_aoe.append(aoe_zone)
                         
                         liste_explosions.append(Explosion(proj.x, proj.y, proj.sprite_explosion,proj.aoe_rayon))
+                        if isinstance(proj,projectile_mine):
+                            programmer_fragmentations_mine(proj.x, proj.y, proj)
 
                     # On vérifie si le projectile est toujours dans la liste avant de remove
                     if proj in liste_projectiles:
@@ -1422,7 +1448,22 @@ def lancer_jeu(settings):
                                 liste_tourelles.remove(t)
                             ennemi.dernier_coup=maintenant
 
-
+        maintenant_fragmentations=pygame.time.get_ticks()
+        for fragmentation in liste_fragmentations_mine[:]:
+            if maintenant_fragmentations<fragmentation["declenchement"]:
+                continue
+            liste_explosions.append(Explosion(fragmentation["x"],fragmentation["y"],fragmentation["sprite_explosion"],fragmentation["rayon"]))
+            liste_aoe.append(AOE(
+                fragmentation["x"],
+                fragmentation["y"],
+                fragmentation["rayon"],
+                fragmentation["degat"],
+                fragmentation["duree"],
+                interval_tick_ms=fragmentation["interval"],
+                cible="ennemi",
+                sprite_feu=fragmentation["sprite_feu"]
+            ))
+            liste_fragmentations_mine.remove(fragmentation)
 
         ##Gerer le spawn des tourelles
         maintenant=pygame.time.get_ticks()
