@@ -94,7 +94,7 @@ class ennemi_main:
 
         self.est_empoisonne=False
         self.degat_poison=0
-        self.interval_poison_ms=500
+        self.interval_poison_ms=1000
         self.prochain_tick_poison=0
         self.sprites_poison=[]
         self.vitesse_animation_poison=0.1
@@ -738,7 +738,7 @@ class aura:
     def ennemi_dans_aura(self,ennemi,player_x,player_y):
         if ennemi is None:
             return False
-        return math.hypot(ennemi.x - player_x, ennemi.y - player_y <= self.rayon)
+        return math.hypot(ennemi.x - player_x, ennemi.y - player_y) <= self.rayon
 
 
     def dessiner(self, screen, player_x, player_y, offset_x, offset_y):
@@ -798,11 +798,11 @@ class tourelle:
         )
 
     def update(self, liste_ennemis, liste_projectiles):
-        self.arme.delai = max(100, 1000 - dico_upgrades_tourelle["cadence_de_tir"]*10)
+        self.arme.delai = max(100, 1000 - dico_upgrades_tourelle["cadence_de_tir"]*45)
         self.arme.vitesse = width/100
         self.arme.degat = 0.5 + dico_upgrades_tourelle["degat"]/2
         self.max_hp = 50+dico_upgrades_tourelle["hp"]
-        self.delai_spawn=max(200,10000-dico_upgrades_tourelle["cadence_de_tir"]*10)
+        self.delai_spawn=max(200,10000-dico_upgrades_tourelle["cadence_de_tir"]*45)
         if self.arme.tirer():
             if liste_ennemis:
                 cible = min(liste_ennemis, key=lambda e: (e.x - self.x)**2 + (e.y - self.y)**2)
@@ -1139,11 +1139,11 @@ def lancer_jeu(settings):
     derniers_spawn = {classe: 0 for classe in types_ennemis}  ##Dictionnaire pour stocker le dernier spawn de chaque type d'ennemi
     clock = pygame.time.Clock()
     liste_projectiles = []  ##Liste pour stocker les projectiles
-    laser=weapon_main(500, projectile_laser,homing=False,portee_detection=height/5,vitesse=width/200,interval_tick_ms=500,sprite=laser_sprite)  ##Crée une arme laser avec un délai de 500ms entre chaque tir et des projectiles homing
+    laser=weapon_main(max(100, 500 - dico_upgrades_laser["cadence_de_tir"]*50), projectile_laser, homing=False, portee_detection=height/5 + dico_upgrades_laser["portee"]*(height/20), vitesse=width/200, interval_tick_ms=500, sprite=laser_sprite)
     laser.nom="Laser"
-    roquette=weapon_main(10000, projectile_roquette,homing=True,portee_detection=width/5,vitesse=width/300,aoe=True,aoe_rayon=width/10,duree_AOE=333,interval_tick_ms=500,sprite=roquette_sprite,degat=3,degat_AOE=1,sprite_feu=sprite_feu_roquette,sprite_explosion=sprite_explosion_roquette)  ##Crée une arme roquette avec un délai de 1500ms entre chaque tir et des projectiles homing
+    roquette=weapon_main(max(500, 10000 - dico_upgrades_roquette["cadence_de_tir"]*500), projectile_roquette,homing=True,portee_detection=width/5,vitesse=width/300,aoe=True,aoe_rayon=width/10,duree_AOE=333,interval_tick_ms=500,sprite=roquette_sprite,degat=3,degat_AOE=1,sprite_feu=sprite_feu_roquette,sprite_explosion=sprite_explosion_roquette)  ##Crée une arme roquette avec un délai de 1500ms entre chaque tir et des projectiles homing
     roquette.nom="Roquette"
-    mine=weapon_main(5000, projectile_mine,homing=False,portee_detection=math.inf,vitesse=0,aoe=True,aoe_rayon=width/20,duree_AOE=2500,duree=10000,degat_AOE=1,interval_tick_ms=500,degat=2,sprite=projectile_mine_sprite,sprite_feu=sprite_feu_mine,sprite_explosion=sprite_explosion_mine)  ##Crée une arme mine avec un délai de 1500ms entre chaque tir et des projectiles non homing
+    mine=weapon_main(max(500, 5000 - dico_upgrades_mine["cadence_de_tir"]*500), projectile_mine,homing=False,portee_detection=math.inf,vitesse=0,aoe=True,aoe_rayon=width/20,duree_AOE=2500,duree=10000,degat_AOE=1,interval_tick_ms=500,degat=2,sprite=projectile_mine_sprite,sprite_feu=sprite_feu_mine,sprite_explosion=sprite_explosion_mine)  ##Crée une arme mine avec un délai de 1500ms entre chaque tir et des projectiles non homing
     mine.nom="Mine"
     aura_active=aura(width/4,1,sprite=aura_sprites,interval_tick_ms=500,vitesse_animation=0.1)  ##Crée une aura qui inflige des dégâts aux ennemis à proximité toutes les 500ms
     aura_active.nom="Aura Active"
@@ -1276,7 +1276,7 @@ def lancer_jeu(settings):
                 pv_max_joueur=100+dico_upgrades_stats["pv"]*10
                 pv_joueur=100+dico_upgrades_stats["pv"]*10
                 vitesse_joueur=width/300+dico_upgrades_stats["vitesse"]*5
-                armes_possedees=["stats"]+(["laser"] if laser in type_armes else [])+(["roquette"] if roquette in type_armes else []+(["mine"] if mine in type_armes else [])+(["aura"] if aura_active in type_armes else [])+(["tourelle"] if tourelle_active in type_armes else []))
+                armes_possedees=["stats"]+(["laser"] if laser in type_armes else [])+(["roquette"] if roquette in type_armes else [])+(["mine"] if mine in type_armes else [])+(["aura"] if aura_active in type_armes else [])+(["tourelle"] if tourelle_active in type_armes else [])
                 duree_pause=pygame.time.get_ticks()-temps_debut_pause
                 for armes in type_armes:
                     if hasattr(armes,"compenser_pause"):
@@ -1359,7 +1359,7 @@ def lancer_jeu(settings):
                     if armes.classe == projectile_mine:
                         if armes.tirer():
                             mines_actuelles=[p for p in liste_projectiles if isinstance(p, projectile_mine)]
-                            if len(mines_actuelles) >= 10:  # Limite à 10
+                            if len(mines_actuelles) >= 10+dico_upgrades_mine["duree_vie"]:  # Limite à 10
                                 for p in liste_projectiles:
                                     if isinstance(p, projectile_mine):
                                         liste_projectiles.remove(p)
@@ -1604,7 +1604,7 @@ def lancer_jeu(settings):
         maintenant=pygame.time.get_ticks()
         if tourelle_active in type_armes:
             if maintenant-tourelle_active.dernier_spawn>=tourelle_active.delai_spawn:
-                if len(liste_tourelles)>=20:
+                if len(liste_tourelles)>=10+dico_upgrades_tourelle["cadence_de_tir"]:
                     liste_tourelles.pop(0)
                 nouvelle_t=tourelle(
                     player_x,
@@ -1684,9 +1684,16 @@ def lancer_jeu(settings):
 
         if pv_joueur<=0:
             en_jeu=False
-            
-        #pour les vilaines tourelles >:(
-        tourelle_active.delai_spawn=max(200,10000-dico_upgrades_tourelle["cadence_de_tir"]*10)
+        
+
+        # Mettre à jour les délais de tir
+        laser.delai = max(100, 500 - dico_upgrades_laser["cadence_de_tir"] * 50)
+        laser.range = height/5 + dico_upgrades_laser["portee"] * (height/20)
+        laser.range_balle = laser.range * 2
+        roquette.delai = max(500, 10000 - dico_upgrades_roquette["cadence_de_tir"] * 500)
+        roquette.range = width/5 + dico_upgrades_roquette["portee"] * (width/20)  
+        roquette.range_balle = roquette.range * 2                                   
+        mine.delai = max(500, 5000 - dico_upgrades_mine["cadence_de_tir"] * 500)
 
         duree_journee+=1
         echelle_difficulte=nombre_journees*2+duree_journee//1200
