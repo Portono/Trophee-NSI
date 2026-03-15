@@ -44,7 +44,7 @@ Ce sont pour les sprites :
 
 **2 .ttf :**
 
-Le format pour les 2 polices d'écritures utilisés dans le jeu (font.ttf pour quasi tout et fontgameover.ttf juste pour l'écran de game over).
+Le format pour les 2 polices d'écritures utilisés dans le jeu (ex : fontgameover.ttf juste pour l'écran de game over).
 
 **3. .mp3 :**
 
