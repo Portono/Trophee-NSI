@@ -1,6 +1,7 @@
 import pygame
 import pygame_widgets
 from pygame_widgets.slider import Slider
+from paths import data_path
 
 pygame.init()
 
@@ -32,7 +33,7 @@ orange=(255,165,0)
 gray=(128,128,128)
 
 #Predeffinission de la police et de la couleur des boutons
-menu_font=pygame.font.Font("data/font.ttf", int(height*0.05)) ##Definition de la police et de la taille du texte des boutons
+menu_font=pygame.font.Font(data_path("font.ttf"), int(height*0.05)) ##Definition de la police et de la taille du texte des boutons
 button_color=black
 hover_color=gray
 text_color=orange
@@ -56,24 +57,24 @@ astropedia_back_button_rect=pygame.Rect(0,0,button_width,button_height)
 height_button_text="Hauteur"
 width_button_text="Largeur"
 #Ajout du logo + redissionnement adaptatif a la resolution choisie
-logo_import=pygame.image.load("data/logo_champ_de_mars.png")
+logo_import=pygame.image.load(data_path("logo_champ_de_mars.png"))
 logo_import_width=logo_import.get_width()
 logo_import_height=logo_import.get_height()
 logo=pygame.transform.scale(logo_import,(width,int(logo_import_height/logo_import_width*width)))
 
 #astrowantsyou
-AstroWantsYou=pygame.image.load("data/AstroWantsYou.png")
+AstroWantsYou=pygame.image.load(data_path("AstroWantsYou.png"))
 AstroWantsYou=pygame.transform.scale(AstroWantsYou,(int(AstroWantsYou.get_width()/AstroWantsYou.get_height()*height),height))
 #fond
 background_import=[]
 backgrounds_flou_import=[]
 for i in range(1,7):
-    img = pygame.image.load(f"data/Wallpaper({i}).png")
+    img = pygame.image.load(data_path(f"Wallpaper({i}).png"))
     background_import.append(img)
 
 backgrounds_flou_import=[]
 for i in range(1,7):
-    img = pygame.image.load(f"data/Wallpaper_flou({i}).png")
+    img = pygame.image.load(data_path(f"Wallpaper_flou({i}).png"))
     backgrounds_flou_import.append(img)
 
 backgrounds=[]
@@ -146,22 +147,22 @@ def refresh_ui():
     astropedia_back_button_rect=pygame.Rect(0,0,button_width,button_height)
     astropedia_back_button_rect.center=(width//2,height*3//3.8)
     ##Taille de la police
-    menu_font=pygame.font.Font("data/font.ttf", int(height*0.05))
+    menu_font=pygame.font.Font(data_path("font.ttf"), int(height*0.05))
     ##Slider de son
     sound_slider=Slider(screen,int(width*0.85),int(height*0.25),int(width*0.02),int(height*0.45),min=0,max=100,step=1,initial=sound_volume,vertical=True,colour=hover_color,valueColour=orange)
     ##Taille de AstroWantsYou
-    AstroWantsYou=pygame.image.load("data/AstroWantsYou.png")
+    AstroWantsYou=pygame.image.load(data_path("AstroWantsYou.png"))
     AstroWantsYou=pygame.transform.scale(AstroWantsYou,(int(AstroWantsYou.get_width()/AstroWantsYou.get_height()*height),height))
     ##Taille de background
     background_import=[]
     backgrounds_flou_import=[]
     for i in range(1,7):
-        img = pygame.image.load(f"data/Wallpaper({i}).png")
+        img = pygame.image.load(data_path(f"Wallpaper({i}).png"))
         background_import.append(img)
 
     backgrounds_flou_import=[]
     for i in range(1,7):
-        img = pygame.image.load(f"data/Wallpaper_flou({i}).png")
+        img = pygame.image.load(data_path(f"Wallpaper_flou({i}).png"))
         backgrounds_flou_import.append(img)
 
     backgrounds=[]
@@ -182,7 +183,7 @@ def afficher_menu():
 def boucle_menu(pause=False):
     global current_menu, play, fullscreen, fullscreen_change, resolution_change, width, height, user_width_input, width_input_toggle, user_height_input, height_input_toggle,screen,width_button_text,height_button_text,dernier_frame,image_delay,image_index,sound_slider,sound_volume
     play=False
-    pygame.mixer.music.load("data/Mainmenu.mp3")
+    pygame.mixer.music.load(data_path("Mainmenu.mp3"))
     pygame.mixer.music.play(-1)
     pygame.mixer.music.set_volume(sound_volume/100)
     #Recuperation de la position de la souris
