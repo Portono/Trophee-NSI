@@ -17,13 +17,13 @@ dico_upgrades_stats={
 
 #------------------Upgrades armes uniques----------------------------------------
 dico_upgrades_uniques={
-                "laser":{"laser_electrique":False,                  ##Fait
+                "laser":{"laser_electrique":True,                   ##Fait
                          "laser_ralentissant":False,                ##Fait
-                         "laser_perforant":False                    ##Fait
+                         "laser_perforant":True                     ##Fait
                          },
                 "roquette":{"roquette_shrapnel":False,
                             "roquette_enflammee":False,
-                            "roquette_ricochet":False
+                            "roquette_ricochet":False               ##Fait
                             },
                 "mine":{"mine_empoisonnee":False,
                         "mine_fragmentation":False,
@@ -42,14 +42,12 @@ dico_upgrades_uniques={
 dico_upgrades_laser={
                 "cadence_de_tir":0,
                 "degat":0,
-                "vitesse_balles":0,
                 "portee":0,
                 }  
 #------------------Upgrades stats roquette------------------------------------------   
 dico_upgrades_roquette={
                 "cadence_de_tir":0,
                 "degat":0,
-                "vitesse_balles":0,
                 "portee":0,
                 "rayon_aoe":0,
                 }
@@ -72,7 +70,6 @@ dico_upgrades_tourelle={
                 "cadence_de_tir":0,
                 "degat":0,
                 "hp":0,
-                "vitesse_balles":0,
                 "portee":0
                 }
 
@@ -86,6 +83,10 @@ master_dico = {
     "mine": dico_upgrades_mine,
     "aura": dico_upgrades_aura,
     "tourelle": dico_upgrades_tourelle
+}
+
+MAX_STAT_UPGRADE={
+    "esquive":10
 }
 
 
@@ -112,6 +113,9 @@ def random_upgrade(nb_upgrades=3, armes_possedees=["stats", "laser"]):
     for arme in armes_possedees:
         if arme in master_dico:
             for upgrade_nom in master_dico[arme].keys():
+                if arme=="stats" and upgrade_nom in MAX_STAT_UPGRADE:
+                    if master_dico[arme][upgrade_nom]>=MAX_STAT_UPGRADE[upgrade_nom]:
+                        continue
                 options_stats.append((arme, upgrade_nom))
     
     nb_a_piger = min(nb_upgrades, len(options_stats))
