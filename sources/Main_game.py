@@ -1534,6 +1534,8 @@ def lancer_jeu(settings):
                         impact = True
                         if t.hp<=0 and t in liste_tourelles:
                             liste_tourelles.remove(t)
+                            if dico_upgrades_uniques["tourelle"]["tourelle_explosive"]:
+                                liste_aoe.append(AOE(t.x, t.y, width/5, 10+dico_upgrades_tourelle["degat"], 500, cible="ennemi"))
                         break
 
                 # Collision avec le joueur
@@ -1579,6 +1581,8 @@ def lancer_jeu(settings):
                             t.hp-=ennemi.degat*reduction
                             if t.hp<=0 and t in liste_tourelles:
                                 liste_tourelles.remove(t)
+                                if dico_upgrades_uniques["tourelle"]["tourelle_explosive"]:
+                                    liste_aoe.append(AOE(t.x, t.y, width/5,10+dico_upgrades_tourelle["degat"], 500, cible="ennemi"))
                             ennemi.dernier_coup=maintenant
 
         maintenant_fragmentations=pygame.time.get_ticks()
