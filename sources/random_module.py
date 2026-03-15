@@ -30,7 +30,7 @@ dico_upgrades_uniques={
                         "mine_double_vie":False                     ##Fait
                         },
                 "aura":{"aura_trainee":False,
-                        "aura_affaiblissante":True,                ##Fait
+                        "aura_affaiblissante":False,                ##Fait
                         "aura_pulse":False
                         },
                 "tourelle":{"tourelle_explosive":False,
