@@ -29,6 +29,10 @@ Installation de pygame :
 ```
 pip install pygame
 ```
+et
+```
+pip install pygame_widgets
+```
 
 ou :
 
