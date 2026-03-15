@@ -94,7 +94,7 @@ Version actuelle : **1.0**
 **Alias :**
 
 * Evan Miniscloux = Portono
-* Evan Berthelin  = Enma-EB
+* Evan Berthelin   = Enma-EB
 * Mael Barbaro    = Oltorc/Kolkien
 
 **Développeurs :**
