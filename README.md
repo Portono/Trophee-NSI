@@ -11,7 +11,7 @@ En éliminant les ennemis, le joueur gagne de l’**expérience (XP)** qui lui p
 
 Le jeu comprend plusieurs types d’ennemis avec des comportements différents ainsi qu’un **système de difficulté qui augmente progressivement** au cours de la partie.
 
-*conseil : Astro (personnage) va plus vite en diagonale
+*conseil : Astro (personnage) va plus vite en diagonale*
 
 # Pour commencer
 
