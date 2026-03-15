@@ -29,6 +29,7 @@ projectile_tourelle_sprite=None
 attack_delay_ennemi=1000
 image_leure_liste=[]
 image_majo_liste=[]
+sprites_poison_mine=[]
 image_terminateur_liste=[]
 sprite_feu_roquette=None
 sprite_feu_leure=None
@@ -91,6 +92,14 @@ class ennemi_main:
         self.slow_fin=0
         self.facteur_slow=1
 
+        self.est_empoisonne=False
+        self.degat_poison=0
+        self.interval_poison_ms=500
+        self.prochain_tick_poison=0
+        self.sprites_poison=[]
+        self.vitesse_animation_poison=0.1
+        self.animation_index_poison=0
+
         self.sprite_list=sprite if isinstance(sprite,list) else ([sprite] if sprite else [])
         self.animation_index=0
         self.vitesse_animation=vitesse_animation  ##Vitesse d'animation qui augmente avec la difficulté
@@ -116,6 +125,17 @@ class ennemi_main:
 
         screen.blit(image,pos_ecran)
 
+        if self.est_empoisonne and self.sprites_poison:
+            self.animation_index_poison += self.vitesse_animation_poison
+            index_poison = int(self.animation_index_poison) % len(self.sprites_poison)
+            sprite_poison = self.sprites_poison[index_poison]
+            largeur_poison = int(self.rect.width * 1.8)
+            hauteur_poison = max(1, int(self.rect.height * 1.2))
+            sprite_poison_scale = pygame.transform.scale(sprite_poison, (largeur_poison, hauteur_poison))
+            rect_poison = sprite_poison_scale.get_rect(center=(self.rect.centerx-offset_x, self.rect.centery-offset_y))
+            screen.blit(sprite_poison_scale, rect_poison)
+
+
     def update(self, cible_x, cible_y):
         direction_x = cible_x - self.x
         direction_y = cible_y - self.y
@@ -126,6 +146,14 @@ class ennemi_main:
             self.vitesse=self.vitesse_base
         else:
             self.vitesse=self.vitesse_base*self.facteur_slow
+        
+        if self.est_empoisonne and maintenant>=self.prochain_tick_poison:
+            mort_poison=self.prendre_degats(self.degat_poison)
+            if mort_poison:
+                ajouter_xp(self.xp)
+                return
+            self.prochain_tick_poison=maintenant+self.interval_poison_ms
+
 
         # Ça évite de "dépasser" le centre et de changer de cible par erreur
         if distance < 5: 
@@ -177,6 +205,15 @@ class ennemi_main:
     def appliquer_slow(self,facteur,duree_ms):
         self.facteur_slow=facteur
         self.slow_fin=pygame.time.get_ticks()+duree_ms
+    
+    def appliquer_poison(self, degat_par_tick, interval_ms=1000, sprites_poison=None):
+        self.est_empoisonne=True
+        self.degat_poison=max(self.degat_poison,degat_par_tick)
+        self.interval_poison_ms=interval_ms
+        self.prochain_tick_poison=pygame.time.get_ticks()
+        if sprites_poison:
+            self.sprites_poison=sprites_poison
+
 
     @staticmethod   ##Sert a attribuer une fonction a une classe sans avoir besoin d'instancier un objet
     def calculer_pos_spawn(player_x, player_y,width,height):    ##Calcule une position de spawn aleatoire autour du joueur
@@ -189,7 +226,7 @@ class Majo(ennemi_main):
     """Classe des ennemis simples"""
     spawn_delay=enemi_spawn_delay
     def __init__(self,x,y):
-        super().__init__(x,y,vitesse=width/600,hp=3,xp=2,degat=10,sprite=image_majo_liste,taille_hitbox=[image_majo_liste[0].get_width(),image_majo_liste[0].get_height()],vitesse_animation=0.04)  ##Appelle le constructeur de la classe parente avec une vitesse de 2
+        super().__init__(x,y,vitesse=width/600,hp=3,xp=2,degat=10,sprite=image_majo_liste,taille_hitbox=[image_majo_liste[0].get_width(),image_majo_liste[0].get_height()],vitesse_animation=0.04)  # pyright: ignore[reportArgumentType] ##Appelle le constructeur de la classe parente avec une vitesse de 2
 
 
 class Marcel(ennemi_main):
@@ -406,6 +443,8 @@ class projectile_mine(projectiles_general):
     def __init__(self,x,y,vitesse,cible_initiale,homing=False,sprite=projectile_mine_sprite,degat=2,range=math.inf,aoe=True,aoe_rayon=width/10,degat_AOE=1,duree_AOE=333,duree=5000,interval_tick_ms=500,sprite_feu=sprite_feu_mine,sprite_explosion=sprite_explosion_mine,vitesse_animation=0.1):
         super().__init__(x,y,0,cible_initiale,homing=homing, sprite_path=sprite, couleur=(255,165,0),degat=degat+dico_upgrades_mine["degat"],range=range,aoe=aoe,aoe_rayon=aoe_rayon+dico_upgrades_mine["rayon_aoe"]*10,degat_AOE=degat_AOE+dico_upgrades_mine["degat"],duree_AOE=duree_AOE+dico_upgrades_mine["duree_aoe"]*10,duree=duree+dico_upgrades_mine["duree_vie"]*100,sprite_feu=sprite_feu,sprite_explosion=sprite_explosion,vitesse_animation=vitesse_animation)  ##Appelle le constructeur de la classe parente avec une couleur orange
         self.interval_tick_ms=interval_tick_ms
+        if dico_upgrades_uniques["mine"]["mine_empoisonnee"]:
+            self.sprite_feu=sprites_poison_mine
         self.double_vie_active=dico_upgrades_uniques["mine"]["mine_double_vie"]
         self.charges_restantes=2 if self.double_vie_active else 1
         self.en_recharge=False
@@ -566,7 +605,7 @@ class Explosion:
         screen.blit(image,rect)
 
 class AOE:
-    def __init__(self,x,y,rayon,degat_par_tick,duree_ms,interval_tick_ms=500,sprite_feu=None,cible="joueur",proprietaire=None):
+    def __init__(self,x,y,rayon,degat_par_tick,duree_ms,interval_tick_ms=500,sprite_feu=None,cible="joueur",proprietaire=None,empoisonne=False):
         self.x=x
         self.y=y
         self.rayon=rayon
@@ -576,13 +615,17 @@ class AOE:
         self.interval_tick=interval_tick_ms
         self.sprite=sprite_feu
         self.proprietaire=proprietaire
+        self.empoisonne=empoisonne
+        self.index_animation=0
+        self.vitesse_animation=0.15
+
 
         self.temps_creation=pygame.time.get_ticks()
         self.dernier_tick=self.temps_creation
         self.dernier_tick=pygame.time.get_ticks()-self.interval_tick  ##Permet de faire en sorte que les dégâts soient appliqués immédiatement à la création de l'AOE
         self.terminee=False
 
-        if self.sprite:
+        if self.sprite and not isinstance(self.sprite,list):
             taille=int(self.rayon*2)
             self.sprite=pygame.transform.scale(self.sprite,(taille,taille))
             self.rect=self.sprite.get_rect(center=(self.x,self.y))
@@ -612,6 +655,9 @@ class AOE:
                     if math.hypot(self.x - ennemi.x, self.y - ennemi.y) <= self.rayon:
                         mort = ennemi.prendre_degats(self.degat)
 
+                        if self.empoisonne:
+                            ennemi.appliquer_poison(self.degat,self.interval_tick,self.sprite if isinstance(self.sprite,list) else None)
+
                         if mort and xp_callback:
                             xp_callback(ennemi.xp)
 
@@ -622,8 +668,17 @@ class AOE:
             return
         
         if self.sprite:
-            pos_ecran = (self.x - offset_x - self.rayon, self.y - offset_y - self.rayon)
-            screen.blit(self.sprite, pos_ecran)
+            if isinstance(self.sprite,list):
+                self.index_animation += self.vitesse_animation
+                index = int(self.index_animation) % len(self.sprite)
+                frame = self.sprite[index]
+                frame_scale=pygame.transform.scale(frame,(int(self.rayon*2),int(self.rayon*2)))
+                pos_ecran = (self.x - offset_x - self.rayon, self.y - offset_y - self.rayon)
+                screen.blit(frame_scale, pos_ecran)
+            else:
+                pos_ecran = (self.x - offset_x - self.rayon, self.y - offset_y - self.rayon)
+                screen.blit(self.sprite, pos_ecran)
+
         else:
             # Créer une surface temporaire pour de l'alpha (transparence) si tu veux
             # Ou simplement dessiner un cercle plein (enlever le "2" à la fin)
@@ -825,7 +880,7 @@ class arc_electrique:
         screen.blit(sprite,rect)
 
 def lancer_jeu(settings):
-    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay,liste_ennemis,player_y,player_x,pv_max_joueur,laser,roquette,mine,aura_active,type_armes,liste_armes,mines_actuelles,projectile_leure_sprite,liste_projectiles_ennemis,tourelle,sprite_feu_roquette,sprite_feu_leure,projectile_mine_sprite,image_leure_liste,xp,xp_for_level,sprite_explosion_leure,sprite_explosion_mine,sprite_explosion_roquette,image_majo_liste,image_terminateur_liste,aura_sprites,arc_electrique_sprite,liste_arcs,projectile_terminateur,shrapnel_sprite
+    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay,liste_ennemis,player_y,player_x,pv_max_joueur,laser,roquette,mine,aura_active,type_armes,liste_armes,mines_actuelles,projectile_leure_sprite,liste_projectiles_ennemis,tourelle,sprite_feu_roquette,sprite_feu_leure,projectile_mine_sprite,image_leure_liste,xp,xp_for_level,sprite_explosion_leure,sprite_explosion_mine,sprite_explosion_roquette,image_majo_liste,image_terminateur_liste,aura_sprites,arc_electrique_sprite,liste_arcs,projectile_terminateur,shrapnel_sprite,sprites_poison_mine
     if settings is None:
         settings={"width":width,"height":height,"fullscreen":fullscreen,"sound_volume":50,"play":True}
 
@@ -955,6 +1010,12 @@ def lancer_jeu(settings):
     img=pygame.image.load(data_path("Fire.png")).convert_alpha()
     img=pygame.transform.scale(img,(width/10,int(img.get_height()/img.get_width()*width/10)))
     sprite_feu_mine=img
+
+    ###Sprite poison mine
+    sprites_poison_mine=[]
+    for i in range(1,3):
+        img=pygame.image.load(data_path(f"Poison({i}).png")).convert_alpha()
+        sprites_poison_mine.append(img)
 
     ###Sprite feu Leure
     img=pygame.image.load(data_path("Fire.png")).convert_alpha()
@@ -1087,7 +1148,7 @@ def lancer_jeu(settings):
     aura_active=aura(width/4,1,sprite=aura_sprites,interval_tick_ms=500,vitesse_animation=0.1)  ##Crée une aura qui inflige des dégâts aux ennemis à proximité toutes les 500ms
     aura_active.nom="Aura Active"
     tourelle_active=tourelle(0,0,sprite_batiment=tourelle_sprites,sprite_balle=projectile_tourelle_sprite,vitesse_animation=0.1)  ##Crée une tourelle qui tire des projectiles de tourelle
-    type_armes=["stats",laser]   ##Liste des types d'armes
+    type_armes=["stats",laser,mine]   ##Liste des types d'armes
     liste_armes=[laser,roquette,mine,aura_active,tourelle_active]   ##Liste des armes du joueur, utilisée pour le level up
     armes_possedees=["stats"]+(["laser"] if laser in type_armes else [])+(["roquette"] if roquette in type_armes else [])+(["mine"] if mine in type_armes else [])+(["aura"] if aura_active in type_armes else [])+(["tourelle"] if tourelle_active in type_armes else [])
     liste_projectiles_ennemis=[]  ##Liste pour stocker les projectiles des ennemis
@@ -1145,6 +1206,7 @@ def lancer_jeu(settings):
                 "interval":projectile_source.interval_tick_ms,
                 "sprite_feu":projectile_source.sprite_feu,
                 "sprite_explosion":projectile_source.sprite_explosion,
+                "empoisonne":dico_upgrades_uniques["mine"]["mine_empoisonnee"],
                 "declenchement":moment_declenchement,
             })
 
@@ -1304,6 +1366,7 @@ def lancer_jeu(settings):
                                         break
                             # On crée une cible factice sur le joueur
                             cible_ici = type('Cible', (), {'x': player_x, 'y': player_y})()
+                            sprite_aoe_mine = sprites_poison_mine if dico_upgrades_uniques["mine"]["mine_empoisonnee"] else armes.sprite_feu
                             nouveau_p = projectile_mine(
                                 player_x, player_y, 0, cible_ici,
                                 degat=armes.degat,
@@ -1315,7 +1378,7 @@ def lancer_jeu(settings):
                                 sprite=projectile_mine_sprite,
                                 duree=armes.duree,
                                 interval_tick_ms=armes.interval_tick_ms,
-                                sprite_feu=armes.sprite_feu,
+                                sprite_feu=sprite_aoe_mine,
                                 sprite_explosion=armes.sprite_explosion
                             )
                             liste_projectiles.append(nouveau_p)
@@ -1419,7 +1482,9 @@ def lancer_jeu(settings):
                             proj.duree_AOE,
                             interval_tick_ms=proj.interval_tick_ms,
                             cible="ennemi",
-                            sprite_feu=proj.sprite_feu
+                            sprite_feu=proj.sprite_feu,
+                            empoisonne=isinstance(proj, projectile_mine) and dico_upgrades_uniques["mine"]["mine_empoisonnee"]
+
                         )
                         liste_aoe.append(aoe_zone)
                         
@@ -1529,7 +1594,9 @@ def lancer_jeu(settings):
                 fragmentation["duree"],
                 interval_tick_ms=fragmentation["interval"],
                 cible="ennemi",
-                sprite_feu=fragmentation["sprite_feu"]
+                sprite_feu=fragmentation["sprite_feu"],
+                empoisonne=fragmentation.get("empoisonne", False)
+
             ))
             liste_fragmentations_mine.remove(fragmentation)
 
