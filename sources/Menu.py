@@ -2,6 +2,7 @@ import pygame
 import pygame_widgets
 from pygame_widgets.slider import Slider
 from paths import data_path
+from save_load import *
 
 pygame.init()
 
@@ -106,7 +107,7 @@ def refresh_ui():
     """
     Cette fonction sert a rafraichir l'interface utilisateur en repositionnant les boutons et le logo en recalculant leurs positions et leurs tailles car leur position n'est calcule seulement lors de leur creation
     """
-    global play_button_rect, settings_button_rect, quit_button_rect, logo, menu_font, fullscreen_button_rect, goback_button_rect, input_width_rect,input_height_rect,screen,astropedia_back_button_rect,sound_slider,sound_volume
+    global play_button_rect, settings_button_rect, quit_button_rect, logo, menu_font, fullscreen_button_rect, goback_button_rect, input_width_rect,input_height_rect,screen,astropedia_back_button_rect,sound_slider,sound_volume,astropedia_button_rect
     monitor_info=pygame.display.Info()
     monitor_width=monitor_info.current_w
     monitor_height=monitor_info.current_h
@@ -142,7 +143,7 @@ def refresh_ui():
     input_height_rect.center = (width // 1.5, height // 3)
     ##Bouton Astropedia
     astropedia_button_rect=pygame.Rect(0,0,button_width,button_height)
-    astropedia_button_rect.center=(width//2,height//4.5)
+    astropedia_button_rect.bottomleft=(0,height)
     ##Bouton retour astropedia
     astropedia_back_button_rect=pygame.Rect(0,0,button_width,button_height)
     astropedia_back_button_rect.center=(width//2,height*3//3.8)
@@ -216,6 +217,8 @@ def boucle_menu(pause=False):
                     if settings_button_rect.collidepoint(mouse_pos):   ##Si le bouton Settings est appuye
                         current_menu=menu_settings
                     if quit_button_rect.collidepoint(mouse_pos):
+                        if pause:
+                            sauvegarder_jeu()
                         pygame.quit()       ##Quitte pygame
                         exit()      ##Quitte le programme
                     if astropedia_button_rect.collidepoint(mouse_pos):
@@ -325,6 +328,7 @@ def boucle_menu(pause=False):
             refresh_ui()
         pygame.display.flip()
     return {"width": width, "height": height, "fullscreen": fullscreen, "play": play,"sound_volume":sound_volume}
+
 
 
 
