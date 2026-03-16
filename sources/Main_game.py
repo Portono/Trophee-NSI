@@ -1139,7 +1139,7 @@ def lancer_jeu(settings):
     astro_sprite_actuel=astro_front_sprites[0]
     direction="bas"
 
-    vitesse_joueur = width/300+dico_upgrades_stats["vitesse"]*20  ##Vitesse de deplacement du joueur
+    vitesse_joueur = width/300+dico_upgrades_stats["vitesse"]  ##Vitesse de deplacement du joueur
     couleur_joueur = (255, 0, 0)
     types_ennemis = [Majo, Marcel,Terminateur,Philippe,Leure]  ##Liste des types d'ennemis
     liste_ennemis = []  ##Liste pour stocker les ennemis
@@ -1282,7 +1282,7 @@ def lancer_jeu(settings):
                     niveau -= 1
                 pv_max_joueur=100+dico_upgrades_stats["pv"]*10
                 pv_joueur=100+dico_upgrades_stats["pv"]*10
-                vitesse_joueur=width/300+dico_upgrades_stats["vitesse"]*5
+                vitesse_joueur=width/300+dico_upgrades_stats["vitesse"]
                 armes_possedees=["stats"]+(["laser"] if laser in type_armes else [])+(["roquette"] if roquette in type_armes else [])+(["mine"] if mine in type_armes else [])+(["aura"] if aura_active in type_armes else [])+(["tourelle"] if tourelle_active in type_armes else [])
                 duree_pause=pygame.time.get_ticks()-temps_debut_pause
                 for armes in type_armes:
