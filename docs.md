@@ -26,6 +26,9 @@ Exemples :
 
 **6. random_module.py :**
 
+Là où les améliorations du personnage sont définis.  
+Elles sont organisées en dictionnaires selon leur catégorie (statistiques, pour les différentes armes, améliorations uniques...)
+
 **7. gameover.py :**
 
 **8. save_load :**
