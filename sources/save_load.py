@@ -2,7 +2,7 @@ import json
 import os
 
 dico_all = {
-    dico_upgrades_stats={
+    "dico_upgrades_stats":{
                     "chance":1,         
                     "gain_xp":0,        
                     "pv":0,             
@@ -12,7 +12,7 @@ dico_all = {
                     "esquive":0
                     },
 
-    dico_upgrades_uniques={
+    "dico_upgrades_uniques":{
                     "laser":{"laser_electrique":False,                  ##Fait
                              "laser_ralentissant":False,                ##Fait
                              "laser_perforant":False                    ##Fait
@@ -34,30 +34,30 @@ dico_all = {
                                 "tourelle_leurre":False                 ##Fait
                                 },
                     },
-    dico_upgrades_laser={
+    "dico_upgrades_laser":{
                     "cadence_de_tir":0,
                     "degat":0,
                     "portee":0,
                     },   
-    dico_upgrades_roquette={
+    "dico_upgrades_roquette":{
                     "cadence_de_tir":0,
                     "degat":0,
                     "portee":0,
                     "rayon_aoe":0,
                     },
-    dico_upgrades_mine={
+    "dico_upgrades_mine":{
                     "cadence_de_tir":0,
                     "degat":0,
                     "rayon_aoe":0,
                     "duree_aoe":0,
                     "duree_vie":0
                     },
-    dico_upgrades_aura={
+    "dico_upgrades_aura":{
                     "cadence_de_tir":0,
                     "degat":0,
                     "portee":0
                     },
-    dico_upgrades_tourelle={
+    "dico_upgrades_tourelle":{
                     "cadence_de_tir":0,
                     "degat":0,
                     "hp":0,
