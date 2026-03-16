@@ -5,8 +5,7 @@ import math
 pygame.init()
 
 #-------------------Upgrades stats classiques-------------------------------------
-dico_upgrades_stats={
-                "chance":1,         
+dico_upgrades_stats={         
                 "gain_xp":0,        
                 "pv":0,             
                 "vitesse":0,                        
@@ -21,8 +20,8 @@ dico_upgrades_uniques={
                          "laser_ralentissant":False,                ##Fait
                          "laser_perforant":False                    ##Fait
                          },
-                "roquette":{"roquette_shrapnel":False,               ##Fait
-                            "roquette_enflammee":False,              ##Fait
+                "roquette":{"roquette_shrapnel":False,              ##Fait
+                            "roquette_enflammee":False,             ##Fait
                             "roquette_ricochet":False               ##Fait
                             },
                 "mine":{"mine_empoisonnee":False,                   ##Fait
@@ -239,3 +238,4 @@ def reset_upgrades():
     for arme in dico_upgrades_uniques:
         for k in dico_upgrades_uniques[arme]:
             dico_upgrades_uniques[arme][k] = False
+
