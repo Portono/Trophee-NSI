@@ -1273,7 +1273,7 @@ def lancer_jeu(settings):
             if touches[pygame.K_e] and niveau>=1:
                 temps_debut_pause = pygame.time.get_ticks()
 
-                if nombre_journees %5==0:
+                if nombre_journees %5==0 and nombres_journees!=0:
                     arme_nom, stat = afficher_upgrades(screen,width,height,3,armes_possedees,font,nouvelle_arme=True)
                     type_armes.append(armes_dict[arme_nom])
                     
