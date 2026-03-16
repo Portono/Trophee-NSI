@@ -24,10 +24,16 @@ Exemples :
 
 **5. menu_pause.py :**
 
+Il s'agit du menu où nous avons codé le menu pause. En y accédant avec la touche escape.  
+on peut : 
+- reprendre
+- accéder aux parametres (modification du volume et de la résolution)
+- quitter le jeu (va automatiquement créer un fichier de sauvegarde en Json)
+
 **6. random_module.py :**
 
 Là où les améliorations du personnage sont définis.  
-Elles sont organisées en dictionnaires selon leur catégorie (statistiques, pour les différentes armes, améliorations uniques...)
+Elles sont organisées en dictionnaires selon leur catégorie (statistiques, pour les différentes armes, améliorations uniques...).
 
 **7. gameover.py :**
 
