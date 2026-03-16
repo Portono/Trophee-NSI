@@ -26,7 +26,7 @@ Exemples :
 
 Il s'agit du menu où nous avons codé le menu pause. En y accédant avec la touche escape.  
 on peut : 
-- reprendre
+- reprendre la partie
 - accéder aux parametres (modification du volume et de la résolution)
 - quitter le jeu (va automatiquement créer un fichier de sauvegarde en Json)
 
