@@ -884,7 +884,7 @@ class arc_electrique:
         screen.blit(sprite,rect)
 
 def lancer_jeu(settings):
-    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay,liste_ennemis,player_y,player_x,pv_max_joueur,laser,roquette,mine,aura_active,type_armes,liste_armes,mines_actuelles,projectile_leure_sprite,liste_projectiles_ennemis,tourelle,sprite_feu_roquette,sprite_feu_leure,projectile_mine_sprite,image_leure_liste,xp,xp_for_level,sprite_explosion_leure,sprite_explosion_mine,sprite_explosion_roquette,image_majo_liste,image_terminateur_liste,aura_sprites,arc_electrique_sprite,liste_arcs,projectile_terminateur,shrapnel_sprite,sprites_poison_mine,sprite_explosion_tourelle
+    global width, height, screen, pv_joueur, liste_projectiles_ennemis, image_marcel, image_marcel_liste,echelle_difficulte,laser_sprite,roquette_sprite, sprite_explosion_roquette,image_philippe,image_philippe_liste,offset_x,offset_y,enemi_spawn_delay,liste_ennemis,player_y,player_x,pv_max_joueur,laser,roquette,mine,aura_active,type_armes,liste_armes,mines_actuelles,projectile_leure_sprite,liste_projectiles_ennemis,tourelle,sprite_feu_roquette,sprite_feu_leure,projectile_mine_sprite,image_leure_liste,xp,xp_for_level,sprite_explosion_leure,sprite_explosion_mine,sprite_explosion_roquette,image_majo_liste,image_terminateur_liste,aura_sprites,arc_electrique_sprite,liste_arcs,projectile_terminateur,shrapnel_sprite,sprites_poison_mine,sprite_explosion_tourelle,armes_possedees
     if settings is None:
         settings={"width":width,"height":height,"fullscreen":fullscreen,"sound_volume":50,"play":True}
 
