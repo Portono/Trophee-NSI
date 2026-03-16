@@ -1252,20 +1252,20 @@ def lancer_jeu(settings):
         if True:
             #Mouvement du joueur
             touches = pygame.key.get_pressed()
-            if touches[pygame.K_d]:
+            if touches[pygame.K_d] or touches[pygame.K_RIGHT]:
                 player_x += vitesse_joueur
                 astro_animation_index += astro_animation_vitesse
                 astro_sprite_actuel = astro_front_sprites[int(astro_animation_index) % len(astro_front_sprites)] if direction=="bas" else astro_back_sprites[int(astro_animation_index) % len(astro_back_sprites)]
-            if touches[pygame.K_q] or touches[pygame.K_a]:
+            if touches[pygame.K_q] or touches[pygame.K_a] or touches[pygame.K_LEFT]:
                 player_x -= vitesse_joueur
                 astro_animation_index += astro_animation_vitesse
                 astro_sprite_actuel = astro_front_sprites[int(astro_animation_index) % len(astro_front_sprites)] if direction=="bas" else astro_back_sprites[int(astro_animation_index) % len(astro_back_sprites)]
-            if touches[pygame.K_s]:
+            if touches[pygame.K_s] or touches [pygame.K_DOWN]:
                 player_y += vitesse_joueur
                 direction="bas"
                 astro_animation_index += astro_animation_vitesse
                 astro_sprite_actuel = astro_front_sprites[int(astro_animation_index) % len(astro_front_sprites)]
-            if touches[pygame.K_z] or touches[pygame.K_w]:
+            if touches[pygame.K_z] or touches[pygame.K_w] or touches[pygame.K_UP]:
                 player_y -= vitesse_joueur
                 direction="haut"
                 astro_animation_index += astro_animation_vitesse
