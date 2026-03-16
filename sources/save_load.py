@@ -1,68 +1,17 @@
 import json
 import os
+from random_module import *
+from Main_game import *
 
 dico_all = {
-    "dico_upgrades_stats":{
-                    "chance":1,         
-                    "gain_xp":0,        
-                    "pv":0,             
-                    "vitesse":0,                        
-                    "regen_pv":0,           
-                    "vol_de_vie":0,  
-                    "esquive":0
-                    },
-
-    "dico_upgrades_uniques":{
-                    "laser":{"laser_electrique":False,                  ##Fait
-                             "laser_ralentissant":False,                ##Fait
-                             "laser_perforant":False                    ##Fait
-                             },
-                    "roquette":{"roquette_shrapnel":False,              ##Fait
-                                "roquette_enflammee":False,             ##Fait
-                                "roquette_ricochet":False               ##Fait
-                                },
-                    "mine":{"mine_empoisonnee":False,                   ##Fait
-                            "mine_fragmentation":False,                 ##Fait
-                            "mine_double_vie":False                     ##Fait
-                            },
-                    "aura":{"aura_trainee":False,
-                            "aura_affaiblissante":False,                ##Fait
-                            "aura_pulse":False
-                            },
-                    "tourelle":{"tourelle_explosive":False,             ##Fait
-                                "tourelle_aoe_defensive":False,         ##Fait
-                                "tourelle_leurre":False                 ##Fait
-                                },
-                    },
-    "dico_upgrades_laser":{
-                    "cadence_de_tir":0,
-                    "degat":0,
-                    "portee":0,
-                    },   
-    "dico_upgrades_roquette":{
-                    "cadence_de_tir":0,
-                    "degat":0,
-                    "portee":0,
-                    "rayon_aoe":0,
-                    },
-    "dico_upgrades_mine":{
-                    "cadence_de_tir":0,
-                    "degat":0,
-                    "rayon_aoe":0,
-                    "duree_aoe":0,
-                    "duree_vie":0
-                    },
-    "dico_upgrades_aura":{
-                    "cadence_de_tir":0,
-                    "degat":0,
-                    "portee":0
-                    },
-    "dico_upgrades_tourelle":{
-                    "cadence_de_tir":0,
-                    "degat":0,
-                    "hp":0,
-                    "portee":0
-                    }
+    "dico_upgrades_stats":dico_upgrades_stats,
+    "dico_upgrades_uniques":dico_upgrades_uniques,
+    "dico_upgrades_laser":dico_upgrades_laser,
+    "dico_upgrades_roquette":dico_upgrades_roquette,
+    "dico_upgrades_mine":dico_upgrades_mine,
+    "dico_upgrades_aura":dico_upgrades_aura,
+    "dico_upgrades_tourelle":dico_upgrades_tourelle,
+    "armes_possedees":armes_possedees
     }
 
 
