@@ -29,6 +29,7 @@ on peut :
 - reprendre la partie
 - accéder aux parametres (modification du volume et de la résolution)
 - quitter le jeu (va automatiquement créer un fichier de sauvegarde en Json)
+- accéder à l'astropedia
 
 **6. random_module.py :**
 
