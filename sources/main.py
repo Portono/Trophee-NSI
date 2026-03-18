@@ -11,7 +11,7 @@ def main():
     while running:
         settings=afficher_menu()
         if settings["play"]:
-            lancer_jeu(settings)
+            armes_possedees = lancer_jeu(settings)
             afficher_gameover()
         else:
             running=False
