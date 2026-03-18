@@ -9,6 +9,7 @@ from Sounddesign import*
 from menu_pause import*
 from random_module import*
 from paths import data_path
+from save_load import sauvegarder_jeu, charger_jeu
 
 pygame.init()
 echelle_difficulte=0
@@ -1138,8 +1139,6 @@ def lancer_jeu(settings):
     astro_animation_vitesse=0.1
     astro_sprite_actuel=astro_front_sprites[0]
     direction="bas"
-
-    vitesse_joueur = width/300+dico_upgrades_stats["vitesse"]  ##Vitesse de deplacement du joueur
     couleur_joueur = (255, 0, 0)
     types_ennemis = [Majo, Marcel,Terminateur,Philippe,Leure]  ##Liste des types d'ennemis
     liste_ennemis = []  ##Liste pour stocker les ennemis
@@ -1155,9 +1154,25 @@ def lancer_jeu(settings):
     aura_active=aura(width/4,1,sprite=aura_sprites,interval_tick_ms=500,vitesse_animation=0.1)  ##Crée une aura qui inflige des dégâts aux ennemis à proximité toutes les 500ms
     aura_active.nom="Aura Active"
     tourelle_active=tourelle(0,0,sprite_batiment=tourelle_sprites,sprite_balle=projectile_tourelle_sprite,vitesse_animation=0.1)  ##Crée une tourelle qui tire des projectiles de tourelle
-    type_armes=["stats",laser]   ##Liste des types d'armes
+    if settings.get("charger", False):
+        armes_possedees,nombre_journees = charger_jeu()
+        type_armes = ["stats"]
+        if "laser" in armes_possedees: type_armes.append(laser)
+        if "roquette" in armes_possedees: type_armes.append(roquette)
+        if "mine" in armes_possedees: type_armes.append(mine)
+        if "aura" in armes_possedees: type_armes.append(aura_active)
+        if "tourelle" in armes_possedees: type_armes.append(tourelle_active)
+        pv_max_joueur = 100 + dico_upgrades_stats["pv"] * 10
+        pv_joueur = pv_max_joueur
+        vitesse_joueur = width/300 + dico_upgrades_stats["vitesse"]
+    else:
+        reset_upgrades()
+        type_armes = ["stats", laser]
+        armes_possedees = ["stats", "laser"]
+        pv_max_joueur = 100
+        pv_joueur = pv_max_joueur
+        vitesse_joueur = width/300
     liste_armes=[laser,roquette,mine,aura_active,tourelle_active]   ##Liste des armes du joueur, utilisée pour le level up
-    armes_possedees=["stats"]+(["laser"] if laser in type_armes else [])+(["roquette"] if roquette in type_armes else [])+(["mine"] if mine in type_armes else [])+(["aura"] if aura_active in type_armes else [])+(["tourelle"] if tourelle_active in type_armes else [])
     liste_projectiles_ennemis=[]  ##Liste pour stocker les projectiles des ennemis
     liste_explosions=[]
     mines_actuelles=[]  ##Liste pour stocker les mines posées par le joueur
@@ -1169,8 +1184,6 @@ def lancer_jeu(settings):
     "aura": aura_active,
     "tourelle": tourelle_active
     }
-    pv_joueur=100  ##Points de vie du joueur
-    pv_max_joueur=100
     pygame.mixer.music.stop()
     set_sfx_volume(settings.get("sound_volume",50)/100)
     pygame.mixer.music.set_endevent(GAME_MUSIC_EVENT)
@@ -1230,7 +1243,7 @@ def lancer_jeu(settings):
                 if event.key == pygame.K_ESCAPE:
                     temps_debut_pause=pygame.time.get_ticks()
                     pygame.mixer.music.stop()
-                    settings=afficher_menu_pause()
+                    settings = afficher_menu_pause(armes_possedees=armes_possedees, nombre_journees=nombre_journees)
                     set_sfx_volume(settings.get("sound_volume",50)/100)
                     pygame.mixer.music.set_endevent(GAME_MUSIC_EVENT)
                     jouer_musique_jeu_aleatoire(settings)
@@ -1273,7 +1286,7 @@ def lancer_jeu(settings):
             if touches[pygame.K_e] and niveau>=1:
                 temps_debut_pause = pygame.time.get_ticks()
 
-                if nombre_journees %5==0 and nombres_journees!=0:
+                if nombre_journees %5==0 and nombre_journees!=0:
                     arme_nom, stat = afficher_upgrades(screen,width,height,3,armes_possedees,font,nouvelle_arme=True)
                     type_armes.append(armes_dict[arme_nom])
                     
@@ -1712,6 +1725,7 @@ def lancer_jeu(settings):
 
         if pv_joueur<=0:
             en_jeu=False
+            reset_upgrades()
         
 
         # Mettre à jour les délais de tir
@@ -1744,6 +1758,7 @@ def lancer_jeu(settings):
         fleche_vers_destination(player_x,player_y,0,0)
         pygame.display.flip()
 
+    return armes_possedees
 
 
 
