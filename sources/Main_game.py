@@ -739,6 +739,7 @@ class aura:
 
 
     def update(self, player_x, player_y, liste_ennemis, xp_callback=None):
+        global pv_joueur
 
         # upgrades
         self.rayon = width/4 + dico_upgrades_aura["portee"] * (width/40)
@@ -774,7 +775,6 @@ class aura:
             for ennemi in ennemis_dans_aura:
                 mort = ennemi.prendre_degats(degat_total)
 
-                global pv_joueur
                 pv_joueur = min(pv_max_joueur, pv_joueur + dico_upgrades_stats["vol_de_vie"] * degat_total)
 
                 if mort and xp_callback:
