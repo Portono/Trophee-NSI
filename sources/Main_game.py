@@ -414,7 +414,7 @@ class projectile_laser(projectiles_general):
 
             liste_arcs.append(arc_electrique(source.x,source.y,cible.x,cible.y,arc_electrique_sprite))
 
-            mort = cible.prendre_degats(self.degat//2)
+            mort = cible.prendre_degats(self.degat)
 
             if dico_upgrades_uniques["laser"]["laser_ralentissant"]:
                 cible.appliquer_slow(0.2,2500)
