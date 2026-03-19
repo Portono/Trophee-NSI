@@ -83,13 +83,20 @@ backgrounds=[]
 backgrounds_flou=[]
 
 for img in background_import:
-    normal = pygame.transform.scale(img,(width,height))
+    normal = pygame.transform.smoothscale(img,(width,height))
     backgrounds.append(normal)
 
 for img in backgrounds_flou_import:
-    blur = pygame.transform.scale(img,(width,height))
+    blur = pygame.transform.smoothscale(img,(width,height))
     backgrounds_flou.append(blur)
 
+#Astropedia
+astropedia_images=[]
+for i in range(1, 4):
+    img = pygame.image.load(data_path(f"Astropedia({i}).png"))
+    img = pygame.transform.smoothscale(img, (width, height))
+    astropedia_images.append(img)
+astropedia_index = 0
 
 image_index=0
 image_delay=200
@@ -108,7 +115,7 @@ def refresh_ui():
     """
     Cette fonction sert a rafraichir l'interface utilisateur en repositionnant les boutons et le logo en recalculant leurs positions et leurs tailles car leur position n'est calcule seulement lors de leur creation
     """
-    global play_button_rect, settings_button_rect, quit_button_rect, logo, menu_font, fullscreen_button_rect, goback_button_rect, input_width_rect,input_height_rect,screen,astropedia_back_button_rect,sound_slider,sound_volume,astropedia_button_rect,charger_button_rect
+    global play_button_rect, settings_button_rect, quit_button_rect, logo, menu_font, fullscreen_button_rect, goback_button_rect, input_width_rect,input_height_rect,screen,astropedia_back_button_rect,sound_slider,sound_volume,astropedia_button_rect,charger_button_rect,astropedia_images
     monitor_info=pygame.display.Info()
     monitor_width=monitor_info.current_w
     monitor_height=monitor_info.current_h
@@ -147,17 +154,23 @@ def refresh_ui():
     astropedia_button_rect.bottomleft=(0,height)
     ##Bouton retour astropedia
     astropedia_back_button_rect=pygame.Rect(0,0,button_width,button_height)
-    astropedia_back_button_rect.center=(width//2,height*3//3.8)
+    astropedia_back_button_rect.center=(width//2,height/1.2)
     ##Taille de la police
     menu_font=pygame.font.Font(data_path("font.ttf"), int(height*0.05))
     ##Slider de son
     sound_slider=Slider(screen,int(width*0.85),int(height*0.25),int(width*0.02),int(height*0.45),min=0,max=100,step=1,initial=sound_volume,vertical=True,colour=hover_color,valueColour=orange)
     ##Taille de AstroWantsYou
     AstroWantsYou=pygame.image.load(data_path("AstroWantsYou.png"))
-    AstroWantsYou=pygame.transform.scale(AstroWantsYou,(int(AstroWantsYou.get_width()/AstroWantsYou.get_height()*height),height))
+    AstroWantsYou=pygame.transform.smoothscale(AstroWantsYou,(int(AstroWantsYou.get_width()/AstroWantsYou.get_height()*height),height))
     ##Bouton Charger
     charger_button_rect=pygame.Rect(0,0,button_width,button_height)
     charger_button_rect.center=(width//2, height*1.5//3.8)
+    ##Astropedia
+    astropedia_images=[]
+    for i in range(1, 4):
+        img = pygame.image.load(data_path(f"Astropedia({i}).png"))
+        img = pygame.transform.smoothscale(img, (width, height))
+        astropedia_images.append(img)
     ##Taille de background
     background_import=[]
     backgrounds_flou_import=[]
@@ -174,11 +187,11 @@ def refresh_ui():
     backgrounds_flou=[]
 
     for img in background_import:
-        normal = pygame.transform.scale(img,(width,height))
+        normal = pygame.transform.smoothscale(img,(width,height))
         backgrounds.append(normal)
 
     for img in backgrounds_flou_import:
-        blur = pygame.transform.scale(img,(width,height))
+        blur = pygame.transform.smoothscale(img,(width,height))
         backgrounds_flou.append(blur)
 
 def afficher_menu(armes_possedees=None):
@@ -186,7 +199,7 @@ def afficher_menu(armes_possedees=None):
     return boucle_menu(armes_possedees=armes_possedees)
 
 def boucle_menu(pause=False, armes_possedees=None, nombre_journees=0):
-    global current_menu, play, fullscreen, fullscreen_change, resolution_change, width, height, user_width_input, width_input_toggle, user_height_input, height_input_toggle,screen,width_button_text,height_button_text,dernier_frame,image_delay,image_index,sound_slider,sound_volume
+    global current_menu, play, fullscreen, fullscreen_change, resolution_change, width, height, user_width_input, width_input_toggle, user_height_input, height_input_toggle,screen,width_button_text,height_button_text,dernier_frame,image_delay,image_index,sound_slider,sound_volume,astropedia_index
     play=False
     pygame.mixer.music.load(data_path("Mainmenu.mp3"))
     pygame.mixer.music.play(-1)
@@ -254,7 +267,6 @@ def boucle_menu(pause=False, armes_possedees=None, nombre_journees=0):
                 elif current_menu==menu_astropedia:
                     if astropedia_back_button_rect.collidepoint(mouse_pos):
                         current_menu=menu_main
-
             ##Changement de la resolution via l'input utilisateur
             if event.type==pygame.KEYDOWN and current_menu==menu_settings and width_input_toggle==True:   ##Si une touche est appuye dans le menu des parametres
                 if event.key==pygame.K_RETURN or event.key==pygame.K_KP_ENTER:   ##Si la touche entree est appuyee
@@ -283,6 +295,11 @@ def boucle_menu(pause=False, armes_possedees=None, nombre_journees=0):
                     user_height_input=user_height_input[:-1]   ##Supprime le dernier caractere de l'input utilisateur
                 else:
                     user_height_input+=event.unicode   ##Ajoute le caractere appuye a l'input utilisateur
+            if event.type == pygame.KEYDOWN and current_menu==menu_astropedia:
+                if event.key == pygame.K_RIGHT:
+                    astropedia_index = (astropedia_index + 1) % len(astropedia_images)
+                elif event.key == pygame.K_LEFT:
+                    astropedia_index = (astropedia_index - 1) % len(astropedia_images)
 
         #dessine les boutons et le texte
         if current_menu==menu_main: ##les boutons dans le menu principal
@@ -329,16 +346,18 @@ def boucle_menu(pause=False, armes_possedees=None, nombre_journees=0):
             sound_text_rect=sound_text.get_rect(center=(int(width*0.86), int(height*0.18)))
             screen.blit(sound_text,sound_text_rect)
 
-        if current_menu==menu_astropedia:
-            screen.blit(backgrounds_flou[image_index],(0,0))
-            astropedia_text=menu_font.render("coucou",True,black)
-            astropedia_text_rect=astropedia_text.get_rect(center=(width//2,height//2))
-            screen.blit(astropedia_text,astropedia_text_rect)
-            button_color=hover_color if astropedia_back_button_rect.collidepoint(mouse_pos) else black
-            pygame.draw.rect(screen,button_color,astropedia_back_button_rect,border_radius=100)
-            retour_surface=menu_font.render("Retour",True,orange)
-            retour_rect=retour_surface.get_rect(center=astropedia_back_button_rect.center)
-            screen.blit(retour_surface,retour_rect)
+        if current_menu == menu_astropedia:
+            # Affiche uniquement l'image
+            screen.blit(astropedia_images[astropedia_index], (0, 0))
+
+            # Bouton retour
+            button_color = hover_color if astropedia_back_button_rect.collidepoint(mouse_pos) else black
+            pygame.draw.rect(screen, button_color, astropedia_back_button_rect, border_radius=100)
+
+            retour_surface = menu_font.render("Retour", True, orange)
+            retour_rect = retour_surface.get_rect(center=astropedia_back_button_rect.center)
+            screen.blit(retour_surface, retour_rect)
+            
 
         #Toggle du fullscreen
         if fullscreen_change==True or resolution_change==True:
