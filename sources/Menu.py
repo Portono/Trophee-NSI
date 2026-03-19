@@ -92,7 +92,7 @@ for img in backgrounds_flou_import:
 
 #Astropedia
 astropedia_images=[]
-for i in range(1, 4):
+for i in range(1, 6):
     img = pygame.image.load(data_path(f"Astropedia({i}).png"))
     img = pygame.transform.smoothscale(img, (width, height))
     astropedia_images.append(img)
@@ -167,7 +167,7 @@ def refresh_ui():
     charger_button_rect.center=(width//2, height*1.5//3.8)
     ##Astropedia
     astropedia_images=[]
-    for i in range(1, 4):
+    for i in range(1, 6):
         img = pygame.image.load(data_path(f"Astropedia({i}).png"))
         img = pygame.transform.smoothscale(img, (width, height))
         astropedia_images.append(img)
@@ -366,6 +366,7 @@ def boucle_menu(pause=False, armes_possedees=None, nombre_journees=0):
             refresh_ui()
         pygame.display.flip()
     return {"width": width, "height": height, "fullscreen": fullscreen, "play": play,"sound_volume":sound_volume}
+
 
 
 
