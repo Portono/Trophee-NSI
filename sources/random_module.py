@@ -30,7 +30,7 @@ dico_upgrades_uniques={
                         },
                 "aura":{"aura_surpopulation":False,                 ##Fait
                         "aura_affaiblissante":False,                ##Fait
-                        "aura_rage":False
+                        "aura_rage":False                           ##Fait
                         },
                 "tourelle":{"tourelle_explosive":False,             ##Fait
                             "tourelle_aoe_defensive":False,         ##Fait
