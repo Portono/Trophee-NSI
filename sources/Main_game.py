@@ -56,25 +56,30 @@ def ajouter_xp(g):
 
 
 def deplacer_avec_collision(player_x, player_y, dx, dy, player_real_rect, mur_collision):
-    player_x += dx
-    player_real_rect.center = (player_x, player_y)
-    for mur in mur_collision:
-        if player_real_rect.colliderect(mur):
-            if dx > 0:
-                player_x = mur.left - player_real_rect.width / 2
-            elif dx < 0:
-                player_x = mur.right + player_real_rect.width / 2
-            player_real_rect.center = (player_x, player_y)
+    # --- AXE X ---
+    new_rect = player_real_rect.copy()
+    new_rect.centerx += dx
 
-    player_y += dy
-    player_real_rect.center = (player_x, player_y)
     for mur in mur_collision:
-        if player_real_rect.colliderect(mur):
+        if new_rect.colliderect(mur):
+            if dx > 0:
+                new_rect.right = mur.left
+            elif dx < 0:
+                new_rect.left = mur.right
+
+    player_x = new_rect.centerx
+
+    # --- AXE Y ---
+    new_rect.centery = player_y + dy
+
+    for mur in mur_collision:
+        if new_rect.colliderect(mur):
             if dy > 0:
-                player_y = mur.top - player_real_rect.height / 2
+                new_rect.bottom = mur.top
             elif dy < 0:
-                player_y = mur.bottom + player_real_rect.height / 2
-            player_real_rect.center = (player_x, player_y)
+                new_rect.top = mur.bottom
+
+    player_y = new_rect.centery
 
     return player_x, player_y
 
@@ -940,8 +945,16 @@ def lancer_jeu(settings):
 
     # Position de la base au centre de la grille (coordonnées Monde)
     # On divise par 2 pour tomber sur la tuile centrale
-    base_x = (MAP_COLS * TILE_SIZE) // 2
-    base_y = (MAP_ROWS * TILE_SIZE) // 2
+    base_x = ((MAP_COLS * TILE_SIZE) // 2)*zoom+marge_centrage_x
+    base_y = ((MAP_ROWS * TILE_SIZE) // 2)*zoom+marge_centrage_y
+
+    largeur_base = 5 * TILE_SIZE*zoom
+    hauteur_base = 7 * TILE_SIZE*zoom
+
+    base_x+=largeur_base / 2
+    base_y+=hauteur_base / 2
+
+    
 
 
     # Initialisation de l'offset pour que la caméra soit centrée sur le joueur/base
@@ -968,8 +981,8 @@ def lancer_jeu(settings):
     for layers in map_data["layers"]:
         if layers.get("collider")==True:
             for tile in layers["tiles"]:
-                x = tile["x"] * zoom + marge_centrage_x + (width // 2)
-                y = tile["y"] * zoom + marge_centrage_y + (height // 2)
+                x = tile["x"] * zoom + marge_centrage_x
+                y = tile["y"] * zoom + marge_centrage_y
                 rect_mur = pygame.Rect(x, y, TILE_SIZE*zoom, TILE_SIZE*zoom)
                 mur_collision.append(rect_mur)
     #Chargement des sprites
@@ -1308,8 +1321,9 @@ def lancer_jeu(settings):
             astro_sprite_actuel = astro_back_sprites[int(astro_animation_index) % len(astro_back_sprites)]
 
         player_x, player_y = deplacer_avec_collision(player_x, player_y, dx, dy, player_real_rect, mur_collision)
+        distance_base = math.hypot(player_x - base_x, player_y - base_y)
 
-        if touches[pygame.K_e] and niveau>=1:
+        if touches[pygame.K_e] and niveau>=1 and distance_base<=width/4:
             temps_debut_pause = pygame.time.get_ticks()
 
             if nombre_journees %5==0 and nombre_journees!=0:
@@ -1348,7 +1362,7 @@ def lancer_jeu(settings):
         offset_y = player_y - (height // 2)
 
         #Map
-        screen.fill(white)
+        screen.fill((169,169,169))
 
 
         for layer in map_data["layers"]:
@@ -1777,10 +1791,14 @@ def lancer_jeu(settings):
         texte_niveau_rect=texte_niveau.get_rect(topleft=(width/150,height/20))
         screen.blit(texte_niveau,texte_niveau_rect)
 
-        texte_journee=font.render(f"Journee:{nombre_journees}",True,(0,0,0))
-        texte_journee_rect=texte_niveau.get_rect(center=(width/2,height/40))
+        texte_journee=font.render(f"Journee:{nombre_journees}",True,(255,165,0))
+        texte_journee_rect=texte_journee.get_rect(center=(width/2,height/40))
         screen.blit(texte_journee,texte_journee_rect)
 
+        if niveau>=1 and distance_base<=width/4:
+            texte_upgrade = font.render("Appuyez sur E pour passer a la journee suivante", True, (0,0,0))
+            texte_upgrade_rect = texte_upgrade.get_rect(center=(width/2, height/1.2))
+            screen.blit(texte_upgrade, texte_upgrade_rect)
         fleche_vers_destination(player_x,player_y,0,0)
         pygame.display.flip()
 
