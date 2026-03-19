@@ -154,7 +154,7 @@ def refresh_ui():
     astropedia_button_rect.bottomleft=(0,height)
     ##Bouton retour astropedia
     astropedia_back_button_rect=pygame.Rect(0,0,button_width,button_height)
-    astropedia_back_button_rect.center=(width//2,height/1.1)
+    astropedia_back_button_rect.bottomright=(width/2+button_width/2,height)
     ##Taille de la police
     menu_font=pygame.font.Font(data_path("font.ttf"), int(height*0.05))
     ##Slider de son
@@ -366,8 +366,6 @@ def boucle_menu(pause=False, armes_possedees=None, nombre_journees=0):
             refresh_ui()
         pygame.display.flip()
     return {"width": width, "height": height, "fullscreen": fullscreen, "play": play,"sound_volume":sound_volume}
-
-
 
 
 
