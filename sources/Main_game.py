@@ -759,13 +759,16 @@ class aura:
                     ennemis_dans_aura.append(ennemi)
 
             # Calcul dégâts
+            ratio_vie=pv_joueur/pv_max_joueur
+            facteur_rage=min((1+(1-ratio_vie))**1.5,3)
             degat_total = 1 + dico_upgrades_aura["degat"]
 
             if dico_upgrades_uniques["aura"]["aura_surpopulation"]:
                 facteur = 1.2 ** max(0, len(ennemis_dans_aura) - 1)     ##Pour pas avoir de bonus si il y a 1 seul ennemi
                 facteur = min(facteur, 5)
                 degat_total *= facteur
-
+            if dico_upgrades_uniques["aura"]["aura_rage"]:
+                degat_total*=facteur_rage
 
             # Application
             for ennemi in ennemis_dans_aura:
