@@ -327,7 +327,7 @@ def boucle_menu(pause=False, armes_possedees=None, nombre_journees=0):
                 texte_surface=menu_font.render(texte,True,orange)    ##Creation du texte
                 texte_rect=texte_surface.get_rect(center=rect.center)   ##Centrage du texte
                 screen.blit(texte_surface, texte_rect)  ##Affichage du texte
-                if save_existe():
+                if save_existe() and not pause:
                     score = charger_score()
                     texte_score = menu_font.render(f"Journees : {score}", True, orange)
                     texte_score_rect = texte_score.get_rect(center=(width//2+button_width, height*1.5//3.8))
