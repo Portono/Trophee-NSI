@@ -1,30 +1,33 @@
 # Docs
 
-Pour l'explication de la structuration du projet  
-*aider moi à expliquer tout ça*
+Notre projets est structurés en differents scripts, certains plus long que d'autres qui sont classes par fonctions par exemple les fonctions de sauvegarde dans save_load.py
+
 
 # Sources :
 
 **1. Main_game.py :**
-
-C'est là où est codé le jeu principal, là où tout est assemblé.
+C'est là où est codé le jeu principal.
 Exemples : 
-
 - Les déplacements du joueur
+- Toutes les classes
 - Les sprites et animations des personnages
 - La carte du jeu
+- La logique des projectiles
+- La logique des armes
+- La logique des ennemis
   
-*à changer, je sais pas comment expliquer le main_game*
 
 **2. Menu.py :**
+C'est là où le jeu commence, on peut acceder aux parametres, quitter et a l'astropedia
 
 **3. Main.py :**
+C'est là où les scripts sont assembles.
 
 **4. Sounddesign.py :**
+C'est la où sont chargés les sons et leur volume modifié
 
 **5. menu_pause.py :**
-
-Il s'agit du menu où nous avons codé le menu pause. En y accédant avec la touche escape.  
+Il s'agit du script qui appel le menu avec des parametres precis. En y accédant avec la touche escape.  
 on peut : 
 - reprendre la partie
 - accéder aux parametres (modification du volume et de la résolution)
@@ -32,27 +35,25 @@ on peut :
 - accéder à l'astropedia
 
 **6. random_module.py :**
-
 Là où les améliorations du personnage sont définis.  
 Elles sont organisées en dictionnaires selon leur catégorie (statistiques, pour les différentes armes, améliorations uniques...).
 
 **7. gameover.py :**
-
 Là où l'écran de mort est créé avec l'affichage, la police d'ériture et le son.
 
 **8. save_load :**
-
 Fichier contenant les deux fonctions permettant la sauvegarde et le chargement du jeu.  
 La sauvegarde se fait automatiquement en quittant le jeu depuis la menu pause.  
 La fonction fait appel à un dictionnaire dans lequel nous avons regroupé tout ce qui nécessite une sauvegarde(nombre de jours, améliorations, niveau, etc).
 
 **9. paths.py :**
+C'est la où est créée la fonction pour trouver le chemin des fichiers dans d'autre dossiers
 
 # Data :
 
 **1. .png :**
 
-*Les : "(1)" ou avec d'autres nombres sont là pour programmer les animations.*
+Les : "(1)" ou avec d'autres nombres sont là pour programmer les animations.
 
 Ce sont pour les sprites :
 - des personnages
@@ -71,8 +72,4 @@ Les musiques : 1-3, 2-3 et 3-3 sont les 3 en rotation aléatoire pour Main_game.
 **4. .json :**
 
 Le format pour la carte de Mars avec la base.
-
-**5. .pixil :**
-
-Le format utilisé pour ouvrir les sprites dans le logiciel "pixilart".  
-Il n'est pas important pour le jeu, c'est juste pour changer certain sprites importants.
+Aussi le format du fichier de sauvegarde
