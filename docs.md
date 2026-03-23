@@ -15,7 +15,7 @@ Exemples :
 - La logique des projectiles
 - La logique des armes
 - La logique des ennemis
-  
+- + bien d'autres
 
 **2. Menu.py :**
 C'est là où le jeu commence, on peut acceder aux parametres, quitter et a l'astropedia
