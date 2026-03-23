@@ -17,37 +17,37 @@ Exemples :
 - La logique des ennemis
 - plus bien d'autres...
 
-**2. Menu.py :**
-C'est là où le jeu commence, on peut acceder aux parametres, quitter et a l'astropedia
+**2. Menu.py :**  
+C'est là où le jeu commence, on peut accéder aux parametres, quitter et à l'astropedia.
 
-**3. Main.py :**
-C'est là où les scripts sont assembles.
+**3. Main.py :**  
+C'est là où les scripts sont assemblés.
 
-**4. Sounddesign.py :**
-C'est la où sont chargés les sons et leur volume modifié
+**4. Sounddesign.py :**  
+C'est là où sont chargés les sons et leur volume modifié.
 
-**5. menu_pause.py :**
-Il s'agit du script qui appel le menu avec des parametres precis. En y accédant avec la touche escape.  
-on peut : 
+**5. menu_pause.py :**  
+Il s'agit du script qui appel le menu avec des paramètres précis, on y accède avec la touche escape.  
+On peut : 
 - reprendre la partie
 - accéder aux parametres (modification du volume et de la résolution)
-- quitter le jeu (va automatiquement créer un fichier de sauvegarde en Json)
+- quitter le jeu (va automatiquement créer un fichier de sauvegarde en .Json)
 - accéder à l'astropedia
 
-**6. random_module.py :**
+**6. random_module.py :**  
 Là où les améliorations du personnage sont définis.  
 Elles sont organisées en dictionnaires selon leur catégorie (statistiques, pour les différentes armes, améliorations uniques...).
 
-**7. gameover.py :**
+**7. gameover.py :**  
 Là où l'écran de mort est créé avec l'affichage, la police d'ériture et le son.
 
-**8. save_load :**
+**8. save_load :**  
 Fichier contenant les deux fonctions permettant la sauvegarde et le chargement du jeu.  
 La sauvegarde se fait automatiquement en quittant le jeu depuis la menu pause.  
 La fonction fait appel à un dictionnaire dans lequel nous avons regroupé tout ce qui nécessite une sauvegarde(nombre de jours, améliorations, niveau, etc).
 
-**9. paths.py :**
-C'est la où est créée la fonction pour trouver le chemin des fichiers dans d'autre dossiers
+**9. paths.py :**  
+C'est là où est créée la fonction pour trouver le chemin des fichiers dans d'autre dossiers
 
 # Data :
 
