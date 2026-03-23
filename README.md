@@ -22,7 +22,7 @@ Si vous voyez ce projet depuis une autre plateforme, nous vous recommandons de v
 
 Ce qui est nécessaire pour exécuter le projet :
 
-* **Python 3.13**
+* **Python 3.8 ou superieur**
 * La bibliothèque **pygame**
 * La bibliothèque **pygame_widgets**
 
