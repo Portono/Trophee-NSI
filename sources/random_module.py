@@ -239,3 +239,4 @@ def reset_upgrades():
         for k in dico_upgrades_uniques[arme]:
             dico_upgrades_uniques[arme][k] = False
 
+
