@@ -104,4 +104,4 @@ Le code source complet du projet, ainsi que l'historique des versions et les mis
 
 # License
 
-Ce projet est sous licence **MIT** — voir le fichier `LICENSE` pour plus d'informations.
+Ce projet est sous licence **GNU** — voir le fichier `LICENSE` pour plus d'informations.
