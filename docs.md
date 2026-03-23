@@ -38,6 +38,8 @@ Elles sont organisées en dictionnaires selon leur catégorie (statistiques, pou
 
 **7. gameover.py :**
 
+Là où l'écran de mort est créé avec l'affichage, la police d'ériture et le son.
+
 **8. save_load :**
 
 Fichier contenant les deux fonctions permettant la sauvegarde et le chargement du jeu.  
