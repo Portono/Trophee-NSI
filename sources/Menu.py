@@ -92,7 +92,7 @@ for img in backgrounds_flou_import:
 
 #Astropedia
 astropedia_images=[]
-for i in range(1, 6):
+for i in range(1, 7):
     img = pygame.image.load(data_path(f"Astropedia({i}).png"))
     img = pygame.transform.smoothscale(img, (width, height))
     astropedia_images.append(img)
@@ -169,7 +169,7 @@ def refresh_ui():
     charger_button_rect.center=(width//2, height*1.5//3.8)
     ##Astropedia
     astropedia_images=[]
-    for i in range(1, 6):
+    for i in range(1, 7):
         img = pygame.image.load(data_path(f"Astropedia({i}).png"))
         img = pygame.transform.smoothscale(img, (width, height))
         astropedia_images.append(img)
