@@ -327,6 +327,11 @@ def boucle_menu(pause=False, armes_possedees=None, nombre_journees=0):
                 texte_surface=menu_font.render(texte,True,orange)    ##Creation du texte
                 texte_rect=texte_surface.get_rect(center=rect.center)   ##Centrage du texte
                 screen.blit(texte_surface, texte_rect)  ##Affichage du texte
+                if save_existe():
+                    score = charger_score()
+                    texte_score = menu_font.render(f"Journees : {score}", True, orange)
+                    texte_score_rect = texte_score.get_rect(center=(width//2+button_width, height*1.5//3.8))
+                    screen.blit(texte_score, texte_score_rect)
         if current_menu==menu_settings: #les boutons dans le menu des parametres
             #Texte de la resolution actuelle
             screen.blit(backgrounds_flou[image_index],(0,0))
@@ -370,6 +375,7 @@ def boucle_menu(pause=False, armes_possedees=None, nombre_journees=0):
             refresh_ui()
         pygame.display.flip()
     return {"width": width, "height": height, "fullscreen": fullscreen, "play": play,"sound_volume":sound_volume}
+
 
 
 
