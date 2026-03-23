@@ -97,7 +97,7 @@ def random_upgrade(nb_upgrades=3, armes_possedees=["stats", "laser"]):
     liste_upgrades = []
     type_upgrade = random.randint(0, 10)
 
-    if type_upgrade == 0:   ##pour les upgrades uniques
+    if type_upgrade ==0:   ##pour les upgrades uniques
         options_uniques = []
         for arme in armes_possedees:
             if arme in dico_upgrades_uniques:
@@ -201,7 +201,14 @@ def afficher_upgrades(screen, width, height, nb_upgrades, armes_possedees, font,
             rect_scaled = pygame.Rect(x_scaled, y_scaled, largeur_scaled, hauteur_scaled)
 
             # Couleur au hover
-            couleur = (0, 255, 0) if scale > 1 else (0, 200, 0)
+            arme, stat = liste_upgrades[i]
+
+            est_unique = (arme in dico_upgrades_uniques and stat in dico_upgrades_uniques[arme])
+
+            if est_unique:
+                couleur = (255, 255, 0) if scale > 1 else (255, 0, 0)  # jaune hover, rouge normal
+            else:
+                couleur = (0, 255, 0) if scale > 1 else (0, 200, 0)
 
             # Rectangle avec coins arrondis
             pygame.draw.rect(screen, couleur, rect_scaled, border_radius=int(width*0.015))
