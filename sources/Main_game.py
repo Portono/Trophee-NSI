@@ -9,7 +9,7 @@ from Sounddesign import*
 from menu_pause import*
 from random_module import*
 from paths import data_path
-from save_load import sauvegarder_jeu, charger_jeu
+from save_load import sauvegarder_jeu, charger_jeu,charger_meilleur_score, mettre_a_jour_meilleur_score
 
 pygame.init()
 echelle_difficulte=0
@@ -1249,6 +1249,7 @@ def lancer_jeu(settings):
     liste_aoe=[]
     liste_fragmentations_mine=[]
     liste_arcs=[]
+    meilleur_score = charger_meilleur_score()
     taille_base = int(TILE_SIZE * zoom)
     # On ajoute 1 pixel pour l'overlapping
     taille_overlap = taille_base + 2
@@ -1777,6 +1778,7 @@ def lancer_jeu(settings):
             niveau+=1
 
         if pv_joueur<=0:
+            meilleur_score = mettre_a_jour_meilleur_score(nombre_journees)
             en_jeu=False
             reset_upgrades()
         
