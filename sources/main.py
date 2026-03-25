@@ -1,3 +1,6 @@
+import sys
+sys.dont_write_bytecode = True      ##Pour enlever la creation de pycache, car il se met dans sources :( et on a pas le droite de mettre autres que des scirpts dans sources
+
 import pygame
 from Main_game import*
 from Sounddesign import*
