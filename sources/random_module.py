@@ -174,7 +174,7 @@ def afficher_upgrades(screen, width, height, nb_upgrades, armes_possedees, font,
                         armes_possedees.append(arme_choisie)
                     
                     #C'est une upgrade unique (True/False)
-                    elif arme_choisie in dico_upgrades_uniques:
+                    elif arme_choisie in dico_upgrades_uniques and stat_choisie in dico_upgrades_uniques[arme_choisie]:
                          dico_upgrades_uniques[arme_choisie][stat_choisie] = True
                     
                     #C'est une upgrade de stat classique
