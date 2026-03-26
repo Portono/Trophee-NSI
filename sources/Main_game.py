@@ -9,7 +9,7 @@ from Sounddesign import*
 from menu_pause import*
 from random_module import*
 from paths import data_path
-from save_load import sauvegarder_jeu, charger_jeu,charger_meilleur_score, mettre_a_jour_meilleur_score
+from save_load import sauvegarder_jeu, charger_jeu,charger_meilleur_score, mettre_a_jour_meilleur_score, supprimer_sauvegarde
 
 pygame.init()
 echelle_difficulte=0
@@ -1779,6 +1779,7 @@ def lancer_jeu(settings):
 
         if pv_joueur<=0:
             meilleur_score = mettre_a_jour_meilleur_score(nombre_journees)
+            supprimer_sauvegarde()
             en_jeu=False
             reset_upgrades()
         
