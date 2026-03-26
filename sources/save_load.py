@@ -7,6 +7,11 @@ SAVE_FILE = "save.json"
 def save_existe():
     return os.path.exists(data_path(SAVE_FILE))
 
+
+def supprimer_sauvegarde():
+    if save_existe():
+        os.remove(data_path(SAVE_FILE))
+
 from random_module import (dico_upgrades_stats, dico_upgrades_uniques,
                            dico_upgrades_laser, dico_upgrades_roquette,
                            dico_upgrades_mine, dico_upgrades_aura,
