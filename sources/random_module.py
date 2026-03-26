@@ -185,35 +185,35 @@ def afficher_upgrades(screen, width, height, nb_upgrades, armes_possedees, font,
                     
 
         souris_x, souris_y = pygame.mouse.get_pos()
-
         # Dessin des boutons
         for i in range(nb_u):
             x = marge_ecran + i * (r_width + marge_entre)
             y = (height - r_height) / 2
             rect = pygame.Rect(x, y, r_width, r_height)
-
+        
             # Effet au survol
-            scale = 1.05 if rect.collidepoint(souris_x, souris_y) else 1.0  # grossissement 5% pour quand tu le survole comme ca ca fait "style"
+            scale = 1.05 if rect.collidepoint(souris_x, souris_y) else 1.0  # Grossissement 5% pour survol
             largeur_scaled = rect.width * scale
             hauteur_scaled = rect.height * scale
             x_scaled = rect.centerx - largeur_scaled / 2
             y_scaled = rect.centery - hauteur_scaled / 2
             rect_scaled = pygame.Rect(x_scaled, y_scaled, largeur_scaled, hauteur_scaled)
-
-            # Couleur au hover
+        
+            # Vérification si c'est une upgrade unique
             arme, stat = liste_upgrades[i]
-
             est_unique = (arme in dico_upgrades_uniques and stat in dico_upgrades_uniques[arme])
-
+        
             if est_unique:
-                couleur = (127,0,255) if scale > 1 else (255, 0, 0)  # jaune hover, rouge normal
+                # Si c'est une upgrade unique, la couleur est rouge au départ, violet au survol
+                couleur = (255, 0, 0) if scale == 1 else (127, 0, 255)  # Rouge normal, violet au survol
             else:
-                couleur = (0, 255, 0) if scale > 1 else (0, 200, 0)
-
+                # Si c'est une upgrade classique, la couleur est verte
+                couleur = (0, 255, 0) if scale > 1 else (0, 200, 0)  # Vert normal, vert clair au survol
+        
             # Rectangle avec coins arrondis
             pygame.draw.rect(screen, couleur, rect_scaled, border_radius=int(width*0.015))
             pygame.draw.rect(screen, (255, 255, 255), rect_scaled, 3, border_radius=int(width*0.015))
-
+        
             # Texte centré
             nom_arme, nom_stat = liste_upgrades[i]
             txt_arme = font.render(str(nom_arme).upper(), True, (255, 255, 255))
@@ -221,7 +221,7 @@ def afficher_upgrades(screen, width, height, nb_upgrades, armes_possedees, font,
             centro_x = rect_scaled.centerx
             screen.blit(txt_arme, txt_arme.get_rect(center=(centro_x, rect_scaled.y + rect_scaled.height/3)))
             screen.blit(txt_stat, txt_stat.get_rect(center=(centro_x, rect_scaled.y + 2*rect_scaled.height/3)))
-
+        
         pygame.display.flip()
 
 
