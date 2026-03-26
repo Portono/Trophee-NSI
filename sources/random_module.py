@@ -95,7 +95,7 @@ MAX_STAT_UPGRADE = {
 
 def random_upgrade(nb_upgrades=3, armes_possedees=["stats", "laser"]):
     liste_upgrades = []
-    type_upgrade = random.randint(0, 12)
+    type_upgrade = random.randint(0, 10)
 
     if type_upgrade ==0:   ##pour les upgrades uniques
         options_uniques = []
